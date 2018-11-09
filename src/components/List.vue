@@ -1,0 +1,142 @@
+<template>
+  <div id="main">
+    <!--礼物赠送列表-->
+    <div id="list" v-if="noneData===false">
+      <div id="rankList">
+        <ul>
+          <li class="card-item flex" v-for="(item,index) in dataList" :key="index">
+            <div v-if="index===0" style="display: flex;align-items: center;">
+              <img src="../assets/img/champion_32.png" alt="">
+            </div>
+            <div v-if="index===1" style="display: flex;align-items: center;">
+              <img src="../assets/img/second_32.png" alt="">
+            </div>
+            <div v-if="index===2" style="display: flex;align-items: center;">
+              <img src="../assets/img/third_32.png" alt="">
+            </div>
+            <div v-if="index>2" class="rank">
+              {{index+1}}
+            </div>
+
+            <div class="fl grid marL10">
+              <img v-if="item.studentImg===null" src="../assets/img/boy.jpg" width="35px">
+              <img v-else :src="path+item.studentImg" width="35px"/>
+            </div>
+            <div class="fl grid marL10">
+              <div class="userName">
+                <span>{{item.studentName}}</span>
+              </div>
+              <div>
+                <span style="color: #a22232;font-size: 12px;">总票数：{{item.studentTicket}}</span>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <none-data class="none-data" v-else/>
+  </div>
+</template>
+
+<script>
+  import { login, getRankingList } from '@/api/Service'
+  import NoneData from './common/NoneData'
+
+  export default {
+    components: {
+      'none-data': NoneData
+    },
+    data () {
+      return {
+        jessionid: '',
+        dataList: [],
+        path: 'http://47.100.243.198:8080',
+        noneData: false//暂无数据，默认false
+      }
+    },
+    created: function () {
+      this.getRankingList()
+    },
+    methods: {
+      //获取排行榜列表
+      getRankingList () {
+        getRankingList(
+          {
+            uuid: sessionStorage.getItem('uuid')
+          },
+          res => {
+            this.dataList = res.data
+            this.noneData = (!this.dataList) ? true : false
+          }
+        )
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  #main {
+    min-height: 100vh;
+  }
+
+  .rank {
+    font-size: 16px;
+    color: #d81111;
+    font-weight: bold;
+    width: 32px;
+    line-height: 55px;
+  }
+
+  #rankList {
+    margin-top: 35px;
+    margin-bottom: 55px;
+  }
+
+  .card-item {
+    background: #fff;
+    height: 55px;
+  }
+
+  .flex {
+    display: flex;
+    border-bottom: 1px solid #ececec;
+  }
+
+  .grid {
+    align-content: center;
+    display: grid;
+  }
+
+  .fl {
+    float: left;
+  }
+
+  .fr {
+    float: right;
+  }
+
+  .marL10 {
+    margin-left: 10px;
+  }
+
+  .marR10 {
+    margin-right: 10px;
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  #list {
+    background: #26a69a;
+    margin-left: 15px;
+    margin-right: 15px;
+    box-shadow: 1px 4px 17px #c7c7c7;
+  }
+
+  .userName {
+    text-align: left !important;
+    color: #26a69a;
+  }
+
+</style>

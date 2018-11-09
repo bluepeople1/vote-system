@@ -1,0 +1,21 @@
+.none-data{
+  width: 100%;
+  height: calc(100vh - 51px);
+  display: flex;
+  justify-content: center;
+}
+
+.index-none-data{
+  margin-top: 30px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.banner-img{
+  height: 230px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
