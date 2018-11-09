@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 //引入数据库操作
 // var db = require('./db');
 
-const host = 'http://192.168.3.73:80';
+const host = 'http://www.hzrtpxt.top';
 
 // 建立 express 实例
 const app = express();
@@ -525,6 +525,6 @@ app.get('/test', function (req, res) {
   res.send('version:1.7 微信登录授权调试启动成功');
 });
 
-app.listen(3000, function (req, res) {
-  console.log('app is running at port 3000');
+app.listen(3010, function (req, res) {
+  console.log('app is running at port 3010');
 });

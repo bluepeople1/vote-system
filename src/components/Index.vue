@@ -46,19 +46,19 @@
       </div>
       <!--倒计时-->
       <div id="countDown">
-        <span style="color: #e46112;">活动结束倒计时</span>
+        <span>活动结束倒计时</span>
         <ul>
           <li class="li-item-time">
-            <span><span style="color:red">{{days}} </span>天</span>
+            <span><span>{{days}} </span>天</span>
           </li>
           <li class="li-item-time">
-            <span><span style="color:red">{{hours}}</span> 小时</span>
+            <span><span>{{hours}}</span> 小时</span>
           </li>
           <li class="li-item-time">
-            <span><span style="color:red">{{minutes}}</span> 分</span>
+            <span><span>{{minutes}}</span> 分</span>
           </li>
           <li class="li-item-time">
-            <span><span style="color:red">{{seconds}}</span> 秒</span>
+            <span><span>{{seconds}}</span> 秒</span>
           </li>
         </ul>
         {{time}}
@@ -68,7 +68,7 @@
     <div id="content">
       <!--搜索框-->
       <div id="search">
-        <input type="text" v-model="keywords" placeholder="请输入"/>
+        <input type="text" v-model="keywords" placeholder="请输入选手信息"/>
         <!-- <button>搜  索</button> -->
         <div @click="search">
           <a class="weui-btn weui-btn_primary flex-grow">搜 索</a>
@@ -80,7 +80,8 @@
           <div @click="toDetailPage(item)">
             <span class="sort">{{item.studentNumb}}</span>
             <img v-if="item.studentImg===null" src="../assets/img/user.jpg" width="100%" height="150">
-            <img v-else :src="path+item.studentImg" ref="errorImg" width="100%" height="150"/>
+            <!--<image-waterfall v-else :src="path+item.studentImg" :imgsArr="imgsArr" @scrollReachBottom="getData"></image-waterfall>-->
+            <!--<img v-else :src="path+item.studentImg" ref="errorImg" width="100%" height="150"/>-->
           </div>
           <div class="item-bottom">
             <span>{{item.studentName}} </span>
@@ -134,18 +135,20 @@
     getStuAndAct,
     search,
     getActivityImg
-  } from '@/api/Service'
-  import Dialog from './common/Dialog'
-  import ImageError from './common/ImageError'
-  import NoneData from './common/NoneData'
+  } from '@/api/Service';
+  import Dialog from './common/Dialog';
+  import ImageError from './common/ImageError';
+  import NoneData from './common/NoneData';
+  import WaterFall from 'vue-waterfall-easy';
 
   export default {
     components: {
       'my-dialog': Dialog,
       'my-img': ImageError,
-      'none-data': NoneData
+      'none-data': NoneData,
+      'img-waterfall':WaterFall
     },
-    data () {
+    data() {
       return {
         time: '',
         days: 0,
@@ -155,7 +158,7 @@
         imgList: [],
         banner: '',
         count: 0, //报名人数
-        dataList: {}, //学生列表
+        dataList: [], //学生列表
         activityInfo: {}, //活动信息
         pv: 0, //访问量
         voteNum: 0, //投票总数
@@ -166,29 +169,30 @@
         path: 'http://47.100.243.198:8080',
         studentData: true,
         imageData: true
-      }
+      };
     },
     created: function () {
       //倒计时
-      this.timediff
+      this.timediff;
       //判断用户是否登录
       if (sessionStorage.getItem('sessionId')) {
-        this.getDataList()
+        this.getDataList();
       } else {
         //用户登录，获取sessionid
         login(res => {
-          sessionStorage.setItem('sessionId', res.data.sessionid)
-          this.getDataList()
-        })
+          sessionStorage.setItem('sessionId', res.data.sessionid);
+          this.getDataList();
+        });
       }
     },
-    mounted () {},
+    mounted() {
+    },
     // 监听,当路由发生变化的时候执行
     watch: {
       $route: {
         handler: function (val, oldVal) {
-          console.log(val)
-          this.getDataList()
+          console.log(val);
+          this.getDataList();
         },
         // 深度观察监听
         deep: true
@@ -200,7 +204,7 @@
         this.$router.push({
           name: 'Detail',
           params: {userInfo: userInfo}
-        })
+        });
       },
       //搜索
       search: function () {
@@ -208,17 +212,17 @@
           key: this.keywords,
           id: '',
           uuid: sessionStorage.getItem('uuid')
-        }
+        };
         search(params, res => {
-          this.dataList = []
+          this.dataList = [];
           if (res.data) {
-            this.dataList = res.data
+            this.dataList = res.data;
           } else {
-            this.title = '提示'
-            this.content = '没有找到该选手'
-            this.dialog = 'block' //显示dialog
+            this.title = '提示';
+            this.content = '没有找到该选手';
+            this.dialog = 'block'; //显示dialog
           }
-        })
+        });
       },
       //投票方法
       vote: function (studentId) {
@@ -226,66 +230,66 @@
         let params = {
           openId: sessionStorage.getItem('openId'),
           studentid: studentId
-        }
+        };
 
         //调用投票接口
         vote(params, res => {
           if (res.code === 7) {
-            this.title = '投票失败'
-            this.content = '请不要重复投票'
+            this.title = '投票失败';
+            this.content = '请不要重复投票';
           } else if (res.code === 0) {
-            this.title = '投票成功'
-            this.content = '您已成功给该选手投票'
+            this.title = '投票成功';
+            this.content = '您已成功给该选手投票';
           } else if (res.code === 8) {
-            this.title = '投票失败'
-            this.content = '一天只能投三票'
+            this.title = '投票失败';
+            this.content = '一天只能投三票';
           }
-          this.dialog = 'block' //显示dialog
-        })
+          this.dialog = 'block'; //显示dialog
+        });
       },
       //dialog 的监听方法
       dialogListener: function (data) {
-        this.dialog = data.hide
+        this.dialog = data.hide;
       },
       //获取数据
       getDataList: function () {
-        if(sessionStorage.getItem('uuid')){
-          return
+        if (sessionStorage.getItem('uuid')) {
+          return;
         }
         let params = {
           uuid: sessionStorage.getItem('uuid')
-        }
+        };
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
-          if(res){
-            return
+          if (res) {
+            return;
           }
-          sessionStorage.setItem('activityId', res.activity[0].activeId)
-          this.voteNum = res.voteNum
-          this.activityInfo = res.activity[0]
-          this.dataList = res.student
-          this.studentData = (!this.dataList) ? true : false
-          this.count = res.student.length
-          let activeName = res.activity[0].activeName
+          sessionStorage.setItem('activityId', res.activity[0].activeId);
+          this.voteNum = res.voteNum;
+          this.activityInfo = res.activity[0];
+          this.dataList = res.student;
+          this.studentData = (!this.dataList) ? true : false;
+          this.count = res.student.length;
+          let activeName = res.activity[0].activeName;
           pv(
             {
               activeId: this.activityInfo.activeId
             },
             res => {
-              this.pv = res.pv
+              this.pv = res.pv;
               getActivityImg(
                 {
                   activeName: activeName
                 },
                 res => {
-                  this.banner = res.data[0].imgSource
-                  this.imgList = res.data
-                  this.imageData = (!imgList) ? true : false
+                  this.banner = res.data[0].imgSource;
+                  this.imgList = res.data;
+                  this.imageData = (!imgList) ? true : false;
                 }
-              )
+              );
             }
-          )
-        })
+          );
+        });
         //获取选手列表
         // getStudentList(params,res=>{
         //   console.log(res);
@@ -309,49 +313,51 @@
     computed: {
       //倒计时
       timediff: function () {
-        const that = this
+        const that = this;
         let timecount = setInterval(() => {
-          let endTime = ''
+          let endTime = '';
           if (this.activityInfo.activeEndtime) {
-            endTime = this.activityInfo.activeEndtime + ' 00:00:00' //结束时间
+            endTime = this.activityInfo.activeEndtime + ' 00:00:00'; //结束时间
           }
-          let now = new Date()
-          let timeDiff = new Date(endTime).getTime() - now.getTime()
+          let now = new Date();
+          let timeDiff = new Date(endTime).getTime() - now.getTime();
           //时间差的毫秒数
 
           //计算出相差天数
-          let days = Math.floor(timeDiff / (24 * 3600 * 1000))
+          let days = Math.floor(timeDiff / (24 * 3600 * 1000));
           //计算出小时数
-          let temp1 = timeDiff % (24 * 3600 * 1000) //计算天数后剩余的毫秒数
-          let hours = Math.floor(temp1 / (3600 * 1000))
+          let temp1 = timeDiff % (24 * 3600 * 1000); //计算天数后剩余的毫秒数
+          let hours = Math.floor(temp1 / (3600 * 1000));
           //计算相差分钟数
-          let temp2 = temp1 % (3600 * 1000) //计算小时数后剩余的毫秒数
-          let minutes = Math.floor(temp2 / (60 * 1000))
+          let temp2 = temp1 % (3600 * 1000); //计算小时数后剩余的毫秒数
+          let minutes = Math.floor(temp2 / (60 * 1000));
           //计算相差秒数
-          let temp3 = temp2 % (60 * 1000) //计算分钟数后剩余的毫秒数
-          let seconds = Math.round(temp3 / 1000)
-          that.days = days
-          that.hours = hours
-          that.minutes = minutes
-          that.seconds = seconds
-
+          let temp3 = temp2 % (60 * 1000); //计算分钟数后剩余的毫秒数
+          let seconds = Math.round(temp3 / 1000);
+          // that.days = days;
+          // that.hours = hours;
+          // that.minutes = minutes;
+          // that.seconds = seconds;
+          [that.days, that.hours, that.minutes, that.seconds] = [days, hours, minutes, seconds];
           if (!timeDiff) {
-            this.days = 0
-            this.hours = 0
-            this.minutes = 0
-            this.seconds = 0
-            clearInterval(timecount)
-            this.title = '提示'
-            this.content = '当前活动已结束'
-            this.dialog = 'block' //显示dialog
+            [this.days, this.hours, this.minutes, this.seconds] = [0, 0, 0, 0];
+            // this.days = 0;
+            // this.hours = 0;
+            // this.minutes = 0;
+            // this.seconds = 0;
+            clearInterval(timecount);
+            [this.title, this.content, this.dialog] = ['提示', '当前活动已结束', 'block'];
+            // this.title = '提示';
+            // this.content = '当前活动已结束';
+            // this.dialog = 'block'; //显示dialog
           }
-        }, 1000)
+        }, 1000);
       }
     }
-  }
+  };
 </script>
 
-<style scoped>
+<style scoped lang="less">
   .sort {
     background: #000000bd;
     color: #90ee90;
@@ -378,6 +384,21 @@
     background: #3cb371;
     height: 55px;
     color: #fff;
+    .weui-flex {
+      .weui-flex__item {
+        .placeholder {
+          div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            span {
+              padding-left: 5px;
+            }
+          }
+        }
+      }
+    }
+
   }
 
   /*倒计时*/
@@ -387,9 +408,16 @@
     background: #fff;
     height: 80px;
     padding-top: 10px;
-    /* border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    box-shadow: 2px 0px 12px #b3b3b3; */
+
+    & > span{
+      color: #e46112;
+    }
+    .li-item-time{
+      & > span > span{
+        color:red
+      }
+
+    }
   }
 
   /*搜索*/
@@ -415,6 +443,11 @@
   ul {
     width: 100%;
     list-style: none;
+  }
+
+  #counter .weui-flex {
+    font-size: 14px;
+    padding: 5px;
   }
 
   .li-item {

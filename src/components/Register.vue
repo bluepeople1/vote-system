@@ -3,10 +3,10 @@
   <div id="main">
     <div style="margin:15px;">
 
-      <div class="page__bd marT10 marT35" >
+      <div class="page__bd marT10 marT35">
         <div class="weui-cells weui-cells_form">
           <div class="title">
-              报名信息
+            报名信息
           </div>
           <div class="weui-cell">
             <div class="weui-cell__hd">
@@ -84,62 +84,10 @@
           <a class="weui-btn weui-btn_primary flex-grow">立即报名</a>
         </div>
       </div>
-
-      <!-- <div class="bg-white">
-          <ul>
-              <li>
-                  <div class="label">
-                      风采照：
-                  </div>
-                  <div style="width: 70%;box-sizing: border-box;overflow: hidden;">
-                      <div style="position: relative;text-align: center;overflow: hidden;margin: 0;color:#fff;width: 100%;background: #3cb371;border-radius: 3px;padding: 5px 0;overflow: hidden;">
-                          <div style="position: absolute;width: 100%;text-align: center;">
-                              上传照片
-                          </div>
-                          <input type="file" style="opacity: 0;width: 100%;height: 100%;">
-                      </div>
-
-                  </div>
-              </li>
-              <li>
-                  <div class="label">
-                      姓名：
-                  </div>
-                  <div>
-                      <input type="text" class="input">
-                  </div>
-              </li>
-              <li>
-                  <div class="label">
-                      性别：
-                  </div>
-                  <div>
-                      <input type="text" class="input">
-                  </div>
-              </li>
-              <li>
-                  <div class="label">
-                      年龄：
-                  </div>
-                  <div>
-                      <input type="text" class="input">
-                  </div>
-              </li>
-
-          </ul>
-
-
-      </div> -->
-
     </div>
 
     <!--底部-->
     <div id="footer">
-      <!-- <div id="tab" @click="toIndex">
-          <div class="tab-item">
-              <span>立即报名</span>
-          </div>
-      </div> -->
 
     </div>
     <my-dialog :title="title" :content="content" :display="dialog" v-on:dialogListener="dialogListener"/>
@@ -148,26 +96,26 @@
 
 <script>
   $(function () {
-    var $gallery = $('#gallery'),
+    let $gallery = $('#gallery'),
       $galleryImg = $('#galleryImg'),
-      $uploaderFiles = $('#uploaderFiles')
+      $uploaderFiles = $('#uploaderFiles');
     $uploaderFiles.on('click', 'li', function () {
-      $galleryImg.attr('style', this.getAttribute('style'))
-      $gallery.fadeIn(100)
-    })
+      $galleryImg.attr('style', this.getAttribute('style'));
+      $gallery.fadeIn(100);
+    });
     $gallery.on('click', function () {
-      $gallery.fadeOut(100)
-    })
-  })
+      $gallery.fadeOut(100);
+    });
+  });
 
-  import { login, sign } from '@/api/Service'
-  import Dialog from './common/Dialog'
+  import {login, sign} from '@/api/Service';
+  import Dialog from './common/Dialog';
 
   export default {
     components: {
       'my-dialog': Dialog
     },
-    data () {
+    data() {
       return {
         userName: '',
         userSex: 1,
@@ -177,85 +125,85 @@
         dialog: 'none',
         userImg: '',
         imgNum: 0
-      }
+      };
     },
     created: function () {
-      console.log(this.$route.params)
+      console.log(this.$route.params);
     },
     methods: {
       //删除选中图片
-      deleteImg () {
+      deleteImg() {
         $('#uploaderFiles')
           .children('li')
-          .remove()
-        this.imgNum = 0
-        this.userImg = ''
+          .remove();
+        this.imgNum = 0;
+        this.userImg = '';
       },
       //dialog 的监听方法
       dialogListener: function (data) {
-        this.dialog = data.hide
+        this.dialog = data.hide;
       },
       toIndex: function () {
-        this.$router.push('/index')
+        this.$router.push('/index');
       },
       //上传图片
       upload: function (e) {
-        const that = this
+        const that = this;
         var tmpl =
-          '<li class="weui-uploader__file" style="background-image:url(#url#)"></li>'
+          '<li class="weui-uploader__file" style="background-image:url(#url#)"></li>';
         var src,
           url = window.URL || window.webkitURL || window.mozURL,
-          files = e.target.files
+          files = e.target.files;
         if (that.imgNum !== 0) {
-          that.title = '提示'
-          that.content = '只能上传一张图片'
-          that.dialog = 'block' //显示dialog
-          return
+          that.title = '提示';
+          that.content = '只能上传一张图片';
+          that.dialog = 'block'; //显示dialog
+          return;
         }
         for (var i = 0, len = files.length; i < len; ++i) {
-          var file = files[i]
+          var file = files[i];
           if (url) {
-            src = url.createObjectURL(file)
+            src = url.createObjectURL(file);
           } else {
-            src = e.target.result
+            src = e.target.result;
           }
-          var reader = new FileReader()
-          reader.readAsDataURL(file)
+          var reader = new FileReader();
+          reader.readAsDataURL(file);
           reader.onload = function (e) {
-            var image_base64 = this.result.split(',')[1]
+            var image_base64 = this.result.split(',')[1];
             //就是base64
-            var article_image = image_base64
-            that.userImg = article_image
-          }
-          $('#uploaderFiles').append($(tmpl.replace('#url#', src)))
-          that.imgNum = 1
+            var article_image = image_base64;
+            that.userImg = article_image;
+          };
+          $('#uploaderFiles').append($(tmpl.replace('#url#', src)));
+          that.imgNum = 1;
         }
       },
       //报名方法
       sign: function () {
         if (!this.userName) {
-          this.title = '错误提示'
-          this.content = '请填写参赛选手姓名'
-          this.dialog = 'block' //显示dialog
-          return
+          this.title = '错误提示';
+          this.content = '请填写参赛选手姓名';
+          this.dialog = 'block'; //显示dialog
+          return;
         }
         if (!this.userAge) {
-          this.title = '错误提示'
-          this.content = '请填写参赛选手年龄'
-          this.dialog = 'block' //显示dialog
-          return
+          this.title = '错误提示';
+          this.content = '请填写参赛选手年龄';
+          this.dialog = 'block'; //显示dialog
+          return;
         }
         if (!this.userImg) {
-          this.title = '错误提示'
-          this.content = '请选择一张参赛选手图片'
-          this.dialog = 'block' //显示dialog
-          return
+          this.title = '错误提示';
+          this.content = '请选择一张参赛选手图片';
+          this.dialog = 'block'; //显示dialog
+          return;
         }
         if (!this.userSex) {
-          this.title = '错误提示'
-          this.content = '请填写参赛选手性别'
-          this.dialog = 'block' //显示dialog
-          return
+          this.title = '错误提示';
+          this.content = '请填写参赛选手性别';
+          this.dialog = 'block'; //显示dialog
+          return;
         }
 
         //请求参数
@@ -266,20 +214,20 @@
           studentContext: this.userSex,
           studentTicket: 0,
           activityId: sessionStorage.getItem('activityId')
-        }
-        console.log(params)
+        };
+        console.log(params);
         //报名接口
         sign(params, res => {
-          console.log(res)
+          console.log(res);
           if (res.data === 1) {
-            this.title = '报名成功'
-            this.content = '您已成功参加活动'
-            this.dialog = 'block' //显示dialog
+            this.title = '报名成功';
+            this.content = '您已成功参加活动';
+            this.dialog = 'block'; //显示dialog
           }
-        })
+        });
       }
     }
-  }
+  };
 </script>
 
 <style scoped>
