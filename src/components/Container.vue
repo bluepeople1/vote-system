@@ -78,34 +78,35 @@
 
       const uuid = sessionStorage.getItem('uuid');
       //判断uuid是否存在
-      // if (uuid) {
-      //   //如果uuid不存在，就从url中截取
-      //   let url = window.location.href.split("#")[1];
-      //   let data = Base64.decode(url.split("/")[2]);
-      //   let openId = data.split("#")[0].split("=")[1];
-      //   let uuid = data.split("#")[1].split("=")[1];
-      //   sessionStorage.setItem("uuid", uuid);
-      //   sessionStorage.setItem("openId", openId);
-      //   this.uuid = sessionStorage.getItem("uuid");
-      // }
-      // const sessionId = sessionStorage.getItem("sessionId");
-      // if (sessionId) {
-      //   //用户登录，获取sessionid
-      //   login(res => {
-      //     sessionStorage.setItem("sessionId", res.data.sessionid);
-      //     this.getDataList();
-      //   });
-      // } else {
-      //   this.getDataList();
-      // }
-      // this.device();
+      if (uuid) {
+        //如果uuid不存在，就从url中截取
+        let url = window.location.href.split("#")[1];
+        let data = Base64.decode(url.split("/")[2]);
+        let openId = data.split("#")[0].split("=")[1];
+        let uuid = data.split("#")[1].split("=")[1];
+        sessionStorage.setItem("uuid", uuid);
+        sessionStorage.setItem("openId", openId);
+        this.uuid = sessionStorage.getItem("uuid");
+      }
+      const sessionId = sessionStorage.getItem("sessionId");
+      if (sessionId) {
+        //用户登录，获取sessionid
+        login(res => {
+          sessionStorage.setItem("sessionId", res.data.sessionid);
+          this.getDataList();
+        });
+      } else {
+        this.getDataList();
+      }
+      this.device();
     },
     mounted: function () {
 
-      const ticket="kgt8ON7yVITDhtdwci0qeVM6-pSBagSBp94OYaUJtdIWsmmo207FXHRgWoskuXmGESpydpqopeMt1csM6SeEuA";
 
-      const config = sign(ticket, 'http://47.100.243.198/vote-system/');
-      console.log(location.href.split('#')[0]);
+      const ticket="kgt8ON7yVITDhtdwci0qeVM6-pSBagSBp94OYaUJtdKzrphbtqvxINirpNsxXRpXlUElp-JJtcqpzFg4I-A5Ig";
+
+      const config = sign(ticket, 'http://www.hzrtpxt.top/vote-system');
+      console.log(config);
       // 配置功能
       wx.config({
         debug: true,
@@ -138,7 +139,7 @@
           signType: '', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
           paySign: '', // 支付签名
           success: function (res) {
-// 支付成功后的回调函数
+            // 支付成功后的回调函数
           }
         });
       });
@@ -178,16 +179,19 @@
         //获取活动信息
         getActivityInfo(params, res => {
           console.log('活动', res);
-          that.activityInfo = res.data[0];
-          sessionStorage.setItem('activityName', res.data[0].activeName);
-          sessionStorage.setItem(
-            'activityBeginTime',
-            res.data[0].activeBegintime
-          );
-          sessionStorage.setItem('activityEndTime', res.data[0].activeEndtime);
-          that.activityName = sessionStorage.getItem('activityName');
-          that.activityBeginTime = sessionStorage.getItem('activityBeginTime');
-          that.activityEndTime = sessionStorage.getItem('activityEndTime');
+          let data=res.data[0];
+
+          if(data){
+            that.activityInfo = data;
+            sessionStorage.setItem('activityName', res.data[0].activeName);
+            sessionStorage.setItem('activityBeginTime',res.data[0].activeBegintime);
+            sessionStorage.setItem('activityEndTime', res.data[0].activeEndtime);
+            that.activityName = sessionStorage.getItem('activityName');
+            that.activityBeginTime = sessionStorage.getItem('activityBeginTime');
+            that.activityEndTime = sessionStorage.getItem('activityEndTime');
+          }else{
+            console.log('暂无数据');
+          }
         });
       },
       //判断是什么设备打开的网页

@@ -39,11 +39,9 @@ export const sign = function (jsapi_ticket, url) {
     url: url
   };
   const string = raw(ret);
-  console.log(string);
   const jsSHA = require('jssha');
   const shaObj = new jsSHA(string, 'TEXT');
   ret.signature = shaObj.getHash('SHA-1', 'HEX');
-  console.log(ret.signature);
   return ret;
 };
 

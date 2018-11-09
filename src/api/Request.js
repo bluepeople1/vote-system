@@ -29,8 +29,8 @@ export const post = (path, params = {}, callback) => {
   });
 };
 
-export const jsapi_ticket = () => {
-  const ACCESS_TOKEN = '14_LcakykM4fy3izh7qpobvCr7Z8tXBIuxcVDI4yLfU0zjKF__3iCwG2ejDTLiW3I2WquwQSimp3cEImAbemDo2l-Ls70g1TDZgIuM15UohvW9VV-feQ3T0D-VIO40BOEhACAUHX';
+export const jsapi_ticket = (callback) => {
+  const ACCESS_TOKEN = '15_9jrKoJ9p1UHfDpbctoZD45Epc2GTcxJhTH2e8FVGn0g12EJN8bF0wgp9CpOpAen16wBQ6KALYKHK-MqVY5yx1EnGRUp7CCiA2kkn4kRwvvaFk6cKjtF49dqFKczoWVnwUnVegwt8gUjUR83QERZgAGAPCK';
   axios.get('https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=' + ACCESS_TOKEN + '&type=jsapi').then(res => {
     callback(res);
   }).catch(err => {

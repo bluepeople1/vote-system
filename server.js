@@ -522,9 +522,9 @@ app.get('/wxcode', function (req, res) {
  * 测试启动
  */
 app.get('/test', function (req, res) {
-  res.send('version:1.7 微信登录授权调试启动成功');
+  res.send('version:1.8.1 微信登录授权调试启动成功 地址：http://47.100.243.198:3000');
 });
 
-app.listen(3010, function (req, res) {
-  console.log('app is running at port 3010');
+app.listen(3000, function (req, res) {
+  console.log('app is running at port 3000');
 });
