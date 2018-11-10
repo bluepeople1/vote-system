@@ -140,6 +140,7 @@
   import ImageError from './common/ImageError';
   import NoneData from './common/NoneData';
   import WaterFall from 'vue-waterfall-easy';
+  import store from '@/assets/js/store';
 
   export default {
     components: {
@@ -172,6 +173,7 @@
       };
     },
     created: function () {
+      console.log(store.state);
       //倒计时
       this.timediff;
       //判断用户是否登录

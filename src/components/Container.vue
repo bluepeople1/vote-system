@@ -2,7 +2,9 @@
   <div id="container">
     <!-- {{wxcode}} -->
     <div class="marquee-title">
-      <marquee>{{activityName}} 活动时间：{{activityBeginTime}} ~ {{activityEndTime}}</marquee>
+      <marquee>{{activityName}} 活动时间：{{activityBeginTime?activityBeginTime:''}} ~
+        {{activityEndTime?activityEndTime:''}}
+      </marquee>
     </div>
     <keep-alive>
       <router-view class="child"/>
@@ -55,57 +57,57 @@
 </template>
 
 <script>
-  import { wxlogin, login, getActivityInfo, wxAuth ,getJsapiTicket} from '@/api/Service';
-  import { sign } from '@/assets/js/sign';
+  import {wxlogin, login, getActivityInfo, wxAuth, getJsapiTicket} from '@/api/Service';
+  import {sign} from '@/assets/js/sign';
+  import store from '@/assets/js/store';
+  import wx from 'weixin-js-sdk';
 
   let Base64 = require('js-base64').Base64;
 
   export default {
-    data () {
+    data() {
       return {
         wxcode: '',
         selectedTab: 1,
         uuid: '',
-        activityInfo: '',
-        activityName: sessionStorage.getItem('activityName'),
-        activityBeginTime: sessionStorage.getItem('activityBegintime'),
-        activityEndTime: sessionStorage.getItem('activityEndtime')
+        activityInfo: ''
       };
     },
     created: function () {
       //页面刷新后，判断当前页面所在tab
       this.currentTab();
-
-      const uuid = sessionStorage.getItem('uuid');
-      //判断uuid是否存在
-      if (uuid) {
+      if (this.uuid || this.uuid === '') {
+        console.log('会执行吗');
         //如果uuid不存在，就从url中截取
         let url = window.location.href.split("#")[1];
         let data = Base64.decode(url.split("/")[2]);
         let openId = data.split("#")[0].split("=")[1];
         let uuid = data.split("#")[1].split("=")[1];
-        sessionStorage.setItem("uuid", uuid);
-        sessionStorage.setItem("openId", openId);
-        this.uuid = sessionStorage.getItem("uuid");
+        this.uuid = uuid;
+        store.setOpenId("openId");
+        store.setUuid("uuid");
       }
       const sessionId = sessionStorage.getItem("sessionId");
-      if (sessionId) {
+      if (sessionId || sessionId === '') {
         //用户登录，获取sessionid
         login(res => {
-          sessionStorage.setItem("sessionId", res.data.sessionid);
+          store.setSessionId(res.data.sessionid);
           this.getDataList();
         });
       } else {
         this.getDataList();
       }
-      this.device();
+      // this.device();
     },
     mounted: function () {
+      getJsapiTicket((data)=>{
+        console.log('getJsapiTicket',data);
+      });
 
 
-      const ticket="kgt8ON7yVITDhtdwci0qeVM6-pSBagSBp94OYaUJtdKzrphbtqvxINirpNsxXRpXlUElp-JJtcqpzFg4I-A5Ig";
+      const ticket = "kgt8ON7yVITDhtdwci0qeVM6-pSBagSBp94OYaUJtdJidEbkRcxEEz-iCiSZw4QzwXjgslxcnnlmNaF76vLNDQ";
 
-      const config = sign(ticket, 'http://www.hzrtpxt.top/vote-system');
+      const config = sign(ticket, 'http://localhost:8080/#/');
       console.log(config);
       // 配置功能
       wx.config({
@@ -174,22 +176,21 @@
       getDataList: function () {
         const that = this;
         let params = {
-          uuid: sessionStorage.getItem('uuid')
+          uuid: store.state.uuid
         };
         //获取活动信息
         getActivityInfo(params, res => {
           console.log('活动', res);
-          let data=res.data[0];
+          let data = res.data[0];
 
-          if(data){
+          if (data) {
             that.activityInfo = data;
-            sessionStorage.setItem('activityName', res.data[0].activeName);
-            sessionStorage.setItem('activityBeginTime',res.data[0].activeBegintime);
-            sessionStorage.setItem('activityEndTime', res.data[0].activeEndtime);
-            that.activityName = sessionStorage.getItem('activityName');
-            that.activityBeginTime = sessionStorage.getItem('activityBeginTime');
-            that.activityEndTime = sessionStorage.getItem('activityEndTime');
-          }else{
+            store.setActivity({
+              activityName: res.data[0].activeName,
+              activityBeginTime: res.data[0].activeBegintime,
+              activityEndTime: res.data[0].activeEndtime
+            });
+          } else {
             console.log('暂无数据');
           }
         });
@@ -231,11 +232,22 @@
         // 深度观察监听
         deep: true
       }
+    },
+    computed: {
+      activityName: function () {
+        return store.state.activity.activityName;
+      },
+      activityBeginTime: function () {
+        return store.state.activity.activityBegintime;
+      },
+      activityEndTime: function () {
+        return store.state.activity.activityEndtime;
+      }
     }
   };
 </script>
 
-<style scoped>
+<style scoped lang="less">
   ul {
     list-style: none;
   }
@@ -287,12 +299,16 @@
   }
 
   .marquee-title {
+    height: 30px;
     position: fixed;
     top: 0px;
     margin: 0px;
     width: 100%;
     color: #fff;
-    background: #09bb0759;
+    background: #ff0700;
     z-index: 1000;
+    & > marquee {
+      line-height: 30px;
+    }
   }
 </style>

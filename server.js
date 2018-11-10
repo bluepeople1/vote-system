@@ -90,7 +90,7 @@ app.post('/getStudentList', function (req, res) {
     headers: {
       'content-type': 'application/x-www-form-urlencoded',
       'cookie': req.body.jessionid
-    },
+    }
   }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.send({
@@ -111,7 +111,7 @@ app.post('/getActivityInfo', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
@@ -145,7 +145,7 @@ app.post('/pv', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
@@ -178,7 +178,7 @@ app.post('/getStuAndAct', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
@@ -212,7 +212,7 @@ app.post('/vote', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
@@ -244,7 +244,7 @@ app.post('/search', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
@@ -253,7 +253,7 @@ app.post('/search', function (req, res) {
     url: host + '/master/Interface/getStudentByName',
     json: true,
     headers: {
-      'cookie': sessionId,
+      'cookie': sessionId
     },
     form: {
       studentName: req.body.key,
@@ -285,7 +285,7 @@ app.post('/sign', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
@@ -293,7 +293,7 @@ app.post('/sign', function (req, res) {
   request.post({
     url: host + '/master/Interface/addStudent',
     headers: {
-      'cookie': sessionId,
+      'cookie': sessionId
     },
     form: {
       studentName: req.body.studentName,
@@ -303,7 +303,7 @@ app.post('/sign', function (req, res) {
       studentTicket: req.body.studentTicket,
       activeId: req.body.activityId
     },
-    json: true,
+    json: true
   }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.send({
@@ -322,7 +322,7 @@ app.post('/sendGift', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
@@ -331,7 +331,7 @@ app.post('/sendGift', function (req, res) {
     url: host + '/master/Interface/sendGift',
     json: true,
     headers: {
-      'cookie': sessionId,
+      'cookie': sessionId
     },
     form: {
       accountUsercode: req.body.openId,
@@ -360,7 +360,7 @@ app.get('/getGiftList', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
@@ -391,7 +391,7 @@ app.post('/rank', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
@@ -399,7 +399,7 @@ app.post('/rank', function (req, res) {
     url: host + '/master/Interface/getRankList',
     json: true,
     headers: {
-      'cookie': sessionId,
+      'cookie': sessionId
     },
     form: {
       activeUuid: req.body.uuid
@@ -423,14 +423,14 @@ app.post('/prize', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
   request.post({
     url: host + '/master/Interface/getPrizeList',
     headers: {
-      'cookie': sessionId,
+      'cookie': sessionId
     },
     json: true,
     form: {
@@ -455,14 +455,14 @@ app.post('/activityImg', function (req, res) {
   if (sessionId === null || sessionId === undefined || sessionId === '') {
     res.send({
       code: 1000,
-      msg: '请先登录后再进行操作',
+      msg: '请先登录后再进行操作'
     });
     return;
   }
   request.post({
     url: host + '/master/Active/getActiveImgList',
     headers: {
-      'cookie': sessionId,
+      'cookie': sessionId
     },
     json: true,
     form: {
@@ -517,6 +517,36 @@ app.get('/wxcode', function (req, res) {
   console.log(req);
   console.log(res);
 });
+
+app.get('/ticket', function (req, res) {
+  // const APPID = 'wx3fec79cd177fcfe9';
+  // const APPSECRET = '78b98452f99249894105d89aef6f7b66';
+  // request({
+  //   url: 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + APPID + '&secret=' + APPSECRET,
+  //   method: 'GET',
+  //   json: true
+  // }, function (error, response, body) {
+  //
+  //
+  //   res.send({
+  //     body
+  //   });
+  // });
+
+  const ACCESS_TOKEN = "15_9fIS87QoXo-7AvBrxYQZcLuLvaD8Y5QjVlHYxIy3CU_r896W2ZSVCnf7NKSjVkE_qjR4GyuQE33__8v555swJkFKP3Vc_hWdhnAxZV7pFzZjDjd7xbYshXxTHFAO-f7dVKhnGKLtpy240XvlEAUbACAIEY";
+
+  request({
+    url: 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=' + ACCESS_TOKEN + '&type=jsapi',
+    method: 'GET',
+    json: true
+  }, function (error, response, body) {
+    res.send({
+      response
+    });
+  });
+
+});
+
 
 /**
  * 测试启动
