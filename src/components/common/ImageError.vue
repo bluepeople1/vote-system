@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <img v-if='errorType==="user"' :src="imageSrc" :onerror="userErr"/>
-    <img v-if='errorType==="img"' :src="imageSrc" :onerror="imgErr"/>
+  <div id="error">
+    <img v-if='errorType==="user"' :src="path+imageSrc" :onerror="userErr"/>
+    <img v-if='errorType==="img"' :src="path+imageSrc" :onerror="imgErr"/>
   </div>
 </template>
 
@@ -10,8 +10,9 @@
     name: 'ImageError',
     data () {
       return {
+        path:'http://www.hzrtpxt.top',
         imgErr: 'this.src="' + require('../../assets/img/errorImg.png') + '"',
-        userErr: 'this.src="' + require('../../assets/img/errorImg.png') + '"'
+        userErr: 'this.src="' + require('../../assets/img/user.jpg') + '"'
       }
     },
     props: {
@@ -27,6 +28,13 @@
   }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+  #error{
+    & > img{
+      height: 170px;
+      width: 100%;
+    }
+  }
+
 
 </style>

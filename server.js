@@ -88,8 +88,7 @@ app.post('/getStudentList', function (req, res) {
     method: 'POST',
     json: true,
     headers: {
-      'content-type': 'application/x-www-form-urlencoded',
-      'cookie': req.body.jessionid
+      'cookie': req.headers.sessionid
     }
   }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
@@ -107,25 +106,16 @@ app.post('/getStudentList', function (req, res) {
  * 暂时没有使用
  */
 app.post('/getActivityInfo', function (req, res) {
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   request.post({
     url: host + '/master/Interface/getActiveList',
     json: true,
     headers: {
-      'cookie': sessionId
+      'cookie': req.headers.sessionid
     },
     form: {
       activeUuid: req.body.uuid
     }
   }, function (error, response, body) {
-
     if (!error && response.statusCode == 200) {
       res.send({
         code: 0,
@@ -141,19 +131,11 @@ app.post('/getActivityInfo', function (req, res) {
  * 访问量
  */
 app.post('/pv', function (req, res) {
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   request.post({
     url: host + '/master/Interface/watchNumb',
     json: true,
     headers: {
-      'cookie': sessionId
+      'cookie': req.headers.sessionid
     },
     form: {
       activeId: req.body.activeId
@@ -173,20 +155,11 @@ app.post('/pv', function (req, res) {
  * 获取参赛选手信息和活动信息
  */
 app.post('/getStuAndAct', function (req, res) {
-
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   request.post({
     url: host + '/master/Interface/getStudentAndActive',
     json: true,
     headers: {
-      'cookie': sessionId
+      'cookie': req.headers.sessionid
     },
     form: {
       activeUuid: req.body.uuid
@@ -208,20 +181,12 @@ app.post('/getStuAndAct', function (req, res) {
  * 投票
  */
 app.post('/vote', function (req, res) {
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   //request 请求
   request.post({
     url: host + '/master/Interface/addVote',
     json: true,
     headers: {
-      'cookie': sessionId
+      'cookie': req.headers.sessionid
     },
     form: {
       openid: req.body.openId,
@@ -240,20 +205,12 @@ app.post('/vote', function (req, res) {
  * 根据id或名字查询用户
  */
 app.post('/search', function (req, res) {
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   //request请求
   request.post({
     url: host + '/master/Interface/getStudentByName',
     json: true,
     headers: {
-      'cookie': sessionId
+      'cookie': req.headers.sessionid
     },
     form: {
       studentName: req.body.key,
@@ -262,7 +219,7 @@ app.post('/search', function (req, res) {
     }
   }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      var rank = '';
+      let rank = '';
       if (response.body.studentRank != null || response.body.studentRank != undefined) {
         rank = response.body.studentRank;
       }
@@ -280,21 +237,9 @@ app.post('/search', function (req, res) {
  * 活动报名
  */
 app.post('/sign', function (req, res) {
-  console.log(req.body.activityId);
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
-  //request 
+  //request
   request.post({
     url: host + '/master/Interface/addStudent',
-    headers: {
-      'cookie': sessionId
-    },
     form: {
       studentName: req.body.studentName,
       studentImg: req.body.studentImg,
@@ -302,6 +247,9 @@ app.post('/sign', function (req, res) {
       studentContext: req.body.studentContext,
       studentTicket: req.body.studentTicket,
       activeId: req.body.activityId
+    },
+    headers: {
+      'cookie': req.headers.sessionid
     },
     json: true
   }, function (error, response, body) {
@@ -318,20 +266,12 @@ app.post('/sign', function (req, res) {
  * 赠送礼物
  */
 app.post('/sendGift', function (req, res) {
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   //request 请求
   request.post({
     url: host + '/master/Interface/sendGift',
     json: true,
     headers: {
-      'cookie': sessionId
+      'cookie': req.headers.sessionid
     },
     form: {
       accountUsercode: req.body.openId,
@@ -356,21 +296,13 @@ app.post('/sendGift', function (req, res) {
  * 获取礼物列表
  */
 app.get('/getGiftList', function (req, res) {
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   request({
     url: host + '/master/Gift/getGiftList',
     method: 'GET',
-    json: true,
     headers: {
-      'cookie': sessionId
-    }
+      'cookie': req.headers.sessionid
+    },
+    json: true,
   }, function (error, response, body) {
     console.log('statusCode:' + response.statusCode);
     if (!error && response.statusCode == 200) {
@@ -387,19 +319,11 @@ app.get('/getGiftList', function (req, res) {
  * 排行榜
  */
 app.post('/rank', function (req, res) {
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   request.post({
     url: host + '/master/Interface/getRankList',
     json: true,
     headers: {
-      'cookie': sessionId
+      'cookie': req.headers.sessionid
     },
     form: {
       activeUuid: req.body.uuid
@@ -419,20 +343,12 @@ app.post('/rank', function (req, res) {
  * 奖品
  */
 app.post('/prize', function (req, res) {
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   request.post({
     url: host + '/master/Interface/getPrizeList',
-    headers: {
-      'cookie': sessionId
-    },
     json: true,
+    headers: {
+      'cookie': req.headers.sessionid
+    },
     form: {
       activeUuid: req.body.uuid
     }
@@ -451,20 +367,12 @@ app.post('/prize', function (req, res) {
  * 活动图片
  */
 app.post('/activityImg', function (req, res) {
-  var sessionId = req.headers.sessionid;
-  if (sessionId === null || sessionId === undefined || sessionId === '') {
-    res.send({
-      code: 1000,
-      msg: '请先登录后再进行操作'
-    });
-    return;
-  }
   request.post({
     url: host + '/master/Active/getActiveImgList',
-    headers: {
-      'cookie': sessionId
-    },
     json: true,
+    headers: {
+      'cookie': req.headers.sessionid
+    },
     form: {
       activeName: req.body.activeName
     }
@@ -480,79 +388,31 @@ app.post('/activityImg', function (req, res) {
 });
 
 /**
- * 微信登录
+ * 获取ticket
  */
-app.get('/wxAuth', function (req, res) {
-  console.log('微信登录');
-  const redirect_uri = 'https%3A%2F%2F4e6d1030.ngrok.io%2Flxsj%2Fwechat%2Fsecurity';
-  const appid = 'wx339df95d83b73048';
-
+app.get('/getTicket', function (req, res) {
   request({
-    url: host + '/master/wxlogin',
+    url: host + '/master/getToken',
     method: 'GET',
-    data: {
-      uuid: ""
-    },
-    json: true
-  }, function (error, response, body) {
-    console.log('statusCode:' + response.statusCode);
-    res.send({
-      response
-    });
-    // if (!error && response.statusCode == 200) {
-    //   res.send({
-    //     code: 0,
-    //     msg: "请求成功",
-    //     data: body.rows
-    //   });
-    // }
-  });
-});
-
-
-/**
- * 微信登录
- */
-app.get('/wxcode', function (req, res) {
-  console.log(req);
-  console.log(res);
-});
-
-app.get('/ticket', function (req, res) {
-  // const APPID = 'wx3fec79cd177fcfe9';
-  // const APPSECRET = '78b98452f99249894105d89aef6f7b66';
-  // request({
-  //   url: 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + APPID + '&secret=' + APPSECRET,
-  //   method: 'GET',
-  //   json: true
-  // }, function (error, response, body) {
-  //
-  //
-  //   res.send({
-  //     body
-  //   });
-  // });
-
-  const ACCESS_TOKEN = "15_9fIS87QoXo-7AvBrxYQZcLuLvaD8Y5QjVlHYxIy3CU_r896W2ZSVCnf7NKSjVkE_qjR4GyuQE33__8v555swJkFKP3Vc_hWdhnAxZV7pFzZjDjd7xbYshXxTHFAO-f7dVKhnGKLtpy240XvlEAUbACAIEY";
-
-  request({
-    url: 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=' + ACCESS_TOKEN + '&type=jsapi',
-    method: 'GET',
-    json: true
+    json: true,
+    headers: {
+      'cookie': sessionId
+    }
   }, function (error, response, body) {
     res.send({
-      response
+      code: 0,
+      msg: '请求成功',
+      data: body[0]
     });
   });
 
 });
-
 
 /**
  * 测试启动
  */
 app.get('/test', function (req, res) {
-  res.send('version:1.8.1 微信登录授权调试启动成功 地址：http://47.100.243.198:3000');
+  res.send('version:1.8.4 微信登录授权调试启动成功 地址：http://47.100.243.198:3000');
 });
 
 app.listen(3000, function (req, res) {

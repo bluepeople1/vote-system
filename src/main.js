@@ -8,7 +8,7 @@ import $ from 'jquery';
 import {login} from '@/api/Service';
 import './assets/css/weui.min.css';
 import './assets/css/common.css';
-
+import store from './assets/js/store'
 
 /*
 *  1.超时处理
@@ -16,17 +16,16 @@ import './assets/css/common.css';
 *  3.开发环境与正式环境的区别
 */
 axios.defaults.timeout = 5000
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
-// axios.defaults.baseURL =  (process.env.NODE_ENV == 'development' ? 'http://192.168.1.15:8080/' : 'http://www.xxxx.com/')
+// axios.defaults.baseURL =  'http://www.hzrtpxt.top/'
+// axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {
+  console.log('拦截器',store.state.sessionId);
   // 在发送请求之前做些什么
-  if (sessionStorage.getItem('sessionId')) {
     config.headers = {
-      'SessionId': sessionStorage.getItem('sessionId')
+      'SessionId': store.state.sessionId
     };
-  }
   return config;
 }, function (error) {
   // 对请求错误做些什么
@@ -36,11 +35,11 @@ axios.interceptors.request.use(function (config) {
 // 添加响应拦截器
 axios.interceptors.response.use(function (response) {
   // 对响应数据做点什么
-  if (response.data.code === 1000) {
-    login(res => {
-      sessionStorage.setItem('sessionId', res.data.sessionid);
-    });
-  }
+  // if (response.data.code === 1000) {
+  //   login(res => {
+  //     sessionStorage.setItem('sessionId', res.data.sessionid);
+  //   });
+  // }
   return response.data;
 }, function (error) {
   // 对响应错误做点什么

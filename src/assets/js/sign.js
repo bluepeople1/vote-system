@@ -31,9 +31,10 @@ let raw = function (args) {
  *
  * @returns
  */
-export const sign = function (jsapi_ticket, url) {
+export const sign = function (jsApi_ticket, url) {
+
   const ret = {
-    jsapi_ticket: jsapi_ticket,
+    jsapi_ticket: jsApi_ticket,
     noncestr: createNonceStr(),
     timestamp: createTimestamp(),
     url: url

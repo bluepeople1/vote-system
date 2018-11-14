@@ -4,7 +4,7 @@
     <div id="banner">
       <!--海报图-->
       <div id="image">
-        <my-img imageSrc="path+banner" errorType="img" width="100%" class="banner-img"/>
+        <my-img :imageSrc="path+banner" errorType="img" class="banner-img"/>
       </div>
       <!--已报名、累计投票、访问量-->
       <div id="counter">
@@ -80,8 +80,7 @@
           <div @click="toDetailPage(item)">
             <span class="sort">{{item.studentNumb}}</span>
             <img v-if="item.studentImg===null" src="../assets/img/user.jpg" width="100%" height="150">
-            <!--<image-waterfall v-else :src="path+item.studentImg" :imgsArr="imgsArr" @scrollReachBottom="getData"></image-waterfall>-->
-            <!--<img v-else :src="path+item.studentImg" ref="errorImg" width="100%" height="150"/>-->
+            <my-img v-else :src="item.studentImg" errorType="user" ref="errorImg" width="100%" height="150"/>
           </div>
           <div class="item-bottom">
             <span>{{item.studentName}} </span>
@@ -114,10 +113,10 @@
           </div>
         </div>
       </div>
-      <div class="marTop30" v-if="imageData===false">
+      <div class="marTop30" v-if="imageData===true">
         <ul>
-          <li v-for="item in imgList" :key="item.id">
-            <img v-if="item.id!==0" :src="path+item.imgSource" width="100%">
+          <li v-for="(it,idx) in imgList" :key="idx">
+            <img v-if="idx!==0" :src="path+it.imgSource" width="100%">
           </li>
         </ul>
       </div>
@@ -134,22 +133,24 @@
     login,
     getStuAndAct,
     search,
-    getActivityImg
+    getActivityImg,
+    getJsapiTicket
   } from '@/api/Service';
   import Dialog from './common/Dialog';
   import ImageError from './common/ImageError';
   import NoneData from './common/NoneData';
   import WaterFall from 'vue-waterfall-easy';
   import store from '@/assets/js/store';
+  import {config} from '../assets/js/config';
 
   export default {
     components: {
       'my-dialog': Dialog,
       'my-img': ImageError,
       'none-data': NoneData,
-      'img-waterfall':WaterFall
+      'img-waterfall': WaterFall
     },
-    data() {
+    data () {
       return {
         time: '',
         days: 0,
@@ -167,27 +168,29 @@
         content: '', //dialog 显示提示内容
         keywords: '', //搜索关键字
         dialog: 'none',
-        path: 'http://47.100.243.198:8080',
+        path: config.img_url,
         studentData: true,
         imageData: true
       };
     },
     created: function () {
-      console.log(store.state);
-      //倒计时
-      this.timediff;
+      console.log('Container created', store);
+      // this.getDataList();
       //判断用户是否登录
-      if (sessionStorage.getItem('sessionId')) {
+      if (store.state.sessionid) {
+        console.log('用户已经登录');
         this.getDataList();
       } else {
+        console.log('用户没有登录');
         //用户登录，获取sessionid
         login(res => {
-          sessionStorage.setItem('sessionId', res.data.sessionid);
+          store.setSessionId(res.data.sessionid);
           this.getDataList();
         });
       }
     },
-    mounted() {
+    mounted () {
+
     },
     // 监听,当路由发生变化的时候执行
     watch: {
@@ -213,7 +216,7 @@
         let params = {
           key: this.keywords,
           id: '',
-          uuid: sessionStorage.getItem('uuid')
+          uuid: store.state.uuid
         };
         search(params, res => {
           this.dataList = [];
@@ -230,7 +233,7 @@
       vote: function (studentId) {
         //接口请求参数
         let params = {
-          openId: sessionStorage.getItem('openId'),
+          openId: store.state.openId,
           studentid: studentId
         };
 
@@ -255,38 +258,30 @@
       },
       //获取数据
       getDataList: function () {
-        if (sessionStorage.getItem('uuid')) {
-          return;
-        }
         let params = {
-          uuid: sessionStorage.getItem('uuid')
+          uuid: store.state.uuid
         };
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
-          if (res) {
+          if (!res) {
             return;
           }
           sessionStorage.setItem('activityId', res.activity[0].activeId);
           this.voteNum = res.voteNum;
           this.activityInfo = res.activity[0];
+          //倒计时
+          this.timediff;
           this.dataList = res.student;
           this.studentData = (!this.dataList) ? true : false;
           this.count = res.student.length;
           let activeName = res.activity[0].activeName;
-          pv(
-            {
-              activeId: this.activityInfo.activeId
-            },
-            res => {
+          pv({activeId: this.activityInfo.activeId}, res => {
               this.pv = res.pv;
-              getActivityImg(
-                {
-                  activeName: activeName
-                },
-                res => {
+              getActivityImg({activeName: activeName}, res => {
+                  console.log('img',res);
                   this.banner = res.data[0].imgSource;
                   this.imgList = res.data;
-                  this.imageData = (!imgList) ? true : false;
+                  this.imageData = this.imgList ? true : false;
                 }
               );
             }
@@ -315,11 +310,10 @@
     computed: {
       //倒计时
       timediff: function () {
-        const that = this;
         let timecount = setInterval(() => {
           let endTime = '';
           if (this.activityInfo.activeEndtime) {
-            endTime = this.activityInfo.activeEndtime + ' 00:00:00'; //结束时间
+            endTime = this.activityInfo.activeEndtime + ' 24:00:00'; //结束时间
           }
           let now = new Date();
           let timeDiff = new Date(endTime).getTime() - now.getTime();
@@ -340,7 +334,7 @@
           // that.hours = hours;
           // that.minutes = minutes;
           // that.seconds = seconds;
-          [that.days, that.hours, that.minutes, that.seconds] = [days, hours, minutes, seconds];
+          [this.days, this.hours, this.minutes, this.seconds] = [days, hours, minutes, seconds];
           if (!timeDiff) {
             [this.days, this.hours, this.minutes, this.seconds] = [0, 0, 0, 0];
             // this.days = 0;
@@ -377,6 +371,11 @@
 
   #banner {
     width: 100%;
+    #image {
+      width: 100%;
+      height: 220px;
+    }
+
   }
 
   /*计数器*/
@@ -411,12 +410,12 @@
     height: 80px;
     padding-top: 10px;
 
-    & > span{
+    & > span {
       color: #e46112;
     }
-    .li-item-time{
-      & > span > span{
-        color:red
+    .li-item-time {
+      & > span > span {
+        color: red
       }
 
     }

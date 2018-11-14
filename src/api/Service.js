@@ -1,6 +1,6 @@
-import Vue from 'vue';
-import axios from 'axios';
-import { post, get,jsapi_ticket } from './Request';
+import $http from 'axios';
+import { post, get } from './Request';
+let qs= require('qs');
 
 //-----------Begin----------------
 //---通用接口 简单的post、get请求---
@@ -182,26 +182,13 @@ export const wxpay = (params, callback) => {
   });
 };
 
-export const wxlogin = (callback) => {
-  get('/wxAuth', res => {
+export const getJsApiTicket = (callback) => {
+  get('/getTicket', res => {
     callback(res);
   });
 };
 
-
-export const getJsapiTicket=(callback)=>{
-  jsapi_ticket(res => {
-    callback(res);
-  });
-}
 //-----------End------------------
 //---通用接口 简单的post、get请求---
 //-----------End------------------
 
-//-----------Begin----------------
-//--- 复杂逻辑 单独的网络请求接口---
-//-----------Begin----------------
-
-//-----------End------------------
-//--- 复杂逻辑 单独的网络请求接口---
-//-----------End------------------

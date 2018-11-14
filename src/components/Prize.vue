@@ -62,8 +62,10 @@
 </template>
 
 <script>
-  import { login, getPrizeList } from '../api/Service'
+  import { getPrizeList } from '../api/Service'
   import NoneData from './common/NoneData'
+
+  import {config} from '../assets/js/config';
 
   export default {
     components: {
@@ -72,7 +74,7 @@
     data () {
       return {
         dataList: [],
-        path: 'http://47.100.243.198:8080',
+        path: config.img_url,
         noneData: false//没有数据,默认false
       }
     },

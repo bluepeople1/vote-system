@@ -19,8 +19,9 @@
             </div>
 
             <div class="fl grid marL10">
-              <img v-if="item.studentImg===null" src="../assets/img/boy.jpg" width="35px">
-              <img v-else :src="path+item.studentImg" width="35px"/>
+              <img v-if="item.studentImg===null" src="../assets/img/user.jpg" width="35px" height="35px">
+              <my-img v-else :src="path+item.studentImg" errorType="user" ref="errorImg" width="45px"
+                      height="45px"/>
             </div>
             <div class="fl grid marL10">
               <div class="userName">
@@ -39,8 +40,9 @@
 </template>
 
 <script>
-  import { login, getRankingList } from '@/api/Service'
-  import NoneData from './common/NoneData'
+  import { login, getRankingList } from '@/api/Service';
+  import NoneData from './common/NoneData';
+  import { config } from '../assets/js/config';
 
   export default {
     components: {
@@ -50,12 +52,12 @@
       return {
         jessionid: '',
         dataList: [],
-        path: 'http://47.100.243.198:8080',
+        path: config.img_url,
         noneData: false//暂无数据，默认false
-      }
+      };
     },
     created: function () {
-      this.getRankingList()
+      this.getRankingList();
     },
     methods: {
       //获取排行榜列表
@@ -65,13 +67,13 @@
             uuid: sessionStorage.getItem('uuid')
           },
           res => {
-            this.dataList = res.data
-            this.noneData = (!this.dataList) ? true : false
+            this.dataList = res.data;
+            this.noneData = (!this.dataList) ? true : false;
           }
-        )
+        );
       }
     }
-  }
+  };
 </script>
 
 <style scoped>

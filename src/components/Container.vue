@@ -2,9 +2,9 @@
   <div id="container">
     <!-- {{wxcode}} -->
     <div class="marquee-title">
-      <marquee>{{activityName}} 活动时间：{{activityBeginTime?activityBeginTime:''}} ~
-        {{activityEndTime?activityEndTime:''}}
-      </marquee>
+      <marquee>{{activityInfo.activeName?activityInfo.activeName:''}}
+        活动时间：{{activityInfo.activeBegintime?activityInfo.activeBegintime:''}} ~
+        {{activityInfo.activeEndtime?activityInfo.activeEndtime:''}}</marquee>
     </div>
     <keep-alive>
       <router-view class="child"/>
@@ -57,98 +57,58 @@
 </template>
 
 <script>
-  import {wxlogin, login, getActivityInfo, wxAuth, getJsapiTicket} from '@/api/Service';
-  import {sign} from '@/assets/js/sign';
+  import { wxlogin, login, getActivityInfo, wxAuth, getJsApiTicket,newLogin } from '@/api/Service';
+  import { sign } from '@/assets/js/sign';
   import store from '@/assets/js/store';
   import wx from 'weixin-js-sdk';
 
   let Base64 = require('js-base64').Base64;
 
   export default {
-    data() {
+    data () {
       return {
-        wxcode: '',
         selectedTab: 1,
         uuid: '',
-        activityInfo: ''
+        activityInfo: '',
+        activityName: '',
+        activityBeginTime: '',
+        activityEndTime: ''
       };
     },
     created: function () {
+      console.log(store)
       //页面刷新后，判断当前页面所在tab
       this.currentTab();
-      if (this.uuid || this.uuid === '') {
-        console.log('会执行吗');
+      if (store.state.uuid==='') {
         //如果uuid不存在，就从url中截取
-        let url = window.location.href.split("#")[1];
-        let data = Base64.decode(url.split("/")[2]);
-        let openId = data.split("#")[0].split("=")[1];
-        let uuid = data.split("#")[1].split("=")[1];
-        this.uuid = uuid;
-        store.setOpenId("openId");
-        store.setUuid("uuid");
+        let url = window.location.href.split('#')[1];
+        let data = Base64.decode(url.split('/')[2]);
+        let openId = data.split('#')[0].split('=')[1];
+        let uuid = data.split('#')[1].split('=')[1];
+        let sharedUrl = 'http://www.hzrtpxt.top/master/wxlogin?uuid=' + uuid;
+        store.setOpenId(openId);
+        store.setUuid(uuid);
+        store.setSharedUrl(sharedUrl);
       }
-      const sessionId = sessionStorage.getItem("sessionId");
-      if (sessionId || sessionId === '') {
-        //用户登录，获取sessionid
-        login(res => {
-          store.setSessionId(res.data.sessionid);
-          this.getDataList();
-        });
-      } else {
-        this.getDataList();
-      }
-      // this.device();
+
+      const that = this;
+      //用户登录，获取sessionid
+      login(res => {
+        store.setSessionId(res.data.sessionid);
+        that.getDataList();
+      });
+
+      //this.device();
     },
     mounted: function () {
-      getJsapiTicket((data)=>{
-        console.log('getJsapiTicket',data);
-      });
-
-
-      const ticket = "kgt8ON7yVITDhtdwci0qeVM6-pSBagSBp94OYaUJtdJidEbkRcxEEz-iCiSZw4QzwXjgslxcnnlmNaF76vLNDQ";
-
-      const config = sign(ticket, 'http://localhost:8080/#/');
-      console.log(config);
-      // 配置功能
-      wx.config({
-        debug: true,
-        appId: "wx3fec79cd177fcfe9",
-        timestamp: config.timestamp,
-        nonceStr: config.noncestr,
-        signature: config.signature,
-        jsApiList: [
-          'updateAppMessageShareData',
-          'chooseWXPay'
-        ]
-      });
-      wx.ready(function () {
-        wx.updateAppMessageShareData({
-          title: '我们的班级我们的团，快来为班级荣誉而战！', // 分享标题
-          desc: '哥们儿，咱多久没一起喝酒吃饭了，多久没促膝长谈了，Hey兄弟们！咱该聚聚了！',
-          link: location.href, // 分享链接
-          imgUrl: 'https://tup.iheima.com/sport.png', // 分享图标
-          success: function () {
-            alert('成功');
-          },
-          cancel: function () {
-            alert('失败');
-          }
-        });
-        wx.chooseWXPay({
-          timestamp: 0, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
-          nonceStr: '', // 支付签名随机串，不长于 32 位
-          package: '', // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=\*\*\*）
-          signType: '', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
-          paySign: '', // 支付签名
-          success: function (res) {
-            // 支付成功后的回调函数
-          }
-        });
-      });
-      wx.error(function (res) {
-        console.log(res);
-        // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
-      });
+      if (window.history && window.history.pushState) {
+        window.addEventListener('popstate',function () {
+          window.history.pushState('forward', null, '#');
+          window.history.forward(1);
+        })
+      }
+      window.history.pushState('forward', null, '#'); //在IE中必须得有这两行
+      window.history.forward(1);
     },
     methods: {
       currentTab: function () {
@@ -180,15 +140,87 @@
         };
         //获取活动信息
         getActivityInfo(params, res => {
-          console.log('活动', res);
           let data = res.data[0];
-
+          console.log(data)
           if (data) {
             that.activityInfo = data;
             store.setActivity({
-              activityName: res.data[0].activeName,
-              activityBeginTime: res.data[0].activeBegintime,
-              activityEndTime: res.data[0].activeEndtime
+              activityName: data.activeName,
+              activityBeginTime: data.activeBegintime,
+              activityEndTime: data.activeEndtime
+            });
+
+            this.$http.get(store.base_url + '/getTicket').then((res) => {
+              console.log('getJsapiTicket', res);
+              store.setJsApiTicket(res.data.jsapi_ticket);
+              const config = sign(res.data.jsapi_ticket, window.location.href.split('#')[0]);
+              // 配置功能
+              wx.config({
+                debug: true,
+                appId: store.state.appId,
+                timestamp: config.timestamp,
+                nonceStr: config.noncestr,
+                signature: config.signature,
+                jsApiList: [
+                  'onMenuShareTimeline',
+                  'onMenuShareAppMessage',
+                  'updateAppMessageShareData',
+                  'updateTimelineShareData'
+                ]
+              });
+
+              wx.ready(function () {
+                wx.onMenuShareTimeline({
+                  title: store.state.activity.activityName, // 分享标题
+                  desc: '正在做活动，快点进来看看吧！',
+                  link: store.state.sharedUrl, // 分享链接
+                  imgUrl: 'https://tup.iheima.com/sport.png', // 分享图标
+                  success: function () {
+                    alert('成功');
+                  },
+                  cancel: function () {
+                    alert('失败');
+                  }
+                });
+                wx.onMenuShareAppMessage({
+                  title: store.state.activity.activityName, // 分享标题
+                  desc: '正在做活动，快点进来看看吧！',
+                  link: store.state.sharedUrl, // 分享链接
+                  imgUrl: 'https://tup.iheima.com/sport.png', // 分享图标
+                  success: function () {
+                    alert('成功');
+                  },
+                  cancel: function () {
+                    alert('失败');
+                  }
+                });
+                wx.updateAppMessageShareData({
+                  title: store.state.activity.activityName, // 分享标题
+                  desc: '正在做活动，快点进来看看吧！',
+                  link: store.state.sharedUrl, // 分享链接
+                  imgUrl: 'https://tup.iheima.com/sport.png', // 分享图标
+                  success: function () {
+                    alert('成功');
+                  },
+                  cancel: function () {
+                    alert('失败');
+                  }
+                });
+
+                wx.updateTimelineShareData({
+                  title: store.state.activity.activityName, // 分享标题
+                  desc: '正在做活动，快点进来看看吧！',
+                  link: store.state.sharedUrl, // 分享链接
+                  imgUrl: 'https://tup.iheima.com/sport.png', // 分享图标
+                  success: function () {
+                    alert('成功');
+                  },
+                  cancel: function () {
+                    alert('失败');
+                  }
+                });
+
+              });
             });
           } else {
             console.log('暂无数据');
@@ -217,7 +249,6 @@
     watch: {
       $route: {
         handler: function (val, oldVal) {
-          console.log(val);
           let tab = val.name;
           if (tab === 'Index') {
             this.changeTab(1);
@@ -305,7 +336,7 @@
     margin: 0px;
     width: 100%;
     color: #fff;
-    background: #ff0700;
+    background: rgba(9, 187, 7, 0.65);
     z-index: 1000;
     & > marquee {
       line-height: 30px;

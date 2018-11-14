@@ -70,7 +70,9 @@
 <script>
 import Header from "./common/Header";
 import Dialog from "./common/Dialog";
-import { login, getGiftList, wxpay } from "../api/Service";
+import { getGiftList, wxpay } from "../api/Service";
+import {config} from '../assets/js/config';
+
 export default {
   components: {
     "my-dialog": Dialog,
@@ -88,7 +90,7 @@ export default {
       title: "", //dialog title 信息
       content: "", //dialog 显示提示内容
       dialog: "none", //dialog 的显示隐藏
-      path: "http://47.100.243.198:8080"
+      path: config.img_url
     };
   },
   created: function() {
