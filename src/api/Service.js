@@ -1,10 +1,36 @@
 import $http from 'axios';
 import { post, get } from './Request';
-let qs= require('qs');
+
+let qs = require('qs');
+import store from '../assets/js/store';
+
+let url = 'https://www.hzrtpxt.top/nserver';
 
 //-----------Begin----------------
 //---通用接口 简单的post、get请求---
 //-----------Begin----------------
+
+export const newLogin = function (callback) {
+
+  $http.get(url + '/login').then(function (res1) {
+    store.setSessionId(res1.data.sessionid);
+    let params = {
+      uuid: store.state.uuid
+    };
+    $http.post(url + '/getActivityInfo', params).then(function (res2) {
+      let data = res2.data[0];
+      if (data) {
+        store.setActivity(data);
+        callback(data);
+      }
+    }).catch(function (err) {
+      console.log(err);
+    });
+  }).catch(function (err) {
+    console.log(err);
+  });
+};
+
 
 /**
  * 获取用户列表
@@ -176,14 +202,29 @@ export const getActivityImg = (params, callback) => {
  * @param {请求参数} params
  * @param {回调函数} callback
  */
-export const wxpay = (params, callback) => {
+export const wxPay = (params, callback) => {
+  post('/wxPay', params, res => {
+    callback(res);
+  });
+};
+/**
+ * 赠送礼物
+ * @param params
+ * @param callback
+ */
+export const sendGift = (params, callback) => {
   post('/sendGift', params, res => {
     callback(res);
   });
 };
 
+/**
+ * 获取js_ticket
+ * @param callback
+ */
 export const getJsApiTicket = (callback) => {
-  get('/getTicket', res => {
+  $http.get(url + '/getTicket').then((res) => {
+    store.setJsApiTicket(res.data.jsapi_ticket);
     callback(res);
   });
 };

@@ -4,7 +4,7 @@
     <div id="banner">
       <!--海报图-->
       <div id="image">
-        <my-img :imageSrc="path+banner" errorType="img" class="banner-img"/>
+        <my-img :imageSrc="path+banner" errorType="img" class="banner-img" width="100%" height="170px"/>
       </div>
       <!--已报名、累计投票、访问量-->
       <div id="counter">
@@ -16,7 +16,7 @@
                 <span> 报名人数</span>
               </div>
               <div>
-                <span>{{count}}</span>
+                <span>{{count||0}}</span>
               </div>
             </div>
           </div>
@@ -27,7 +27,7 @@
                 <span> 累计投票</span>
               </div>
               <div>
-                <span>{{voteNum}}</span>
+                <span>{{voteNum||0}}</span>
               </div>
             </div>
           </div>
@@ -38,7 +38,7 @@
                 <span> 访问量</span>
               </div>
               <div>
-                <span>{{pv}}</span>
+                <span>{{pv||0}}</span>
               </div>
             </div>
           </div>
@@ -75,12 +75,11 @@
         </div>
       </div>
       <!--列表-->
-      <div id="list" v-if="studentData===false">
+      <div id="list" v-if="studentData===true">
         <div class="item" v-for="(item,index) in dataList" :key="index">
           <div @click="toDetailPage(item)">
             <span class="sort">{{item.studentNumb}}</span>
-            <img v-if="item.studentImg===null" src="../assets/img/user.jpg" width="100%" height="150">
-            <my-img v-else :src="item.studentImg" errorType="user" ref="errorImg" width="100%" height="150"/>
+            <my-img :imageSrc="path+item.studentImg" errorType="user" width="100%" height="170"/>
           </div>
           <div class="item-bottom">
             <span>{{item.studentName}} </span>
@@ -128,6 +127,7 @@
 
 <script>
   import {
+    newLogin,
     vote,
     pv,
     login,
@@ -174,19 +174,16 @@
       };
     },
     created: function () {
-      console.log('Container created', store);
-      // this.getDataList();
       //判断用户是否登录
       if (store.state.sessionid) {
-        console.log('用户已经登录');
         this.getDataList();
       } else {
-        console.log('用户没有登录');
         //用户登录，获取sessionid
         login(res => {
           store.setSessionId(res.data.sessionid);
           this.getDataList();
         });
+
       }
     },
     mounted () {
@@ -196,7 +193,6 @@
     watch: {
       $route: {
         handler: function (val, oldVal) {
-          console.log(val);
           this.getDataList();
         },
         // 深度观察监听
@@ -223,6 +219,7 @@
           if (res.data) {
             this.dataList = res.data;
           } else {
+            this.getDataList();
             this.title = '提示';
             this.content = '没有找到该选手';
             this.dialog = 'block'; //显示dialog
@@ -240,13 +237,14 @@
         //调用投票接口
         vote(params, res => {
           if (res.code === 7) {
-            this.title = '投票失败';
+            this.title = '温馨提示';
             this.content = '请不要重复投票';
           } else if (res.code === 0) {
-            this.title = '投票成功';
+            this.getUserInfo(store.state.sessionId);
+            this.title = '温馨提示';
             this.content = '您已成功给该选手投票';
           } else if (res.code === 8) {
-            this.title = '投票失败';
+            this.title = '温馨提示';
             this.content = '一天只能投三票';
           }
           this.dialog = 'block'; //显示dialog
@@ -263,29 +261,29 @@
         };
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
-          if (!res) {
-            return;
+          if (res) {
+            console.log(res)
+            sessionStorage.setItem('activityId', res.activity[0].activeId);
+            this.voteNum = res.voteNum;
+            this.activityInfo = res.activity[0];
+            //倒计时
+            this.timeDiff;
+            this.dataList = res.student;
+            this.studentData = this.dataList ? true : false;
+            this.count = res.student.length;
+            let activeName = res.activity[0].activeName;
+            pv({activeId: this.activityInfo.activeId}, res => {
+                this.pv = res.pv;
+                getActivityImg({activeName: activeName}, res => {
+                    store.setSharedImg(res.data[0].imgSource);
+                    this.banner = res.data[0].imgSource;
+                    this.imgList = res.data;
+                    this.imageData = this.imgList ? true : false;
+                  });
+              }
+            );
           }
-          sessionStorage.setItem('activityId', res.activity[0].activeId);
-          this.voteNum = res.voteNum;
-          this.activityInfo = res.activity[0];
-          //倒计时
-          this.timediff;
-          this.dataList = res.student;
-          this.studentData = (!this.dataList) ? true : false;
-          this.count = res.student.length;
-          let activeName = res.activity[0].activeName;
-          pv({activeId: this.activityInfo.activeId}, res => {
-              this.pv = res.pv;
-              getActivityImg({activeName: activeName}, res => {
-                  console.log('img',res);
-                  this.banner = res.data[0].imgSource;
-                  this.imgList = res.data;
-                  this.imageData = this.imgList ? true : false;
-                }
-              );
-            }
-          );
+
         });
         //获取选手列表
         // getStudentList(params,res=>{
@@ -308,15 +306,23 @@
       }
     },
     computed: {
+
       //倒计时
-      timediff: function () {
+      timeDiff: function () {
+        let that=this;
         let timecount = setInterval(() => {
           let endTime = '';
-          if (this.activityInfo.activeEndtime) {
-            endTime = this.activityInfo.activeEndtime + ' 24:00:00'; //结束时间
+          if (that.activityInfo.activeEndtime) {
+            endTime = that.activityInfo.activeEndtime + ' 24:00:00'; //结束时间
           }
           let now = new Date();
           let timeDiff = new Date(endTime).getTime() - now.getTime();
+          if (!timeDiff) {
+            clearInterval(timecount);
+            [that.days, that.hours, that.minutes, that.seconds] = [0, 0, 0, 0];
+            [that.title, that.content, that.dialog] = ['提示', '当前活动已结束', 'block'];
+            return;
+          }
           //时间差的毫秒数
 
           //计算出相差天数
@@ -330,23 +336,7 @@
           //计算相差秒数
           let temp3 = temp2 % (60 * 1000); //计算分钟数后剩余的毫秒数
           let seconds = Math.round(temp3 / 1000);
-          // that.days = days;
-          // that.hours = hours;
-          // that.minutes = minutes;
-          // that.seconds = seconds;
-          [this.days, this.hours, this.minutes, this.seconds] = [days, hours, minutes, seconds];
-          if (!timeDiff) {
-            [this.days, this.hours, this.minutes, this.seconds] = [0, 0, 0, 0];
-            // this.days = 0;
-            // this.hours = 0;
-            // this.minutes = 0;
-            // this.seconds = 0;
-            clearInterval(timecount);
-            [this.title, this.content, this.dialog] = ['提示', '当前活动已结束', 'block'];
-            // this.title = '提示';
-            // this.content = '当前活动已结束';
-            // this.dialog = 'block'; //显示dialog
-          }
+          [that.days, that.hours, that.minutes, that.seconds] = [days, hours, minutes, seconds];
         }, 1000);
       }
     }
@@ -354,13 +344,20 @@
 </script>
 
 <style scoped lang="less">
-  .sort {
-    background: #000000bd;
-    color: #90ee90;
-    padding: 5px;
-    position: absolute;
-    font-size: 12px;
+  .list{
+    .item{
+      position: relative;
+      .sort {
+        background: #000000bd;
+        color: #90ee90;
+        padding: 5px;
+        position: absolute;
+        font-size: 12px;
+        left: 5px;
+      }
+    }
   }
+  
 
   #main {
     width: 100%;

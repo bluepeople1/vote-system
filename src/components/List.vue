@@ -5,23 +5,22 @@
       <div id="rankList">
         <ul>
           <li class="card-item flex" v-for="(item,index) in dataList" :key="index">
-            <div v-if="index===0" style="display: flex;align-items: center;">
+            <div v-show="index===0" style="display: flex;align-items: center;">
               <img src="../assets/img/champion_32.png" alt="">
             </div>
-            <div v-if="index===1" style="display: flex;align-items: center;">
+            <div v-show="index===1" style="display: flex;align-items: center;">
               <img src="../assets/img/second_32.png" alt="">
             </div>
-            <div v-if="index===2" style="display: flex;align-items: center;">
+            <div v-show="index===2" style="display: flex;align-items: center;">
               <img src="../assets/img/third_32.png" alt="">
             </div>
-            <div v-if="index>2" class="rank">
+            <div v-show="(index>2)" class="rank">
               {{index+1}}
             </div>
 
             <div class="fl grid marL10">
-              <img v-if="item.studentImg===null" src="../assets/img/user.jpg" width="35px" height="35px">
-              <my-img v-else :src="path+item.studentImg" errorType="user" ref="errorImg" width="45px"
-                      height="45px"/>
+              <img v-if="item.studentImg===null" src="../assets/img/user.jpg" style="width: 45px;height: 45px;"> >
+              <my-img v-else :imageSrc="path+item.studentImg" errorType="user" width="45px" height="45px"/>
             </div>
             <div class="fl grid marL10">
               <div class="userName">
@@ -43,10 +42,13 @@
   import { login, getRankingList } from '@/api/Service';
   import NoneData from './common/NoneData';
   import { config } from '../assets/js/config';
+  import ImageError from './common/ImageError';
+  import store from '@/assets/js/store';
 
   export default {
     components: {
-      'none-data': NoneData
+      'none-data': NoneData,
+      'my-img': ImageError,
     },
     data () {
       return {
@@ -62,11 +64,7 @@
     methods: {
       //获取排行榜列表
       getRankingList () {
-        getRankingList(
-          {
-            uuid: sessionStorage.getItem('uuid')
-          },
-          res => {
+        getRankingList({uuid: store.state.uuid}, res => {
             this.dataList = res.data;
             this.noneData = (!this.dataList) ? true : false;
           }

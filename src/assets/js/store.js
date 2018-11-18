@@ -1,7 +1,8 @@
 // noinspection JSAnnotator
 const store = {
   debug: true,
-  base_url:'http://www.hzrtpxt.top/nserver',
+  base_url:'https://www.hzrtpxt.top/nserver',
+  img_url:'https://www.hzrtpxt.top',
   state: {
     appId: "wxb36f7c6095549952",
     uuid: '',
@@ -9,11 +10,8 @@ const store = {
     sessionId: '',
     jsApiTicket: '',
     sharedUrl: '',
-    activity: {
-      activityName: '',
-      activityBeginTime: '',
-      activityEndTime: ''
-    }
+    sharedImg:'',
+    activity: {}
   },
   setActivity: function (activity) {
     this.state.activity = activity;
@@ -37,7 +35,11 @@ const store = {
   setSharedUrl: function (sharedUrl) {
     this.state.sharedUrl = sharedUrl;
     sessionStorage.setItem('sharedUrl', sharedUrl);
-  }
+  },
+  setSharedImg: function (sharedImg) {
+  this.state.sharedImg = sharedImg;
+  sessionStorage.setItem('sharedImg', sharedImg);
+}
 
 };
 

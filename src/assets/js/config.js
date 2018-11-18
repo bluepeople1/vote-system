@@ -1,4 +1,4 @@
 export const config = {
-  base_url: 'http://www.hzrtpxt.top/nserver',
-  img_url:'http://www.hzrtpxt.top'
+  base_url: 'https://www.hzrtpxt.top/nserver',
+  img_url:'https://www.hzrtpxt.top'
 };

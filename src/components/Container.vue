@@ -57,12 +57,11 @@
 </template>
 
 <script>
-  import { wxlogin, login, getActivityInfo, wxAuth, getJsApiTicket,newLogin } from '@/api/Service';
+  import { wxlogin, login, getActivityInfo, wxAuth, getJsApiTicket,newLogin ,getActivityImg} from '@/api/Service';
   import { sign } from '@/assets/js/sign';
   import store from '@/assets/js/store';
   import wx from 'weixin-js-sdk';
 
-  let Base64 = require('js-base64').Base64;
 
   export default {
     data () {
@@ -76,26 +75,98 @@
       };
     },
     created: function () {
-      console.log(store)
+      let that=this;
       //页面刷新后，判断当前页面所在tab
       this.currentTab();
       if (store.state.uuid==='') {
         //如果uuid不存在，就从url中截取
-        let url = window.location.href.split('#')[1];
-        let data = Base64.decode(url.split('/')[2]);
-        let openId = data.split('#')[0].split('=')[1];
-        let uuid = data.split('#')[1].split('=')[1];
+        let path = window.location.href.split('/index/')[1];
+        let params= path.split('&');
+        let openId=params[0].split('=')[1];
+        let uuid=params[1].split('=')[1];
+
         let sharedUrl = 'http://www.hzrtpxt.top/master/wxlogin?uuid=' + uuid;
         store.setOpenId(openId);
         store.setUuid(uuid);
         store.setSharedUrl(sharedUrl);
       }
+      newLogin(function (data) {
+        that.activityInfo = data;
+        getActivityImg({activeName: store.state.activity.activeName}, res => {
+          store.setSharedImg(res.data[0].imgSource);
+          getJsApiTicket(function (res) {
+            const config = sign(res.data.jsapi_ticket, window.location.href.split('#')[0]);
+            wx.config({
+              debug: false,
+              appId: store.state.appId,
+              timestamp: config.timestamp,
+              nonceStr: config.noncestr,
+              signature: config.signature,
+              jsApiList: [
+                'onMenuShareTimeline',
+                'onMenuShareAppMessage',
+                'updateAppMessageShareData',
+                'updateTimelineShareData'
+              ]
+            });
 
-      const that = this;
-      //用户登录，获取sessionid
-      login(res => {
-        store.setSessionId(res.data.sessionid);
-        that.getDataList();
+            wx.ready(function () {
+              wx.onMenuShareTimeline({
+                title: store.state.activity.activeName, // 分享标题
+                desc: store.state.activity.activeContext||'我们正在做活动，快点进来看看吧！',
+                link: store.state.sharedUrl, // 分享链接
+                imgUrl: store.img_url+store.state.sharedImg, // 分享图标
+                success: function () {
+                  console.log('成功');
+                },
+                cancel: function () {
+                  // alert('失败');
+                }
+              });
+              wx.onMenuShareAppMessage({
+                title: store.state.activity.activeName, // 分享标题
+                desc: store.state.activity.activeContext||'我们正在做活动，快点进来看看吧！',
+                link: store.state.sharedUrl, // 分享链接
+                imgUrl: store.img_url+store.state.sharedImg, // 分享图标
+                success: function () {
+                  console.log('成功');
+                },
+                cancel: function () {
+                  // alert('失败');
+                }
+              });
+              wx.updateAppMessageShareData({
+                title: store.state.activity.activeName, // 分享标题
+                desc: store.state.activity.activeContext||'我们正在做活动，快点进来看看吧！',
+                link: store.state.sharedUrl, // 分享链接
+                imgUrl: store.img_url+store.state.sharedImg, // 分享图标
+                success: function () {
+                  console.log('成功');
+                },
+                cancel: function () {
+                  // alert('失败');
+                }
+              });
+
+              wx.updateTimelineShareData({
+                title: store.state.activity.activeName, // 分享标题
+                desc: store.state.activity.activeContext||'我们正在做活动，快点进来看看吧！',
+                link: store.state.sharedUrl, // 分享链接
+                imgUrl: store.img_url+store.state.sharedImg, // 分享图标
+                success: function () {
+                  console.log('成功');
+                },
+                cancel: function () {
+                  // alert('失败');
+                }
+              });
+
+            });
+
+          });
+        });
+
+
       });
 
       //this.device();
@@ -132,101 +203,7 @@
       changeTab: function (tab) {
         this.selectedTab = tab;
       },
-      //获取数据
-      getDataList: function () {
-        const that = this;
-        let params = {
-          uuid: store.state.uuid
-        };
-        //获取活动信息
-        getActivityInfo(params, res => {
-          let data = res.data[0];
-          console.log(data)
-          if (data) {
-            that.activityInfo = data;
-            store.setActivity({
-              activityName: data.activeName,
-              activityBeginTime: data.activeBegintime,
-              activityEndTime: data.activeEndtime
-            });
 
-            this.$http.get(store.base_url + '/getTicket').then((res) => {
-              console.log('getJsapiTicket', res);
-              store.setJsApiTicket(res.data.jsapi_ticket);
-              const config = sign(res.data.jsapi_ticket, window.location.href.split('#')[0]);
-              // 配置功能
-              wx.config({
-                debug: true,
-                appId: store.state.appId,
-                timestamp: config.timestamp,
-                nonceStr: config.noncestr,
-                signature: config.signature,
-                jsApiList: [
-                  'onMenuShareTimeline',
-                  'onMenuShareAppMessage',
-                  'updateAppMessageShareData',
-                  'updateTimelineShareData'
-                ]
-              });
-
-              wx.ready(function () {
-                wx.onMenuShareTimeline({
-                  title: store.state.activity.activityName, // 分享标题
-                  desc: '正在做活动，快点进来看看吧！',
-                  link: store.state.sharedUrl, // 分享链接
-                  imgUrl: 'https://tup.iheima.com/sport.png', // 分享图标
-                  success: function () {
-                    alert('成功');
-                  },
-                  cancel: function () {
-                    alert('失败');
-                  }
-                });
-                wx.onMenuShareAppMessage({
-                  title: store.state.activity.activityName, // 分享标题
-                  desc: '正在做活动，快点进来看看吧！',
-                  link: store.state.sharedUrl, // 分享链接
-                  imgUrl: 'https://tup.iheima.com/sport.png', // 分享图标
-                  success: function () {
-                    alert('成功');
-                  },
-                  cancel: function () {
-                    alert('失败');
-                  }
-                });
-                wx.updateAppMessageShareData({
-                  title: store.state.activity.activityName, // 分享标题
-                  desc: '正在做活动，快点进来看看吧！',
-                  link: store.state.sharedUrl, // 分享链接
-                  imgUrl: 'https://tup.iheima.com/sport.png', // 分享图标
-                  success: function () {
-                    alert('成功');
-                  },
-                  cancel: function () {
-                    alert('失败');
-                  }
-                });
-
-                wx.updateTimelineShareData({
-                  title: store.state.activity.activityName, // 分享标题
-                  desc: '正在做活动，快点进来看看吧！',
-                  link: store.state.sharedUrl, // 分享链接
-                  imgUrl: 'https://tup.iheima.com/sport.png', // 分享图标
-                  success: function () {
-                    alert('成功');
-                  },
-                  cancel: function () {
-                    alert('失败');
-                  }
-                });
-
-              });
-            });
-          } else {
-            console.log('暂无数据');
-          }
-        });
-      },
       //判断是什么设备打开的网页
       device: function () {
         if (navigator.appVersion.includes('iPhone')) {

@@ -5,10 +5,11 @@
     <my-header title="详情页"/>
     <!--头部用户信息-->
     <div id="header">
-      <!--用护照片-->
+      <!--照片-->
       <div id="userImg">
-        <img v-if="data.studentImg===null" src="../assets/img/user.jpg" width="100%">
-        <img v-else :src="path+data.studentImg" width="100%"/>
+        <my-img :imageSrc="path+data.studentImg" errorType="user" width="100%" height="300"/>
+        <!--<img v-if="data.studentImg===null" src="../assets/img/user.jpg" width="100%">-->
+        <!--<img v-else :src="path+data.studentImg" width="100%"/>-->
       </div>
       <div @click="toPresentPage">
         <div style="color:#0db52b">
@@ -135,12 +136,15 @@
   import { config } from '../assets/js/config';
   import Header from './common/Header';
   import Dialog from './common/Dialog';
+  import ImageError from './common/ImageError';
   import {search, vote } from '../api/Service';
+  import store from '../assets/js/store';
 
   export default {
     components: {
       'my-dialog': Dialog,
-      'my-header': Header
+      'my-header': Header,
+      'my-img': ImageError,
     },
     data () {
       return {
@@ -168,24 +172,25 @@
       vote: function () {
         //接口请求参数
         let params = {
-          jessionid: sessionStorage.getItem('sessionId'),
-          openId: sessionStorage.getItem('openId'),
+          jessionid: store.state.sessionId,
+          openId: store.state.openId,
           studentid: this.data.studentId
         };
 
         //调用投票接口
         vote(params, res => {
-          console.log(res);
-          if (res.code === 9) {
-            this.title = '投票失败';
+          if (res.code === 7) {
+            this.title = '温馨提示';
             this.content = '请不要重复投票';
-            this.dialog = 'block'; //显示dialog
           } else if (res.code === 0) {
-            this.title = '投票成功';
+            this.getUserInfo(store.state.sessionId);
+            this.title = '温馨提示';
             this.content = '您已成功给该选手投票';
-            this.dialog = 'block'; //显示dialog
-            this.getUserInfo(sessionStorage.getItem('sessionId'));
+          } else if (res.code === 8) {
+            this.title = '温馨提示';
+            this.content = '一天只能投三票';
           }
+          this.dialog = 'block'; //显示dialog
         });
       },
       //dialog 事件监听器
@@ -197,7 +202,7 @@
         let params = {
           key: this.$route.params.userInfo.studentName,
           id: this.$route.params.userInfo.studentId,
-          uuid: sessionStorage.getItem('uuid')
+          uuid: store.state.uuid
         };
         search(params, res => {
           this.data = res.data[0];
@@ -211,6 +216,9 @@
 </script>
 
 <style scoped>
+  #header{
+    margin-top: 44px;
+  }
   #main {
     background: #ecf0f5;
     min-height: calc(100% - 44px);

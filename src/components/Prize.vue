@@ -17,8 +17,9 @@
                       {{item.prizeName}}
                     </div>
                     <div>
-                      <img v-if="item.prizeImg!==null" :src="path+item.prizeImg" width="65%">
-                      <img v-else src="../assets/img/errorImg.png" alt="">
+                      <!--<img v-if="item.prizeImg!==null" :src="path+item.prizeImg" width="65%">-->
+
+                      <my-img :imageSrc="path+item.prizeImg" errorType="img" width="65%" height="250"/>
                     </div>
                   </li>
                 </ul>
@@ -62,14 +63,16 @@
 </template>
 
 <script>
-  import { getPrizeList } from '../api/Service'
-  import NoneData from './common/NoneData'
-
+  import { getPrizeList } from '@/api/Service';
+  import NoneData from './common/NoneData';
+  import ImageError from './common/ImageError';
   import {config} from '../assets/js/config';
+  import store from '@/assets/js/store';
 
   export default {
     components: {
-      'none-data': NoneData
+      'none-data': NoneData,
+      'my-img': ImageError
     },
     data () {
       return {
@@ -79,13 +82,13 @@
       }
     },
     created: function () {
-      let params = {
-        uuid: sessionStorage.getItem('uuid')
-      }
-      getPrizeList(params, res => {
-        this.dataList = res.data
-        this.noneData = (!this.dataList) ? true : false
-      })
+      getPrizeList({uuid: store.state.uuid}, res => {
+        console.log('prize',res)
+        if(res.data.sysPrizes){
+          this.dataList = res.data.sysPrizes;
+          this.noneData = (!this.dataList) ? true : false;
+        }
+      });
     }
   }
 </script>

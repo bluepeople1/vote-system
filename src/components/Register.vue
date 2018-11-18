@@ -108,14 +108,14 @@
     });
   });
 
-  import {login, sign} from '@/api/Service';
+  import { login, sign } from '@/api/Service';
   import Dialog from './common/Dialog';
 
   export default {
     components: {
       'my-dialog': Dialog
     },
-    data() {
+    data () {
       return {
         userName: '',
         userSex: 1,
@@ -132,7 +132,7 @@
     },
     methods: {
       //删除选中图片
-      deleteImg() {
+      deleteImg () {
         $('#uploaderFiles')
           .children('li')
           .remove();
@@ -149,9 +149,8 @@
       //上传图片
       upload: function (e) {
         const that = this;
-        var tmpl =
-          '<li class="weui-uploader__file" style="background-image:url(#url#)"></li>';
-        var src,
+        let tmpl ='<li class="weui-uploader__file" style="background-image:url(#url#)"></li>';
+        let src,
           url = window.URL || window.webkitURL || window.mozURL,
           files = e.target.files;
         if (that.imgNum !== 0) {
@@ -160,20 +159,26 @@
           that.dialog = 'block'; //显示dialog
           return;
         }
-        for (var i = 0, len = files.length; i < len; ++i) {
-          var file = files[i];
+        for (let i = 0, len = files.length; i < len; ++i) {
+          let file = files[i];
+          let fileMaxSize = 1024*1024;
+          if((file.size/fileMaxSize)>5){
+            that.title = '提示';
+            that.content = '图片大小不能超过5M';
+            that.dialog = 'block'; //显示dialog
+            return;
+          }
           if (url) {
             src = url.createObjectURL(file);
           } else {
             src = e.target.result;
           }
-          var reader = new FileReader();
+          let reader = new FileReader();
           reader.readAsDataURL(file);
           reader.onload = function (e) {
-            var image_base64 = this.result.split(',')[1];
+            let image_base64 = this.result.split(',')[1];
             //就是base64
-            var article_image = image_base64;
-            that.userImg = article_image;
+            that.userImg = image_base64;
           };
           $('#uploaderFiles').append($(tmpl.replace('#url#', src)));
           that.imgNum = 1;

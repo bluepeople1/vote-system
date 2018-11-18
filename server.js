@@ -7,13 +7,13 @@ const bodyParser = require('body-parser');
 //引入数据库操作
 // var db = require('./db');
 
-const host = 'http://www.hzrtpxt.top';
+const host = 'https://www.hzrtpxt.top';
 
 // 建立 express 实例
 const app = express();
 // 添加json解析
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Content-Length, Authorization, Accept,X-Requested-With,SessionId');
@@ -353,11 +353,11 @@ app.post('/prize', function (req, res) {
       activeUuid: req.body.uuid
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
-        data: body.sysPrizes
+        data: body
       });
     }
   });
@@ -388,6 +388,35 @@ app.post('/activityImg', function (req, res) {
 });
 
 /**
+ * 活动图片
+ */
+app.post('/wxPay', function (req, res) {
+
+  request.post({
+    url: host + '/master/userPay',
+    json: true,
+    headers: {
+      'cookie': req.headers.sessionid
+    },
+    form:{
+      openid: req.body.openId,
+      body:req.body.body,
+      detail:req.body.detail,
+      outTradeNo: req.body.outTradeNo,
+      totalFee: req.body.totalFee
+    }
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.send({
+        code: 0,
+        msg: '请求成功',
+        data: body
+      });
+    }
+  });
+});
+
+/**
  * 获取ticket
  */
 app.get('/getTicket', function (req, res) {
@@ -396,7 +425,7 @@ app.get('/getTicket', function (req, res) {
     method: 'GET',
     json: true,
     headers: {
-      'cookie': sessionId
+      'cookie': req.headers.sessionid
     }
   }, function (error, response, body) {
     res.send({
@@ -405,7 +434,6 @@ app.get('/getTicket', function (req, res) {
       data: body[0]
     });
   });
-
 });
 
 /**

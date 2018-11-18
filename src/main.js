@@ -4,7 +4,7 @@ import Vue from 'vue';
 import App from './App';
 import router from './router';
 import axios from 'axios';
-import $ from 'jquery';
+import jquery from 'jquery';
 import {login} from '@/api/Service';
 import './assets/css/weui.min.css';
 import './assets/css/common.css';
@@ -45,7 +45,7 @@ axios.interceptors.response.use(function (response) {
   // 对响应错误做点什么
   return Promise.reject(error);
 });
-
+Vue.prototype.$ = jquery;
 Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 
