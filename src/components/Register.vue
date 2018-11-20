@@ -186,6 +186,7 @@
       },
       //报名方法
       sign: function () {
+        let that=this;
         if (!this.userName) {
           this.title = '错误提示';
           this.content = '请填写参赛选手姓名';
@@ -223,8 +224,10 @@
         console.log(params);
         //报名接口
         sign(params, res => {
-          console.log(res);
           if (res.data === 1) {
+            that.deleteImg();
+            that.userName='';
+            that.userAge='';
             this.title = '报名成功';
             this.content = '您已成功参加活动';
             this.dialog = 'block'; //显示dialog
@@ -325,13 +328,13 @@
     list-style: none;
   }
 
-  .li-time {
-    display: -webkit-inline-box;
-    display: -ms-inline-flexbox;
-    display: inline-flex;
-    height: 35px;
-    align-items: center;
-  }
+  /*.li-time {*/
+    /*display: -webkit-inline-box;*/
+    /*display: -ms-inline-flexbox;*/
+    /*display: inline-flex;*/
+    /*height: 35px;*/
+    /*align-items: center;*/
+  /*}*/
 
   /*搜索*/
   .inp {
@@ -372,6 +375,7 @@
   }
 
   .weui-uploader__bd {
+    display: flex;
     margin-bottom: 0px !important;
     margin-right: 0px !important;
   }

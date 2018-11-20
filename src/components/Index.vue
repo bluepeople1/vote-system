@@ -121,7 +121,7 @@
       </div>
       <none-data class="index-none-data" v-else/>
     </div>
-    <my-dialog :title="title" :content="content" :display="dialog" v-on:dialogListener="dialogListener"/>
+    <my-dialog :title="title" :toGiftPage="isToGiftPage" :content="content" :display="dialog" v-on:dialogListener="dialogListener"/>
   </div>
 </template>
 
@@ -143,6 +143,8 @@
   import store from '@/assets/js/store';
   import {config} from '../assets/js/config';
 
+  import moment from 'moment';
+
   export default {
     components: {
       'my-dialog': Dialog,
@@ -152,6 +154,7 @@
     },
     data () {
       return {
+        isToGiftPage:false,
         time: '',
         days: 0,
         hours: 0,
@@ -238,14 +241,13 @@
         vote(params, res => {
           if (res.code === 7) {
             this.title = '温馨提示';
-            this.content = '请不要重复投票';
+            this.content = '您已给该选手投过票了哦~\n去给TA赠送礼物吧~';
           } else if (res.code === 0) {
-            this.getUserInfo(store.state.sessionId);
-            this.title = '温馨提示';
-            this.content = '您已成功给该选手投票';
+            this.title = '投票成功';
+            this.content = '感谢您的参与，您已给该选手增加了宝贵一票';
           } else if (res.code === 8) {
             this.title = '温馨提示';
-            this.content = '一天只能投三票';
+            this.content = '您一天只能投三票哦~\n去给TA赠送礼物吧~';
           }
           this.dialog = 'block'; //显示dialog
         });
@@ -310,15 +312,14 @@
       //倒计时
       timeDiff: function () {
         let that=this;
-        let timecount = setInterval(() => {
+        let timeCount = setInterval(() => {
           let endTime = '';
           if (that.activityInfo.activeEndtime) {
-            endTime = that.activityInfo.activeEndtime + ' 24:00:00'; //结束时间
+            endTime =(that.activityInfo.activeEndtime+' 22:00:00').replace(/-/g, "/") ; //结束时间
           }
-          let now = new Date();
-          let timeDiff = new Date(endTime).getTime() - now.getTime();
+          let timeDiff = moment(endTime) - moment().valueOf();
           if (!timeDiff) {
-            clearInterval(timecount);
+            clearInterval(timeCount);
             [that.days, that.hours, that.minutes, that.seconds] = [0, 0, 0, 0];
             [that.title, that.content, that.dialog] = ['提示', '当前活动已结束', 'block'];
             return;

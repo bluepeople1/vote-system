@@ -32,7 +32,8 @@
         <div class="dis-flex-grow gift-item " @click="changeGift(index)" v-for="(item,index) in dataList" :key="index">
           <div class="bg-white gift">
             <div>
-              <img src="../assets/img/sugar_64.png" class="gift-icon">
+              <my-img :imageSrc="path+item.giftImg" errorType="img" class="gift-icon" width="100%" height="150px"/>
+              <!--<img src="../assets/img/sugar_64.png" >-->
             </div>
             <div>
               {{item.giftName}} +{{item.giftTicket}}票
@@ -76,11 +77,13 @@
   import store from '../assets/js/store';
   import { sign } from '@/assets/js/sign';
   import wx from 'weixin-js-sdk';
+  import ImageError from './common/ImageError';
 
   export default {
     components: {
       'my-dialog': Dialog,
-      'my-header': Header
+      'my-header': Header,
+      'my-img': ImageError,
     },
     data () {
       return {
@@ -107,13 +110,14 @@
     },
     methods: {
       refreshUserInfo:function(){
-
-        search({
-          key: this.userInfo.studentId,
+        let params = {
+          key: this.userInfo.studentName,
           id: this.userInfo.studentId,
           uuid: store.state.uuid
-        }, res => {
-          console.log(res)
+        };
+        search(params, res => {
+          this.userInfo=res.data[0];
+          console.log('赠送礼物界面',res);
         });
       },
       //dialog 的监听方法
@@ -146,7 +150,11 @@
               },
               function (res) {
                 if (res.err_msg == 'get_brand_wcpay_request:ok') {
+                  that.title = '赠送成功';
+                  that.content ='成功给该选手增加了' + that.giftTicket * that.num + '票';
+                  that.dialog = 'block';
                   sendGift({
+                    uuid:store.state.uuid,
                     openId:store.state.openId,
                     accountAmt: that.price,
                     accountGiftid: that.giftId,
@@ -154,9 +162,6 @@
                     accountNumb: that.num
                   },function () {
                     that.refreshUserInfo();
-                    that.title = '赠送成功';
-                    that.content ='成功给该选手增加了' + that.giftTicket * that.num + '票';
-                    that.dialog = 'block';
                   });
                 }
               });
@@ -226,6 +231,7 @@
       //获取礼物列表
       getGiftList: function (sessionid) {
         getGiftList(res => {
+          console.log('礼物',res);
           this.dataList = res.data;
         });
       }
@@ -330,7 +336,7 @@
   }
 
   .gift-item {
-    height: 100px;
+    height: 185px;
   }
 
   .fl {

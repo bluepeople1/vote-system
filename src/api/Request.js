@@ -21,7 +21,7 @@ export const get = (path, callback) => {
  * @param {请求参数} params
  * @param {回调函数} callback
  */
-export const post = (path, params = {}, callback) => {
+export const post = (path, params, callback) => {
   axios.post(config.request_ip + path, params).then(res => {
     callback(res);
   }).catch(err => {

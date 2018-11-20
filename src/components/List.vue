@@ -4,7 +4,7 @@
     <div id="list" v-if="noneData===false">
       <div id="rankList">
         <ul>
-          <li class="card-item flex" v-for="(item,index) in dataList" :key="index">
+          <li class="card-item flex" v-for="(item,index) in dataList" :key="index" @click="toDetailPage(item)">
             <div v-show="index===0" style="display: flex;align-items: center;">
               <img src="../assets/img/champion_32.png" alt="">
             </div>
@@ -62,6 +62,12 @@
       this.getRankingList();
     },
     methods: {
+      toDetailPage: function (userInfo) {
+        this.$router.push({
+          name: 'Detail',
+          params: {userInfo: userInfo}
+        });
+      },
       //获取排行榜列表
       getRankingList () {
         getRankingList({uuid: store.state.uuid}, res => {

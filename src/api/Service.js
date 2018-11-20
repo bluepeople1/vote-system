@@ -219,6 +219,30 @@ export const sendGift = (params, callback) => {
 };
 
 /**
+ * 获取用户详情信息
+ * @param params
+ * @param callback
+ */
+export const getStudentDetail = (params, callback) => {
+  post('/getStudentDetail', params, res => {
+    callback(res);
+  });
+};
+
+
+/**
+ * 获取当前用户下，被赠送礼物的列表
+ * @param params
+ * @param callback
+ */
+export const getUserGiftList = (params, callback) => {
+  post('/getUserGiftList', params, res => {
+    callback(res);
+  });
+};
+
+
+/**
  * 获取js_ticket
  * @param callback
  */

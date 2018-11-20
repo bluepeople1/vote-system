@@ -27,6 +27,10 @@ export default {
     display: {
       type: String,
       default: ""
+    },
+    toGiftPage:{
+      type:Boolean,
+      default:false
     }
   },
   methods: {

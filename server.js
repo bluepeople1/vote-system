@@ -178,6 +178,59 @@ app.post('/getStuAndAct', function (req, res) {
 });
 
 /**
+ * 获取当前用户下，被赠送礼物的列表
+ */
+app.post('/getUserGiftList',function (req,res) {
+
+  request.post({
+    url: host + '/master/Interface/getwxUserToGift',
+    json: true,
+    headers: {
+      'cookie': req.headers.sessionid
+    },
+    form: {
+      activityNumber: req.body.uuid,
+      studentId:req.body.studentId
+    }
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.send({
+        code: 0,
+        msg: '请求成功',
+        data:body
+      });
+    }
+  });
+});
+
+/**
+ * 获取选手详情
+ */
+app.post('/getStudentDetail',function (req,res) {
+
+  request.post({
+    url: host + '/master/Interface/selectStudentBySid',
+    json: true,
+    headers: {
+      'cookie': req.headers.sessionid
+    },
+    form: {
+      studentActiveid: req.body.uuid,
+      studentId:req.body.studentId
+    }
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.send({
+        code: 0,
+        msg: '请求成功',
+        data:body
+      });
+    }
+  });
+});
+
+
+/**
  * 投票
  */
 app.post('/vote', function (req, res) {
@@ -274,6 +327,8 @@ app.post('/sendGift', function (req, res) {
       'cookie': req.headers.sessionid
     },
     form: {
+      uuId:req.body.uuid,
+      openId:req.body.openId,
       accountUsercode: req.body.openId,
       accountAmt: req.body.accountAmt,
       accountGiftid: req.body.accountGiftid,

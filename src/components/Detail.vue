@@ -11,11 +11,11 @@
         <!--<img v-if="data.studentImg===null" src="../assets/img/user.jpg" width="100%">-->
         <!--<img v-else :src="path+data.studentImg" width="100%"/>-->
       </div>
-      <div @click="toPresentPage">
-        <div style="color:#0db52b">
-          去给TA加油打气>>
-        </div>
-      </div>
+      <!--<div @click="toPresentPage">-->
+        <!--<div style="color:#0db52b">-->
+          <!--去给TA加油打气>>-->
+        <!--</div>-->
+      <!--</div>-->
     </div>
     <!--内容-->
     <div id="content">
@@ -63,68 +63,46 @@
         </div>
       </div>
       <!--礼物赠送列表-->
-      <!-- <div id="list">
+      <div id="list">
           <div class="menu">
               <div class="menu-icon">
                   <img src="../assets/img/menu-list.png" class="marL10"  />
               </div>
 
-              <span class="menu-name">礼物列表</span>
+              <span class="menu-name">收到的礼物</span>
           </div>
           <div id="giftList">
-              <ul>
-                  <li class="card-item flex">
+              <ul  v-if="(giftList.length)!==0" >
+                  <li class="card-item flex" v-for="item in giftList" :key="item.id">
                       <div class="fl grid marL10">
-                          <img src="../assets/img/badboy.jpg" width="35px"  />
+                        <my-img :imageSrc="item.headImgUrl" errorType="user" width="35" height="35"/>
                       </div>
                       <div class="fl grid marL10">
                           <div>
-                              <span style="color:#26a69a">某某某</span>
+                              <span style="color:#26a69a">{{item.nickName}}</span>
                           </div>
                           <div>
-                              <span style="color: #a22232;font-size: 12px;">赠送了3辆法拉利</span>
-                          </div>
-                      </div>
-                  </li>
-                  <li class="card-item flex">
-                      <div class="fl grid marL10">
-                          <img src="../assets/img/badboy.jpg" width="35px"  />
-                      </div>
-                      <div class="fl grid marL10">
-                          <div>
-                              <span style="color:#26a69a">某某某</span>
-                          </div>
-                          <div>
-                              <span style="color: #a22232;font-size: 12px;">赠送了3辆法拉利</span>
-                          </div>
-                      </div>
-                  </li>
-                  <li class="card-item flex">
-                      <div class="fl grid marL10">
-                          <img src="../assets/img/badboy.jpg" width="35px"  />
-                      </div>
-                      <div class="fl grid marL10">
-                          <div>
-                              <span style="color:#26a69a">某某某</span>
-                          </div>
-                          <div>
-                              <span style="color: #a22232;font-size: 12px;">赠送了3辆法拉利</span>
+                              <span style="color: #a22232;font-size: 12px;">赠送了{{item.giftCount}}个{{item.giftName}}</span>
                           </div>
                       </div>
                   </li>
               </ul>
+            <div v-else class="card-item flex" style="justify-content: center;align-content: center">
+                <div style="color: #ec8b89;line-height: 56px;">暂时还未收到礼物</div>
+            </div>
           </div>
-      </div> -->
+      </div>
 
     </div>
     <!--底部-->
     <div id="footer">
       <div class="weui-flex">
-        <!-- <div class="weui-flex__item" @click="goBack">
-            <div class="placeholder" style="margin:0 15px;"><a class="weui-btn weui-btn_default flex-grow">返回首页</a></div>
-        </div> -->
+
         <div class="weui-flex__item" @click="vote">
-          <div class="placeholder" style="margin:0 15px;"><a class="weui-btn weui-btn_primary flex-grow">投票</a></div>
+          <div class="placeholder" style="margin:0 15px;"><a class="weui-btn weui-btn_default flex-grow">投票</a></div>
+        </div>
+        <div class="weui-flex__item" @click="toPresentPage">
+            <div class="placeholder" style="margin:0 15px;"><a class="weui-btn weui-btn_primary flex-grow">送礼物</a></div>
         </div>
       </div>
     </div>
@@ -137,7 +115,7 @@
   import Header from './common/Header';
   import Dialog from './common/Dialog';
   import ImageError from './common/ImageError';
-  import {search, vote } from '../api/Service';
+  import {search, vote , getUserGiftList } from '../api/Service';
   import store from '../assets/js/store';
 
   export default {
@@ -153,11 +131,15 @@
         data: {},
         title: '',
         path: config.img_url,
-        content: ''
+        content: '',
+        giftList:[]
       };
     },
     created: function () {
       this.data = this.$route.params.userInfo;
+      // window.addEventListener("beforeunload",()=>{
+      //   sessionStorage.setItem("store",JSON.stringify(this.data));
+      // });
       this.getUserInfo();
     },
     methods: {
@@ -181,14 +163,13 @@
         vote(params, res => {
           if (res.code === 7) {
             this.title = '温馨提示';
-            this.content = '请不要重复投票';
+            this.content = '您已给该选手投过票了哦~\n去给TA赠送礼物吧~';
           } else if (res.code === 0) {
-            this.getUserInfo(store.state.sessionId);
-            this.title = '温馨提示';
-            this.content = '您已成功给该选手投票';
+            this.title = '投票成功';
+            this.content = '感谢您的参与，您已给该选手增加了宝贵一票';
           } else if (res.code === 8) {
             this.title = '温馨提示';
-            this.content = '一天只能投三票';
+            this.content = '您一天只能投三票哦~\n去给TA赠送礼物吧~';
           }
           this.dialog = 'block'; //显示dialog
         });
@@ -199,9 +180,10 @@
       },
       //获取用户的信息
       getUserInfo () {
+        let that=this;
         let params = {
-          key: this.$route.params.userInfo.studentName,
-          id: this.$route.params.userInfo.studentId,
+          key: this.data.studentName,
+          id: this.data.studentId,
           uuid: store.state.uuid
         };
         search(params, res => {
@@ -209,13 +191,22 @@
           this.rank = res.rank;
           // this.dataList = [];
           // this.dataList.push(res.data);
+
+          getUserGiftList({
+            uuid: store.state.uuid,
+            studentId: that.data.studentId,
+          },function (res) {
+            that.giftList=res.data.resultMap;
+
+            console.log('被赠送的礼物列表',that.giftList.length);
+          });
         });
       }
     }
   };
 </script>
 
-<style scoped>
+<style scoped lang="less">
   #header{
     margin-top: 44px;
   }
@@ -330,11 +321,8 @@
   }
 
   #list {
-    margin-top: 20px;
-    background: #26a69a;
-    margin-left: 15px;
-    margin-right: 15px;
-    box-shadow: 1px 4px 17px #c7c7c7;
+    background: #3cb371;
+    margin: 20px 15px 55px;
   }
 
   #userName {
