@@ -21,7 +21,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: "投票系统"
+      default: "六弦志合投票系统"
     }
   },
   methods: {

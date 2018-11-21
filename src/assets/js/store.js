@@ -15,6 +15,7 @@ const store = {
   },
   setActivity: function (activity) {
     this.state.activity = activity;
+    sessionStorage.setItem('activity', JSON.stringify(activity));
   },
   setUuid: function (uuid) {
     this.state.uuid = uuid;

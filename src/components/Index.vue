@@ -264,7 +264,13 @@
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
           if (res) {
-            console.log(res)
+            // console.log(res)
+            if(res.activity.length===0){
+              this.title = '温馨提示';
+              this.content = '暂无活动信息，请联系管理员确认是否有此活动哦~';
+              this.dialog = 'block'; //显示dialog
+              return;
+            }
             sessionStorage.setItem('activityId', res.activity[0].activeId);
             this.voteNum = res.voteNum;
             this.activityInfo = res.activity[0];
@@ -274,6 +280,7 @@
             this.studentData = this.dataList ? true : false;
             this.count = res.student.length;
             let activeName = res.activity[0].activeName;
+            document.title=activeName;
             pv({activeId: this.activityInfo.activeId}, res => {
                 this.pv = res.pv;
                 getActivityImg({activeName: activeName}, res => {

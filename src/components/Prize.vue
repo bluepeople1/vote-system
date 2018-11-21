@@ -13,13 +13,12 @@
               <div>
                 <ul class="margin10">
                   <li v-for="item in dataList" :key="item.id" style="display: unset!important;width:100%">
-                    <div>
+                    <div class="prizeName">
                       {{item.prizeName}}
                     </div>
                     <div>
                       <!--<img v-if="item.prizeImg!==null" :src="path+item.prizeImg" width="65%">-->
-
-                      <my-img :imageSrc="path+item.prizeImg" errorType="img" width="65%" height="250"/>
+                      <my-img :imageSrc="path+item.prizeImg" errorType="img" width="100%" height="auto"/>
                     </div>
                   </li>
                 </ul>
@@ -113,6 +112,13 @@
     height: 35px;
     line-height: 35px;
     color: #fff;
+  }
+
+  .prizeName{
+    font-size: 18px;
+    padding: 5px;
+    background: #ff3b30;
+    color: #ffffff;
   }
 
   ul {

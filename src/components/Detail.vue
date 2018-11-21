@@ -137,12 +137,28 @@
     },
     created: function () {
       this.data = this.$route.params.userInfo;
-      // window.addEventListener("beforeunload",()=>{
-      //   sessionStorage.setItem("store",JSON.stringify(this.data));
-      // });
+      alert(JSON.stringify(data))
+    },
+    mounted:function(){
       this.getUserInfo();
+      window.addEventListener("popstate", function(e) {  //popstate监听返回按钮
+        this.goBack();
+      }, false);
     },
     methods: {
+      //刷新选手信息
+      refreshUserInfo:function(){
+        let params = {
+          key: this.data.studentName,
+          id: this.data.studentId,
+          uuid: store.state.uuid
+        };
+        search(params, res => {
+          this.data=res.data[0];
+          console.log('赠送礼物界面',res);
+        });
+      },
+      //返回首页
       goBack: function () {
         this.$router.push('/index');
       },
@@ -167,6 +183,7 @@
           } else if (res.code === 0) {
             this.title = '投票成功';
             this.content = '感谢您的参与，您已给该选手增加了宝贵一票';
+            this.refreshUserInfo();
           } else if (res.code === 8) {
             this.title = '温馨提示';
             this.content = '您一天只能投三票哦~\n去给TA赠送礼物吧~';

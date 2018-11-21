@@ -92,6 +92,9 @@
       }
       newLogin(function (data) {
         that.activityInfo = data;
+        //设置显示标题
+        document.title=store.state.activity.activeName;
+
         getActivityImg({activeName: store.state.activity.activeName}, res => {
           store.setSharedImg(res.data[0].imgSource);
           getJsApiTicket(function (res) {
@@ -160,26 +163,21 @@
                   // alert('失败');
                 }
               });
-
             });
-
           });
         });
-
-
       });
-
       //this.device();
     },
     mounted: function () {
-      if (window.history && window.history.pushState) {
-        window.addEventListener('popstate',function () {
-          window.history.pushState('forward', null, '#');
-          window.history.forward(1);
-        })
-      }
-      window.history.pushState('forward', null, '#'); //在IE中必须得有这两行
-      window.history.forward(1);
+      // if (window.history && window.history.pushState) {
+      //   window.addEventListener('popstate',function () {
+      //     window.history.pushState('forward', null, '#');
+      //     window.history.forward(1);
+      //   })
+      // }
+      // window.history.pushState('forward', null, '#'); //在IE中必须得有这两行
+      // window.history.forward(1);
     },
     methods: {
       currentTab: function () {

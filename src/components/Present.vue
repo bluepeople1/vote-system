@@ -102,13 +102,31 @@
     },
     created: function () {
       this.getGiftList();
+
     },
     computed: {
       totalPrices: function () {
         return this.num * this.price;
       }
     },
+    mounted:function(){
+      let that=this;
+      window.addEventListener("popstate", function(e) {  //popstate监听返回按钮
+        that.backToIndex();
+      }, false);
+    },
     methods: {
+      backToIndex:function(){
+        this.$router.push("/index/"+sessionStorage.getItem('uuid'));
+      },
+      //跳转到详情页面
+      toDetailPage: function () {
+        alert(JSON.stringify(this.userInfo))
+        this.$router.push({
+          name: 'Detail',
+          params: {userInfo: this.userInfo}
+        });
+      },
       refreshUserInfo:function(){
         let params = {
           key: this.userInfo.studentName,
