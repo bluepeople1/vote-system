@@ -117,6 +117,7 @@
   import ImageError from './common/ImageError';
   import {search, vote , getUserGiftList } from '../api/Service';
   import store from '../assets/js/store';
+  import moment from 'moment';
 
   export default {
     components: {
@@ -137,7 +138,6 @@
     },
     created: function () {
       this.data = this.$route.params.userInfo;
-      alert(JSON.stringify(data))
     },
     mounted:function(){
       this.getUserInfo();
@@ -168,6 +168,23 @@
       },
       //投票
       vote: function () {
+
+        //活动开始时间戳
+        let beginTime = moment(store.state.activity.activeBegintime.replace(/-/g, '/'));
+        //活动结束时间戳
+        let endTime = moment(store.state.activity.activeEndtime.replace(/-/g, '/'));
+        //当前时间戳
+        let nowTime = moment().valueOf();
+        //如果当前活动还未开始，不让投票
+        if (store.isActivityNotBegin(nowTime, beginTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block'];
+          return;
+        }
+        //如果活动已经结束了，不让投票
+        if (store.isActivityEnd(nowTime, endTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block'];
+          return;
+        }
         //接口请求参数
         let params = {
           jessionid: store.state.sessionId,

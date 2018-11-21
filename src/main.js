@@ -21,7 +21,6 @@ axios.defaults.timeout = 5000
 
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {
-  console.log('拦截器',store.state.sessionId);
   // 在发送请求之前做些什么
     config.headers = {
       'SessionId': store.state.sessionId
@@ -45,7 +44,7 @@ axios.interceptors.response.use(function (response) {
   // 对响应错误做点什么
   return Promise.reject(error);
 });
-Vue.prototype.$ = jquery;
+Vue.prototype.$jquery = jquery;
 Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 

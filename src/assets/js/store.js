@@ -1,16 +1,16 @@
 // noinspection JSAnnotator
 const store = {
   debug: true,
-  base_url:'https://www.hzrtpxt.top/nserver',
-  img_url:'https://www.hzrtpxt.top',
+  base_url: 'https://www.hzrtpxt.top/nserver',
+  img_url: 'https://www.hzrtpxt.top',
   state: {
-    appId: "wxb36f7c6095549952",
+    appId: 'wxb36f7c6095549952',
     uuid: '',
     openId: '',
     sessionId: '',
     jsApiTicket: '',
     sharedUrl: '',
-    sharedImg:'',
+    sharedImg: '',
     activity: {}
   },
   setActivity: function (activity) {
@@ -38,9 +38,42 @@ const store = {
     sessionStorage.setItem('sharedUrl', sharedUrl);
   },
   setSharedImg: function (sharedImg) {
-  this.state.sharedImg = sharedImg;
-  sessionStorage.setItem('sharedImg', sharedImg);
-}
+    this.state.sharedImg = sharedImg;
+    sessionStorage.setItem('sharedImg', sharedImg);
+  },
+  /**
+   * 计算时间差
+   * @param beginTime 开始时间戳
+   * @param endTime  结束时间戳
+   */
+  calTimeDiff (beginTime, endTime) {
+    return beginTime - endTime;
+  },
+  /**
+   * 判断活动时间是否结束
+   * @param nowTime  当前时间戳
+   * @param endTime  结束时间戳
+   * @returns {boolean}  true代表结束   false代表未结束
+   */
+  isActivityEnd (nowTime, endTime) {
+    //当前时间减去结束时间，如果大于0，表示已结束
+    if (this.calTimeDiff(nowTime, endTime) >= 0)
+      return true;
+    return false;
+  },
+  /**
+   * 判断活动时间是否还未开始
+   * @param nowTime  当前时间戳
+   * @param beginTime  结束时间戳
+   * @returns {boolean}  true代表活动还未开始   false代表活动已经开始
+   */
+  isActivityNotBegin (nowTime, beginTime) {
+    console.log();
+    //当前时间减去开始时间，如果小于0，代表活动还未开始
+    if (this.calTimeDiff(nowTime, beginTime) <= 0)
+      return true;
+    return false;
+  }
 
 };
 

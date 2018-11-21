@@ -46,7 +46,7 @@
       </div>
       <!--倒计时-->
       <div id="countDown">
-        <span>活动结束倒计时</span>
+        <span>{{timeCountTitle}}</span>
         <ul>
           <li class="li-item-time">
             <span><span>{{days}} </span>天</span>
@@ -121,7 +121,8 @@
       </div>
       <none-data class="index-none-data" v-else/>
     </div>
-    <my-dialog :title="title" :toGiftPage="isToGiftPage" :content="content" :display="dialog" v-on:dialogListener="dialogListener"/>
+    <my-dialog :title="title" :toGiftPage="isToGiftPage" :content="content" :display="dialog"
+               v-on:dialogListener="dialogListener"/>
   </div>
 </template>
 
@@ -141,7 +142,7 @@
   import NoneData from './common/NoneData';
   import WaterFall from 'vue-waterfall-easy';
   import store from '@/assets/js/store';
-  import {config} from '../assets/js/config';
+  import { config } from '../assets/js/config';
 
   import moment from 'moment';
 
@@ -154,7 +155,8 @@
     },
     data () {
       return {
-        isToGiftPage:false,
+        timeCountTitle:'活动倒计时',
+        isToGiftPage: false,
         time: '',
         days: 0,
         hours: 0,
@@ -231,6 +233,23 @@
       },
       //投票方法
       vote: function (studentId) {
+        //活动开始时间戳
+        let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'));
+        //活动结束时间戳
+        let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'));
+        //当前时间戳
+        let nowTime = moment().valueOf();
+        //如果当前活动还未开始，不让投票
+        if (store.isActivityNotBegin(nowTime, beginTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block'];
+          return;
+        }
+        //如果活动已经结束了，不让投票
+        if (store.isActivityEnd(nowTime, endTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block'];
+          return;
+        }
+
         //接口请求参数
         let params = {
           openId: store.state.openId,
@@ -258,41 +277,44 @@
       },
       //获取数据
       getDataList: function () {
+        let that = this;
         let params = {
           uuid: store.state.uuid
         };
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
+          console.log(res);
           if (res) {
-            // console.log(res)
-            if(res.activity.length===0){
-              this.title = '温馨提示';
-              this.content = '暂无活动信息，请联系管理员确认是否有此活动哦~';
-              this.dialog = 'block'; //显示dialog
+            if (res.activity && res.activity.length===0) {
+              that.title = '温馨提示';
+              that.content = '暂无活动信息，请联系管理员确认是否有此活动哦~';
+              that.dialog = 'block'; //显示dialog
               return;
             }
             sessionStorage.setItem('activityId', res.activity[0].activeId);
-            this.voteNum = res.voteNum;
-            this.activityInfo = res.activity[0];
+            that.voteNum = res.voteNum;
+            that.activityInfo = res.activity[0];
             //倒计时
-            this.timeDiff;
-            this.dataList = res.student;
-            this.studentData = this.dataList ? true : false;
-            this.count = res.student.length;
+            that.timeDiff;
+            that.dataList = res.student;
+            that.studentData = !(this.dataList);
+            that.count = res.student.length;
             let activeName = res.activity[0].activeName;
-            document.title=activeName;
+            //获取活动访问量
             pv({activeId: this.activityInfo.activeId}, res => {
-                this.pv = res.pv;
+                that.pv = res.pv;
+                //获取活动图片
                 getActivityImg({activeName: activeName}, res => {
+                  if (res && res.data.length !== 0) {
                     store.setSharedImg(res.data[0].imgSource);
-                    this.banner = res.data[0].imgSource;
-                    this.imgList = res.data;
-                    this.imageData = this.imgList ? true : false;
-                  });
+                    that.banner = res.data[0].imgSource;
+                    that.imgList = res.data;
+                    that.imageData = !(that.imgList);
+                  }
+                });
               }
             );
           }
-
         });
         //获取选手列表
         // getStudentList(params,res=>{
@@ -315,23 +337,35 @@
       }
     },
     computed: {
-
       //倒计时
       timeDiff: function () {
-        let that=this;
+        let that = this;
+        //活动开始时间戳
+        let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'));
+        //活动结束时间戳
+        let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'));
         let timeCount = setInterval(() => {
-          let endTime = '';
-          if (that.activityInfo.activeEndtime) {
-            endTime =(that.activityInfo.activeEndtime+' 22:00:00').replace(/-/g, "/") ; //结束时间
+          //当前时间戳
+          let nowTime=moment().valueOf();
+          let timeDiff = '';
+          if(store.isActivityNotBegin(nowTime,beginTime)){
+            //活动还未开始
+            that.timeCountTitle='距活动开始倒计时';
+            timeDiff=beginTime - nowTime;
+          }else{
+            if(!store.isActivityEnd(nowTime,endTime)){
+              //活动开始且未结束
+              that.timeCountTitle='距活动结束倒计时';
+              timeDiff=endTime - nowTime;
+            }else{
+              if (!timeDiff) {
+                clearInterval(timeCount);
+                [that.days, that.hours, that.minutes, that.seconds] = [0, 0, 0, 0];
+                [that.title, that.content, that.dialog] = ['提示', '当前活动已结束', 'block'];
+                return;
+              }
+            }
           }
-          let timeDiff = moment(endTime) - moment().valueOf();
-          if (!timeDiff) {
-            clearInterval(timeCount);
-            [that.days, that.hours, that.minutes, that.seconds] = [0, 0, 0, 0];
-            [that.title, that.content, that.dialog] = ['提示', '当前活动已结束', 'block'];
-            return;
-          }
-          //时间差的毫秒数
 
           //计算出相差天数
           let days = Math.floor(timeDiff / (24 * 3600 * 1000));
@@ -352,8 +386,8 @@
 </script>
 
 <style scoped lang="less">
-  .list{
-    .item{
+  .list {
+    .item {
       position: relative;
       .sort {
         background: #000000bd;
@@ -365,7 +399,6 @@
       }
     }
   }
-  
 
   #main {
     width: 100%;

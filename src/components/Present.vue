@@ -253,6 +253,9 @@
           this.dataList = res.data;
         });
       }
+    },
+    beforeDestroy(){
+      this.$jquery(window).off('popstate');
     }
   };
 </script>

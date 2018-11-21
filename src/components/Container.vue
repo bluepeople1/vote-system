@@ -96,7 +96,10 @@
         document.title=store.state.activity.activeName;
 
         getActivityImg({activeName: store.state.activity.activeName}, res => {
-          store.setSharedImg(res.data[0].imgSource);
+          if(res.data.length!==0){
+            store.setSharedImg(res.data[0].imgSource);
+          }
+
           getJsApiTicket(function (res) {
             const config = sign(res.data.jsapi_ticket, window.location.href.split('#')[0]);
             wx.config({
