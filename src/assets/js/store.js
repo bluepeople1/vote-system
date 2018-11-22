@@ -68,7 +68,6 @@ const store = {
    * @returns {boolean}  true代表活动还未开始   false代表活动已经开始
    */
   isActivityNotBegin (nowTime, beginTime) {
-    console.log();
     //当前时间减去开始时间，如果小于0，代表活动还未开始
     if (this.calTimeDiff(nowTime, beginTime) <= 0)
       return true;

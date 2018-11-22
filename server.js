@@ -128,6 +128,30 @@ app.post('/getActivityInfo', function (req, res) {
 });
 
 /**
+ * 获取微信用户信息
+ */
+app.post('/getWxUserInfo', function (req, res) {
+  request.post({
+    url: host + '/master/Interface/selectWxUserInfo',
+    json: true,
+    headers: {
+      'cookie': req.headers.sessionid
+    },
+    form: {
+      openId: req.body.openId
+    }
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.send({
+        code: 0,
+        msg: '请求成功',
+        data: body
+      });
+    }
+  });
+});
+
+/**
  * 访问量
  */
 app.post('/pv', function (req, res) {
@@ -327,16 +351,19 @@ app.post('/sendGift', function (req, res) {
       'cookie': req.headers.sessionid
     },
     form: {
+      nickname:req.body.nickName,
+      headimgurl:req.body.headImgUrl,
+      sex:req.body.sex,
       uuId:req.body.uuid,
       openId:req.body.openId,
       accountUsercode: req.body.openId,
       accountAmt: req.body.accountAmt,
-      accountGiftid: req.body.accountGiftid,
-      accountStudentid: req.body.accountStudentid,
+      accountGiftid: req.body.accountGiftId,
+      accountStudentid: req.body.accountStudentId,
       accountNumb: req.body.accountNumb
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',

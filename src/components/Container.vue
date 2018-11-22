@@ -4,7 +4,8 @@
     <div class="marquee-title">
       <marquee>{{activityInfo.activeName?activityInfo.activeName:''}}
         活动时间：{{activityInfo.activeBegintime?activityInfo.activeBegintime:''}} ~
-        {{activityInfo.activeEndtime?activityInfo.activeEndtime:''}}</marquee>
+        {{activityInfo.activeEndtime?activityInfo.activeEndtime:''}}
+      </marquee>
     </div>
     <keep-alive>
       <router-view class="child"/>
@@ -57,11 +58,10 @@
 </template>
 
 <script>
-  import { wxlogin, login, getActivityInfo, wxAuth, getJsApiTicket,newLogin ,getActivityImg} from '@/api/Service';
+  import { wxlogin, login, getActivityInfo, wxAuth, getJsApiTicket, newLogin, getActivityImg } from '@/api/Service';
   import { sign } from '@/assets/js/sign';
   import store from '@/assets/js/store';
   import wx from 'weixin-js-sdk';
-
 
   export default {
     data () {
@@ -75,28 +75,29 @@
       };
     },
     created: function () {
-      let that=this;
+      let that = this;
       //页面刷新后，判断当前页面所在tab
       this.currentTab();
-      if (store.state.uuid==='') {
+      if (store.state.uuid === '') {
         //如果uuid不存在，就从url中截取
         let path = window.location.href.split('/index/')[1];
-        let params= path.split('&');
-        let openId=params[0].split('=')[1];
-        let uuid=params[1].split('=')[1];
+        let params = path.split('&');
+        let openId = params[0].split('=')[1];
+        let uuid = params[1].split('=')[1];
 
         let sharedUrl = 'http://www.hzrtpxt.top/master/wxlogin?uuid=' + uuid;
         store.setOpenId(openId);
         store.setUuid(uuid);
         store.setSharedUrl(sharedUrl);
+
       }
       newLogin(function (data) {
         that.activityInfo = data;
         //设置显示标题
-        document.title=store.state.activity.activeName;
-
+        document.title = store.state.activity.activeName;
         getActivityImg({activeName: store.state.activity.activeName}, res => {
-          if(res.data.length!==0){
+          console.log('container   img', res);
+          if (res.data.length !== 0) {
             store.setSharedImg(res.data[0].imgSource);
           }
 
@@ -119,9 +120,9 @@
             wx.ready(function () {
               wx.onMenuShareTimeline({
                 title: store.state.activity.activeName, // 分享标题
-                desc: store.state.activity.activeContext||'我们正在做活动，快点进来看看吧！',
+                desc: store.state.activity.activeContext || '我们正在做活动，快点进来看看吧！',
                 link: store.state.sharedUrl, // 分享链接
-                imgUrl: store.img_url+store.state.sharedImg, // 分享图标
+                imgUrl: store.img_url + store.state.sharedImg, // 分享图标
                 success: function () {
                   console.log('成功');
                 },
@@ -131,9 +132,9 @@
               });
               wx.onMenuShareAppMessage({
                 title: store.state.activity.activeName, // 分享标题
-                desc: store.state.activity.activeContext||'我们正在做活动，快点进来看看吧！',
+                desc: store.state.activity.activeContext || '我们正在做活动，快点进来看看吧！',
                 link: store.state.sharedUrl, // 分享链接
-                imgUrl: store.img_url+store.state.sharedImg, // 分享图标
+                imgUrl: store.img_url + store.state.sharedImg, // 分享图标
                 success: function () {
                   console.log('成功');
                 },
@@ -143,9 +144,9 @@
               });
               wx.updateAppMessageShareData({
                 title: store.state.activity.activeName, // 分享标题
-                desc: store.state.activity.activeContext||'我们正在做活动，快点进来看看吧！',
+                desc: store.state.activity.activeContext || '我们正在做活动，快点进来看看吧！',
                 link: store.state.sharedUrl, // 分享链接
-                imgUrl: store.img_url+store.state.sharedImg, // 分享图标
+                imgUrl: store.img_url + store.state.sharedImg, // 分享图标
                 success: function () {
                   console.log('成功');
                 },
@@ -156,9 +157,9 @@
 
               wx.updateTimelineShareData({
                 title: store.state.activity.activeName, // 分享标题
-                desc: store.state.activity.activeContext||'我们正在做活动，快点进来看看吧！',
+                desc: store.state.activity.activeContext || '我们正在做活动，快点进来看看吧！',
                 link: store.state.sharedUrl, // 分享链接
-                imgUrl: store.img_url+store.state.sharedImg, // 分享图标
+                imgUrl: store.img_url + store.state.sharedImg, // 分享图标
                 success: function () {
                   console.log('成功');
                 },

@@ -1,7 +1,7 @@
 <template>
   <div id="main">
     <!--礼物赠送列表-->
-    <div id="list" v-if="noneData===false">
+    <div id="list" v-if="noneData===true">
       <div id="rankList">
         <ul>
           <li class="card-item flex" v-for="(item,index) in dataList" :key="index" @click="toDetailPage(item)">
@@ -35,23 +35,31 @@
       </div>
     </div>
     <none-data class="none-data" v-else/>
+    <my-dialog :title="title" :content="content" :display="dialog"
+               v-on:dialogListener="dialogListener"/>
   </div>
 </template>
 
 <script>
   import { login, getRankingList } from '@/api/Service';
+  import Dialog from './common/Dialog';
   import NoneData from './common/NoneData';
   import { config } from '../assets/js/config';
   import ImageError from './common/ImageError';
   import store from '@/assets/js/store';
+  import moment from 'moment';
 
   export default {
     components: {
+      'my-dialog': Dialog,
       'none-data': NoneData,
       'my-img': ImageError,
     },
     data () {
       return {
+        title:'',
+        content:'',
+        dialog:'none',
         jessionid: '',
         dataList: [],
         path: config.img_url,
@@ -62,7 +70,20 @@
       this.getRankingList();
     },
     methods: {
+      //dialog 的监听方法
+      dialogListener: function (data) {
+        this.dialog = data.hide;
+      },
       toDetailPage: function (userInfo) {
+        //活动开始时间戳
+        let beginTime = moment(store.state.activity.activeBegintime.replace(/-/g, '/'));
+        //当前时间戳
+        let nowTime = moment().valueOf();
+        //如果当前活动还未开始，不让投票
+        if (store.isActivityNotBegin(nowTime, beginTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block'];
+          return;
+        }
         this.$router.push({
           name: 'Detail',
           params: {userInfo: userInfo}
@@ -72,7 +93,7 @@
       getRankingList () {
         getRankingList({uuid: store.state.uuid}, res => {
             this.dataList = res.data;
-            this.noneData = (!this.dataList) ? true : false;
+            this.noneData = !!this.dataList;
           }
         );
       }

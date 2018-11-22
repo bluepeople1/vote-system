@@ -72,11 +72,10 @@
 <script>
   import Header from './common/Header';
   import Dialog from './common/Dialog';
-  import { getGiftList, wxPay ,sendGift,search } from '../api/Service';
+  import { getGiftList, wxPay, sendGift, search, getWxUserInfo } from '../api/Service';
   import { config } from '../assets/js/config';
   import store from '../assets/js/store';
   import { sign } from '@/assets/js/sign';
-  import wx from 'weixin-js-sdk';
   import ImageError from './common/ImageError';
 
   export default {
@@ -97,45 +96,51 @@
         title: '', //dialog title 信息
         content: '', //dialog 显示提示内容
         dialog: 'none', //dialog 的显示隐藏
-        path: config.img_url
+        path: config.img_url,
+        wxUserInfo: {}//微信用户信息
       };
     },
     created: function () {
       this.getGiftList();
-
     },
     computed: {
       totalPrices: function () {
         return this.num * this.price;
       }
     },
-    mounted:function(){
-      let that=this;
-      window.addEventListener("popstate", function(e) {  //popstate监听返回按钮
+    mounted: function () {
+      let that = this;
+      window.addEventListener('popstate', function (e) {  //popstate监听返回按钮
         that.backToIndex();
       }, false);
     },
     methods: {
-      backToIndex:function(){
-        this.$router.push("/index/"+sessionStorage.getItem('uuid'));
+      //获取微信用户信息
+      getWxUserInfo () {
+        getWxUserInfo({openId: store.state.openId}, res => {
+          this.wxUserInfo = res.data;
+        });
+      },
+      backToIndex: function () {
+        this.$router.push('/index/' + store.state.uuid);
       },
       //跳转到详情页面
       toDetailPage: function () {
-        alert(JSON.stringify(this.userInfo))
+        alert(JSON.stringify(this.userInfo));
         this.$router.push({
           name: 'Detail',
           params: {userInfo: this.userInfo}
         });
       },
-      refreshUserInfo:function(){
+      refreshUserInfo: function () {
         let params = {
           key: this.userInfo.studentName,
           id: this.userInfo.studentId,
           uuid: store.state.uuid
         };
         search(params, res => {
-          this.userInfo=res.data[0];
-          console.log('赠送礼物界面',res);
+          this.userInfo = res.data[0];
+          console.log('赠送礼物界面', res);
         });
       },
       //dialog 的监听方法
@@ -144,9 +149,9 @@
       },
       pay: function () {
         const that = this;
-        let outTradeNo="";  //订单号
-        for(let i=0;i<6;i++){ //6位随机数，用以加在时间戳后面。
-          outTradeNo += Math.floor(Math.random()*10);
+        let outTradeNo = '';  //订单号
+        for (let i = 0; i < 6; i++) { //6位随机数，用以加在时间戳后面。
+          outTradeNo += Math.floor(Math.random() * 10);
         }
         outTradeNo = new Date().getTime() + outTradeNo;
         //调用微信支付
@@ -167,18 +172,21 @@
                 'paySign': res.data.paySign //微信签名
               },
               function (res) {
-                if (res.err_msg == 'get_brand_wcpay_request:ok') {
+                if (res.err_msg === 'get_brand_wcpay_request:ok') {
                   that.title = '赠送成功';
-                  that.content ='成功给该选手增加了' + that.giftTicket * that.num + '票';
+                  that.content = '成功给该选手增加了' + that.giftTicket * that.num + '票';
                   that.dialog = 'block';
                   sendGift({
-                    uuid:store.state.uuid,
-                    openId:store.state.openId,
+                    nickName: that.wxUserInfo.nickname,
+                    headImgUrl: that.wxUserInfo.headimgurl,
+                    sex: that.wxUserInfo.sex,
+                    uuid: store.state.uuid,
+                    openId: store.state.openId,
                     accountAmt: that.price,
-                    accountGiftid: that.giftId,
-                    accountStudentid: that.userInfo.studentId,
+                    accountGiftId: that.giftId,
+                    accountStudentId: that.userInfo.studentId,
                     accountNumb: that.num
-                  },function () {
+                  }, function () {
                     that.refreshUserInfo();
                   });
                 }
@@ -247,15 +255,19 @@
         gift[n].className += ' activeTab';
       },
       //获取礼物列表
-      getGiftList: function (sessionid) {
+      getGiftList: function () {
+        let that = this;
         getGiftList(res => {
-          console.log('礼物',res);
-          this.dataList = res.data;
+          that.dataList = res.data;
+          that.getWxUserInfo();
         });
       }
     },
-    beforeDestroy(){
-      this.$jquery(window).off('popstate');
+    beforeDestroy () {
+      // this.$jquery(window).off('popstate');
+      window.removeEventListener('popstate',function () {
+        ;
+      },false);
     }
   };
 </script>

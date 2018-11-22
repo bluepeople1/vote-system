@@ -9,7 +9,7 @@
             <div class="title">
               <div style="height:30px">奖品展示</div>
             </div>
-            <div v-if="noneData===false">
+            <div v-if="noneData===true">
               <div>
                 <ul class="margin10">
                   <li v-for="item in dataList" :key="item.id" style="display: unset!important;width:100%">
@@ -85,7 +85,7 @@
         console.log('prize',res)
         if(res.data.sysPrizes){
           this.dataList = res.data.sysPrizes;
-          this.noneData = (!this.dataList) ? true : false;
+          this.noneData = !!this.dataList;
         }
       });
     }

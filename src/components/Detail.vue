@@ -236,7 +236,14 @@
           });
         });
       }
+    },
+    beforeDestroy () {
+      // this.$jquery(window).off('popstate');
+      window.removeEventListener('popstate',function () {
+        ;
+      },false);
     }
+
   };
 </script>
 

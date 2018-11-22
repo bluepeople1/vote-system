@@ -174,8 +174,8 @@
         keywords: '', //搜索关键字
         dialog: 'none',
         path: config.img_url,
-        studentData: true,
-        imageData: true
+        studentData: false,
+        imageData: false
       };
     },
     created: function () {
@@ -207,6 +207,16 @@
     methods: {
       //跳转到详情页面
       toDetailPage: function (userInfo) {
+        //活动开始时间戳
+        let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'));
+        //当前时间戳
+        let nowTime = moment().valueOf();
+        //如果当前活动还未开始，不让投票
+        if (store.isActivityNotBegin(nowTime, beginTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block'];
+          return;
+        }
+
         this.$router.push({
           name: 'Detail',
           params: {userInfo: userInfo}
@@ -283,23 +293,23 @@
         };
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
-          console.log(res);
           if (res) {
-            if (res.activity && res.activity.length===0) {
+            if (!res.activity) {
               that.title = '温馨提示';
               that.content = '暂无活动信息，请联系管理员确认是否有此活动哦~';
               that.dialog = 'block'; //显示dialog
               return;
             }
-            sessionStorage.setItem('activityId', res.activity[0].activeId);
+            sessionStorage.setItem('activityId', res.activity.activeId);
             that.voteNum = res.voteNum;
-            that.activityInfo = res.activity[0];
+            that.activityInfo = res.activity;
+            document.title=that.activityInfo.activeName;
             //倒计时
             that.timeDiff;
             that.dataList = res.student;
-            that.studentData = !(this.dataList);
+            that.studentData = !!this.dataList;
             that.count = res.student.length;
-            let activeName = res.activity[0].activeName;
+            let activeName = res.activity.activeName;
             //获取活动访问量
             pv({activeId: this.activityInfo.activeId}, res => {
                 that.pv = res.pv;
@@ -309,7 +319,7 @@
                     store.setSharedImg(res.data[0].imgSource);
                     that.banner = res.data[0].imgSource;
                     that.imgList = res.data;
-                    that.imageData = !(that.imgList);
+                    that.imageData = !!that.imgList;
                   }
                 });
               }

@@ -13,12 +13,14 @@ let url = 'https://www.hzrtpxt.top/nserver';
 export const newLogin = function (callback) {
 
   $http.get(url + '/login').then(function (res1) {
+    console.log('newLogin',store.state.uuid);
     store.setSessionId(res1.data.sessionid);
     let params = {
       uuid: store.state.uuid
     };
     $http.post(url + '/getActivityInfo', params).then(function (res2) {
-      let data = res2.data[0];
+      console.log('newLogin res2',res2);
+      let data = res2.data;
       if (data) {
         store.setActivity(data);
         callback(data);
@@ -28,6 +30,18 @@ export const newLogin = function (callback) {
     });
   }).catch(function (err) {
     console.log(err);
+  });
+};
+
+
+
+/**
+ * 获取用户列表
+ * @param {回调函数} callback
+ */
+export const getWxUserInfo = (params,callback) => {
+  post('/getWxUserInfo', params, res => {
+    callback(res);
   });
 };
 
