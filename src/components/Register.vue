@@ -196,7 +196,7 @@
           isShowProgressTips: 1,// 默认为1，显示进度提示
           success: function (res) {
             //let serverId = res.serverId; // 返回图片的服务器端ID
-            that.userImg="https://api.weixin.qq.com/cgi-bin/media/get?access_token="+that.access_token+"&media_id="+res.serverId;
+            that.userImg=res.serverId;
           }
         });
       },
