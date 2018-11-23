@@ -72,8 +72,8 @@
                     </li> -->
                   </ul>
                   <div class="weui-uploader__input-box">
-                    <input id="uploaderInput" @change="upload" class="weui-uploader__input" type="file" accept="image/*"
-                           multiple/>
+                    <div id="uploaderInput" @click="selectImg()" class="weui-uploader__input" ></div>
+                    <!--<input id="uploaderInput" @change="upload" class="weui-uploader__input" type="file" accept="image/*" multiple/>-->
                   </div>
                 </div>
               </div>
@@ -95,27 +95,18 @@
 </template>
 
 <script>
-  $(function () {
-    let $gallery = $('#gallery'),
-      $galleryImg = $('#galleryImg'),
-      $uploaderFiles = $('#uploaderFiles');
-    $uploaderFiles.on('click', 'li', function () {
-      $galleryImg.attr('style', this.getAttribute('style'));
-      $gallery.fadeIn(100);
-    });
-    $gallery.on('click', function () {
-      $gallery.fadeOut(100);
-    });
-  });
 
-  import { login, sign } from '@/api/Service';
+  import {login, sign, getJsApiTicket} from '@/api/Service';
   import Dialog from './common/Dialog';
+  import wx from 'weixin-js-sdk';
+  import { signs } from '@/assets/js/sign';
+  import store from '@/assets/js/store';
 
   export default {
     components: {
       'my-dialog': Dialog
     },
-    data () {
+    data() {
       return {
         userName: '',
         userSex: 1,
@@ -124,18 +115,117 @@
         content: '', //dialog 显示提示内容
         dialog: 'none',
         userImg: '',
-        imgNum: 0
+        imgNum: 0,
+        localId: 0,
+        localIds:'',
+        access_token:''
       };
     },
     created: function () {
-      console.log(this.$route.params);
+      let that=this;
+      getJsApiTicket(function (res) {
+        that.access_token=res.data.access_token;
+        const config = signs(res.data.jsapi_ticket, window.location.href.split('#')[0]);
+        wx.config({
+          debug: false,
+          appId: store.state.appId,
+          timestamp: config.timestamp,
+          nonceStr: config.noncestr,
+          signature: config.signature,
+          jsApiList: [
+            'chooseImage',
+            'previewImage',
+            'uploadImage'
+          ]
+        });
+      });
+    },
+    mounted(){
+      let that=this;
+      let $gallery = $('#gallery'),
+          $galleryImg = $('#galleryImg'),
+          $uploaderFiles = $('#uploaderFiles');
+      $uploaderFiles.on('click', 'li', function () {
+        if(that.isIosDevice()){
+          wx.getLocalImgData({
+            localId: that.localIds[0], // 图片的localID
+            success: function (res) {
+              $galleryImg.html(`<img src="${res.localData}" class="previewImg" />`);
+            }
+          });
+        }else{
+          $galleryImg.html(`<img src="${that.localIds}" class="previewImg" />`);
+        }
+
+        $galleryImg.attr('style', this.getAttribute('style'));
+        $gallery.fadeIn(100);
+      });
+      $gallery.on('click', function () {
+        $gallery.fadeOut(100);
+      });
     },
     methods: {
+      //判断是什么设备打开的网页
+      isIosDevice: function () {
+        if (navigator.appVersion.includes('iPhone')) {
+          console.log('iPhone');
+          return true;
+        } else if (navigator.appVersion.includes('Android')) {
+          console.log('Android');
+          return false;
+        }
+      },
+      //适配ios设备localId展示图片
+      getLocalImgData(localId){
+        let that=this;
+        wx.getLocalImgData({
+          localId: localId, // 图片的localID
+          success: function (res) {
+            let localData = res.localData; // localData是图片的base64数据，可以用img标签显示
+            let tmpl = `<li><img class="weui-uploader__file" src="${localData}"></li>`;
+            $('#uploaderFiles').html(tmpl);
+            that.imgNum = 1;
+          }
+        });
+      },
+      //上传图片
+      uploadImg(localIds) {
+        let that=this;
+        wx.uploadImage({
+          localId: localIds[0], // 需要上传的图片的本地ID，由chooseImage接口获得
+          isShowProgressTips: 1,// 默认为1，显示进度提示
+          success: function (res) {
+            //let serverId = res.serverId; // 返回图片的服务器端ID
+            that.userImg="https://api.weixin.qq.com/cgi-bin/media/get?access_token="+that.access_token+"&media_id="+res.serverId;
+          }
+        });
+      },
+      //选择图片
+      selectImg() {
+        let that = this;
+        wx.chooseImage({
+          count: 1, // 默认9
+          sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: function (res) {
+            that.localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+            that.uploadImg(res.localIds);
+            if(that.isIosDevice()){
+              that.getLocalImgData(res.localIds[0]);
+            }else{
+              let tmpl = `<li><img class="weui-uploader__file" src="${res.localIds[0]}"></li>`;
+              $('#uploaderFiles').html(tmpl);
+              that.imgNum = 1;
+            }
+          }
+        });
+      },
       //删除选中图片
-      deleteImg () {
+      deleteImg() {
         $('#uploaderFiles')
           .children('li')
           .remove();
+        this.localIds='';
         this.imgNum = 0;
         this.userImg = '';
       },
@@ -149,7 +239,7 @@
       //上传图片
       upload: function (e) {
         const that = this;
-        let tmpl ='<li class="weui-uploader__file" style="background-image:url(#url#)"></li>';
+        let tmpl = '<li class="weui-uploader__file" style="background-image:url(#url#)"></li>';
         let src,
           url = window.URL || window.webkitURL || window.mozURL,
           files = e.target.files;
@@ -161,8 +251,10 @@
         }
         for (let i = 0, len = files.length; i < len; ++i) {
           let file = files[i];
-          let fileMaxSize = 1024*1024;
-          if((file.size/fileMaxSize)>5){
+          console.log('file', file);
+          let fileMaxSize = 1024 * 1024;
+          console.log('file', file.size / fileMaxSize);
+          if ((file.size / fileMaxSize) > 20) {
             that.title = '提示';
             that.content = '图片大小不能超过5M';
             that.dialog = 'block'; //显示dialog
@@ -186,7 +278,7 @@
       },
       //报名方法
       sign: function () {
-        let that=this;
+        let that = this;
         if (!this.userName) {
           this.title = '错误提示';
           this.content = '请填写参赛选手姓名';
@@ -224,10 +316,11 @@
         console.log(params);
         //报名接口
         sign(params, res => {
+          console.log('报名返回', res);
           if (res.data === 1) {
             that.deleteImg();
-            that.userName='';
-            that.userAge='';
+            that.userName = '';
+            that.userAge = '';
             this.title = '报名成功';
             this.content = '您已成功参加活动';
             this.dialog = 'block'; //显示dialog
@@ -239,6 +332,11 @@
 </script>
 
 <style scoped>
+  .previewImg{
+    width: 80%;
+    height: auto;
+    margin: auto;
+  }
   #main {
     background: #ecf0f5;
     min-height: 100vh;
@@ -329,11 +427,11 @@
   }
 
   /*.li-time {*/
-    /*display: -webkit-inline-box;*/
-    /*display: -ms-inline-flexbox;*/
-    /*display: inline-flex;*/
-    /*height: 35px;*/
-    /*align-items: center;*/
+  /*display: -webkit-inline-box;*/
+  /*display: -ms-inline-flexbox;*/
+  /*display: inline-flex;*/
+  /*height: 35px;*/
+  /*align-items: center;*/
   /*}*/
 
   /*搜索*/

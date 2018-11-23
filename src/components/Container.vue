@@ -59,7 +59,7 @@
 
 <script>
   import { wxlogin, login, getActivityInfo, wxAuth, getJsApiTicket, newLogin, getActivityImg } from '@/api/Service';
-  import { sign } from '@/assets/js/sign';
+  import { signs } from '@/assets/js/sign';
   import store from '@/assets/js/store';
   import wx from 'weixin-js-sdk';
 
@@ -102,7 +102,7 @@
           }
 
           getJsApiTicket(function (res) {
-            const config = sign(res.data.jsapi_ticket, window.location.href.split('#')[0]);
+            const config = signs(res.data.jsapi_ticket, window.location.href.split('#')[0]);
             wx.config({
               debug: false,
               appId: store.state.appId,

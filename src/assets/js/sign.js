@@ -26,12 +26,12 @@ let raw = function (args) {
 /**
  * @synopsis 签名算法
  *
- * @param jsapi_ticket 用于签名的 jsapi_ticket
+ * @param jsApi_ticket
  * @param url 用于签名的 url ，注意必须动态获取，不能 hardcode
  *
  * @returns
  */
-export const sign = function (jsApi_ticket, url) {
+export const signs = function (jsApi_ticket, url) {
 
   const ret = {
     jsapi_ticket: jsApi_ticket,
