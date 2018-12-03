@@ -13,8 +13,9 @@ import stores from './store/index'
 
 Vue.use(vueLazyLoad, {
   preLoad: 1.3,
-  error: './assets/img/errorImg.png',
-  loading: './assets/img/loading.gif'
+  error: require('./assets/img/errorImg.png'),
+  loading: require('./assets/img/loading.gif'),
+  attempt:3
 })
 
 /*

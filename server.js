@@ -331,6 +331,34 @@ app.post('/search', function (req, res) {
     }
   });
 });
+/**
+ * 首页搜索查询学生，模糊查询
+ */
+app.post('/fuzzySearchStudent', function (req, res) {
+  //request请求
+  request.post({
+    url: host + '/master/Interface/getStudentByMh',
+    json: true,
+    headers: {
+      'cookie': req.headers.sessionid
+    },
+    form: {
+      studentName: req.body.key,
+      activeUuid: req.body.uuid
+    }
+  }, function (error, response, body) {
+    if (!error && response.statusCode === 200) {
+      res.send({
+        code: 0,
+        msg: '请求成功',
+        rank: rank,
+        data: body
+      });
+    }else{
+      console.log('根据id或名字查询用户(/master/Interface/getStudentByName)：',response.statusCode+' 报错：'+error);
+    }
+  });
+});
 
 /**
  * 活动报名

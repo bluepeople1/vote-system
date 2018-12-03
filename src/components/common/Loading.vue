@@ -56,13 +56,13 @@
 <style scoped lang="less">
   .loading-page{
     overflow: hidden;
-    position: absolute;
+    position: fixed;
     top: 0;
-    width: 100%;
-    height: 100vh;
-    min-height: 100vh;
+    bottom: 0;
+    right: 0;
+    left: 0;
     display: flex;
-    background-color: rgba(210, 210, 210, 0.71);
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     .loading-box{
       width: 45%;

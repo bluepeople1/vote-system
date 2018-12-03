@@ -10,16 +10,17 @@ let url = 'https://www.hzrtpxt.top/nserver';
 //---通用接口 简单的post、get请求---
 //-----------Begin----------------
 
+/**
+ * container 页调用
+ * @param callback
+ */
 export const newLogin = function (callback) {
-
   $http.get(url + '/login').then(function (res1) {
-    console.log('newLogin',store.state.uuid);
     store.setSessionId(res1.data.sessionid);
     let params = {
       uuid: store.state.uuid
     };
     $http.post(url + '/getActivityInfo', params).then(function (res2) {
-      console.log('newLogin res2',res2);
       let data = res2.data;
       if (data) {
         store.setActivity(data);
@@ -33,18 +34,15 @@ export const newLogin = function (callback) {
   });
 };
 
-
-
 /**
  * 获取用户列表
  * @param {回调函数} callback
  */
-export const getWxUserInfo = (params,callback) => {
+export const getWxUserInfo = (params, callback) => {
   post('/getWxUserInfo', params, res => {
     callback(res);
   });
 };
-
 
 /**
  * 获取用户列表
@@ -100,6 +98,17 @@ export const vote = (params, callback) => {
  */
 export const search = (params, callback) => {
   post('/search', params, res => {
+    callback(res);
+  });
+};
+
+/**
+ * 首页模糊查询学生
+ * @param params
+ * @param callback
+ */
+export const searchByFuzzy = (params, callback) => {
+  post('/fuzzySearchStudent', params, res => {
     callback(res);
   });
 };
@@ -243,7 +252,6 @@ export const getStudentDetail = (params, callback) => {
   });
 };
 
-
 /**
  * 获取当前用户下，被赠送礼物的列表
  * @param params
@@ -254,7 +262,6 @@ export const getUserGiftList = (params, callback) => {
     callback(res);
   });
 };
-
 
 /**
  * 获取js_ticket

@@ -103,6 +103,7 @@
           </div>
         </div>
       </div>
+
       <div class="marTop30">
         <div class="weui-flex">
           <div class="weui-flex__item">
@@ -141,7 +142,8 @@
     getStuAndAct,
     search,
     getActivityImg,
-    getJsapiTicket
+    getJsapiTicket,
+    searchByFuzzy
   } from '@/api/Service';
   import Dialog from './common/Dialog';
   import ImageError from './common/ImageError';
@@ -182,6 +184,7 @@
         path: config.img_url,
         studentData: false,
         isLoadMore: true,//是否显示加载更多
+        isShowAllStudent:false,//是否显示加载全部
         imageData: false,
         page: 1//当前页码
       };
@@ -235,21 +238,25 @@
         let that = this;
         let params = {
           key: this.keywords,
-          id: '',
           uuid: store.state.uuid
         };
-        search(params, res => {
-          if (res.data) {
-            that.dataList = [];
-            that.dataList = that.dataList.concat(res.data);
-          } else {
-            // this.getDataList();
-            this.imageData = true;
-            this.title = '提示';
-            this.content = '没有找到该选手';
-            this.dialog = 'block'; //显示dialog
-          }
-        });
+        this.$http.post('https://www.hzrtpxt.top/master/Interface/getStudentByMh?studentName=' + this.keywords + '&activeUuid=' + store.state.uuid, params)
+          .then(res => {
+            console.log('模糊查询', res);
+            let data = res.resultMap;
+            if (data && data.length !== 0) {
+              that.dataList = data;
+              that.isLoadMore=false;
+            } else {
+              that.isLoadMore=true;
+              this.getDataList();
+              // this.imageData = true;
+              this.title = '提示';
+              this.content = '没有找到该选手';
+              this.dialog = 'block'; //显示dialog
+            }
+          });
+
       },
       //投票方法
       vote: function (studentId) {
@@ -306,7 +313,6 @@
         };
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
-          console.log('傻逼程序发神经了', res);
           if (res) {
             let activity = res.data.sysActiveList;
             let voteNum = res.data.numb || 0;
@@ -373,8 +379,6 @@
        * @param curPage
        */
       isShowLoadMoreBtn (total, curPage) {
-        console.log('total', total);
-        console.log('curPage', curPage);
         let totalPage = Math.ceil(total / 10);
         if (curPage < totalPage) {
           this.isLoadMore = true;
@@ -576,6 +580,7 @@
     border: 1px solid #ececec;
     border-radius: 3px;
     padding: 5px;
+    box-sizing: unset;
   }
 
   ul {
