@@ -84,19 +84,24 @@
         let params = path.split('&');
         let openId = params[0].split('=')[1];
         let uuid = params[1].split('=')[1];
-
+        let nickName = decodeURI(params[2].split('=')[1]) ;
+        let headImgUrl = decodeURIComponent(params[3].split('=')[1]);
+        let sex = (params[4].split('=')[1])==='1'?'男':'女';
         let sharedUrl = 'http://www.hzrtpxt.top/master/wxlogin?uuid=' + uuid;
+        store.setWxUserInfo({
+          nickName: nickName,
+          headImgUrl: headImgUrl,
+          sex: sex
+        });
         store.setOpenId(openId);
         store.setUuid(uuid);
         store.setSharedUrl(sharedUrl);
-
       }
       newLogin(function (data) {
         that.activityInfo = data;
         //设置显示标题
         document.title = store.state.activity.activeName;
         getActivityImg({activeName: store.state.activity.activeName}, res => {
-          console.log('container   img', res);
           if (res.data.length !== 0) {
             store.setSharedImg(res.data[0].imgSource);
           }
@@ -204,25 +209,6 @@
       },
       changeTab: function (tab) {
         this.selectedTab = tab;
-      },
-
-      //判断是什么设备打开的网页
-      device: function () {
-        if (navigator.appVersion.includes('iPhone')) {
-          console.log('iPhone');
-        } else if (navigator.appVersion.includes('Android')) {
-          console.log('Android');
-        } else if (
-          navigator.appVersion.includes('MicroMessenger')
-        //   (navigator.appVersion.includes("MicroMessenger") &&
-        //     navigator.appVersion.includes("iPhone")) ||
-        //   (navigator.appVersion.includes("MicroMessenger") &&
-        //     navigator.appVersion.includes("Android"))
-        ) {
-          console.log('mobile micromessenger');
-        } else {
-          console.log('computer');
-        }
       }
     },
     watch: {

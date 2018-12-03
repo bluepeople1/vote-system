@@ -78,7 +78,12 @@
       <div id="list" v-if="studentData===true">
         <div class="item" v-for="(item,index) in dataList" :key="index">
           <div @click="toDetailPage(item)">
-            <span class="sort">{{item.studentNumb}}</span>
+            <div class="item-header">
+              <span class="sort">{{item.studentNumb}}</span>
+              <span class="ticket">{{item.studentTicket}}票</span>
+            </div>
+
+            <!--<img class="item-pic" v-lazy="path+item.studentImg" width="100%" height="170" />-->
             <my-img :imageSrc="path+item.studentImg" errorType="user" width="100%" height="170"/>
           </div>
           <div class="item-bottom">
@@ -89,9 +94,9 @@
       </div>
       <none-data class="index-none-data" v-else/>
 
-      <div class="marTop15" v-show="dataList.length===10">
+      <div class="marTop15" v-show="isLoadMore===true">
         <div class="weui-flex">
-          <div class="weui-flex__item">
+          <div class="weui-flex__item" @click="loadMoreStudent">
             <div class="placeholder" style="margin:0 15px;">
               <a class="weui-btn weui-btn_default flex-grow">查看更多</a>
             </div>
@@ -115,7 +120,8 @@
       <div class="marTop30" v-if="imageData===true">
         <ul>
           <li v-for="(it,idx) in imgList" :key="idx">
-            <img v-if="idx!==0" :src="path+it.imgSource" width="100%">
+            <!--<img v-if="idx!==0" :src="path+it.imgSource" width="100%">-->
+            <my-img v-if="idx!==0" :imageSrc="path+it.imgSource" errorType="img" width="100%"/>
           </li>
         </ul>
       </div>
@@ -155,7 +161,7 @@
     },
     data () {
       return {
-        timeCountTitle:'活动倒计时',
+        timeCountTitle: '活动倒计时',
         isToGiftPage: false,
         time: '',
         days: 0,
@@ -175,7 +181,9 @@
         dialog: 'none',
         path: config.img_url,
         studentData: false,
-        imageData: false
+        isLoadMore: true,//是否显示加载更多
+        imageData: false,
+        page: 1//当前页码
       };
     },
     created: function () {
@@ -224,17 +232,19 @@
       },
       //搜索
       search: function () {
+        let that = this;
         let params = {
           key: this.keywords,
           id: '',
           uuid: store.state.uuid
         };
         search(params, res => {
-          this.dataList = [];
           if (res.data) {
-            this.dataList = res.data;
+            that.dataList = [];
+            that.dataList = that.dataList.concat(res.data);
           } else {
-            this.getDataList();
+            // this.getDataList();
+            this.imageData = true;
             this.title = '提示';
             this.content = '没有找到该选手';
             this.dialog = 'block'; //显示dialog
@@ -288,28 +298,40 @@
       //获取数据
       getDataList: function () {
         let that = this;
+        this.page = 1;
         let params = {
-          uuid: store.state.uuid
+          uuid: store.state.uuid,
+          page: this.page,
+          rows: 10
         };
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
+          console.log('傻逼程序发神经了', res);
           if (res) {
-            if (!res.activity) {
+            let activity = res.data.sysActiveList;
+            let voteNum = res.data.numb || 0;
+            let students = res.data.sysStudentList || [];
+            let studentCount = res.data.studentCount || 0;
+            if (!activity) {
               that.title = '温馨提示';
               that.content = '暂无活动信息，请联系管理员确认是否有此活动哦~';
               that.dialog = 'block'; //显示dialog
               return;
             }
-            sessionStorage.setItem('activityId', res.activity.activeId);
-            that.voteNum = res.voteNum;
-            that.activityInfo = res.activity;
-            document.title=that.activityInfo.activeName;
+            if (!students && students.length === 0) {
+              return;
+            }
+            sessionStorage.setItem('activityId', activity.activeId);
+            that.voteNum = voteNum;
+            that.activityInfo = activity;
+            document.title = that.activityInfo.activeName;
             //倒计时
             that.timeDiff;
-            that.dataList = res.student;
+            that.dataList = students;
             that.studentData = !!this.dataList;
-            that.count = res.student.length;
-            let activeName = res.activity.activeName;
+            that.count = studentCount;
+            that.isShowLoadMoreBtn(studentCount, that.page);
+            let activeName = activity.activeName;
             //获取活动访问量
             pv({activeId: this.activityInfo.activeId}, res => {
                 that.pv = res.pv;
@@ -344,6 +366,41 @@
         //     this.pv=res.pv;
         //   });
         // });
+      },
+      /**
+       * 是否显示加载更多按钮
+       * @param total
+       * @param curPage
+       */
+      isShowLoadMoreBtn (total, curPage) {
+        console.log('total', total);
+        console.log('curPage', curPage);
+        let totalPage = Math.ceil(total / 10);
+        if (curPage < totalPage) {
+          this.isLoadMore = true;
+        } else {
+          this.isLoadMore = false;
+        }
+      },
+      //加载更多学生
+      loadMoreStudent () {
+        let that = this;
+        let params = {
+          uuid: store.state.uuid,
+          page: this.page + 1,
+          rows: 10
+        };
+        //获取活动信息和参赛选手信息
+        getStuAndAct(params, res => {
+          let students = res.data.sysStudentList;
+          let count = res.data.studentCount;
+          if (students && students.length !== 0) {
+            that.page += 1;
+            that.dataList = that.dataList.concat(students);
+            that.studentData = !!that.dataList;
+            that.isShowLoadMoreBtn(count, that.page);
+          }
+        });
       }
     },
     computed: {
@@ -356,18 +413,18 @@
         let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'));
         let timeCount = setInterval(() => {
           //当前时间戳
-          let nowTime=moment().valueOf();
+          let nowTime = moment().valueOf();
           let timeDiff = '';
-          if(store.isActivityNotBegin(nowTime,beginTime)){
+          if (store.isActivityNotBegin(nowTime, beginTime)) {
             //活动还未开始
-            that.timeCountTitle='距活动开始倒计时';
-            timeDiff=beginTime - nowTime;
-          }else{
-            if(!store.isActivityEnd(nowTime,endTime)){
+            that.timeCountTitle = '距活动开始倒计时';
+            timeDiff = beginTime - nowTime;
+          } else {
+            if (!store.isActivityEnd(nowTime, endTime)) {
               //活动开始且未结束
-              that.timeCountTitle='距活动结束倒计时';
-              timeDiff=endTime - nowTime;
-            }else{
+              that.timeCountTitle = '距活动结束倒计时';
+              timeDiff = endTime - nowTime;
+            } else {
               if (!timeDiff) {
                 clearInterval(timeCount);
                 [that.days, that.hours, that.minutes, that.seconds] = [0, 0, 0, 0];
@@ -396,16 +453,48 @@
 </script>
 
 <style scoped lang="less">
-  .list {
+  #list {
+    display: flex;
+    align-items: safe;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-left: 15px;
+    margin-right: 15px;
     .item {
       position: relative;
-      .sort {
-        background: #000000bd;
-        color: #90ee90;
-        padding: 5px;
-        position: absolute;
-        font-size: 12px;
-        left: 5px;
+      transition: all 2s cubic-bezier(.17, .67, .83, .67);
+      width: 45%;
+      border-radius: 5px;
+      margin-top: 15px;
+      overflow: hidden;
+      color: #2e8b57;
+      font-size: 14px;
+      background: #fff;
+      .item-header {
+        display: flex;
+        justify-content: space-between;
+        height: 30px;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        padding-left: 2px;
+        padding-right: 4px;
+        .sort {
+          color: #007900;
+          padding: 5px;
+          font-size: 12px;
+          left: 5px;
+        }
+        .ticket {
+          color: #ff5b1b;
+          font-size: 14px;
+        }
+      }
+      .item-bottom {
+        position: relative;
+        width: 100%;
+        background: #ffffff;
+        height: 35px;
+        line-height: 35px;
       }
     }
   }
@@ -523,34 +612,6 @@
     justify-content: center;
     align-items: center;
     box-shadow: 1px 3px 14px #dcdcdc;
-  }
-
-  /*图片列表*/
-  .item {
-    width: 45%;
-    border-radius: 5px;
-    margin-top: 15px;
-    overflow: hidden;
-    color: #2e8b57;
-    font-size: 14px;
-    background: #fff;
-  }
-
-  #list {
-    display: flex;
-    align-items: safe;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-left: 15px;
-    margin-right: 15px;
-  }
-
-  .item-bottom {
-    position: relative;
-    width: 100%;
-    background: #ffffff;
-    height: 35px;
-    line-height: 35px;
   }
 
   /*投票按钮*/

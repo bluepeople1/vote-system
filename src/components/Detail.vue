@@ -7,7 +7,7 @@
     <div id="header">
       <!--照片-->
       <div id="userImg">
-        <my-img :imageSrc="path+data.studentImg" errorType="user" width="100%" height="300"/>
+        <my-img :imageSrc="path+data.studentImg" errorType="user" width="100%" height="300px"/>
         <!--<img v-if="data.studentImg===null" src="../assets/img/user.jpg" width="100%">-->
         <!--<img v-else :src="path+data.studentImg" width="100%"/>-->
       </div>
@@ -34,7 +34,7 @@
                 <span> 当前票数</span>
               </div>
               <div>
-                <span>{{data.studentTicket}}</span>
+                <span>{{data.studentTicket||0}}</span>
               </div>
             </div>
           </div>
@@ -45,7 +45,7 @@
                 <span> 当前排名</span>
               </div>
               <div>
-                <span>{{rank}}</span>
+                <span>{{rank||'暂未上榜'}}</span>
               </div>
             </div>
           </div>
@@ -78,11 +78,11 @@
                         <my-img :imageSrc="item.headImgUrl" errorType="user" width="35" height="35"/>
                       </div>
                       <div class="fl grid marL10">
-                          <div>
-                              <span style="color:#26a69a">{{item.nickName}}</span>
+                          <div style="text-align: left">
+                              <span style="color:#26a69a;text-align: left">{{item.nickName}}</span>
                           </div>
-                          <div>
-                              <span style="color: #a22232;font-size: 12px;">赠送了{{item.giftCount}}个{{item.giftName}}</span>
+                          <div style="text-align: left">
+                              <span style="color: #a22232;font-size: 12px;">赠送了{{item.giftCount||0}}个{{item.giftName||'未知礼物'}}</span>
                           </div>
                       </div>
                   </li>
@@ -115,7 +115,7 @@
   import Header from './common/Header';
   import Dialog from './common/Dialog';
   import ImageError from './common/ImageError';
-  import {search, vote , getUserGiftList } from '../api/Service';
+  import {search, vote , getUserGiftList} from '../api/Service';
   import store from '../assets/js/store';
   import moment from 'moment';
 
@@ -155,12 +155,13 @@
         };
         search(params, res => {
           this.data=res.data[0];
-          console.log('赠送礼物界面',res);
         });
       },
       //返回首页
       goBack: function () {
-        this.$router.push('/index');
+          window.history.length > 1
+            ? this.$router.go(-1)
+            : this.$router.push('/index')
       },
       //跳转去礼物页面
       toPresentPage: function (userId) {
@@ -231,8 +232,6 @@
             studentId: that.data.studentId,
           },function (res) {
             that.giftList=res.data.resultMap;
-
-            console.log('被赠送的礼物列表',that.giftList.length);
           });
         });
       }
@@ -248,6 +247,10 @@
 </script>
 
 <style scoped lang="less">
+  #userImg{
+    background:url("../assets/img/thum.png") no-repeat;
+    background-size: cover;
+  }
   #header{
     margin-top: 44px;
   }

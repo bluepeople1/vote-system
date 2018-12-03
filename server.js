@@ -55,7 +55,6 @@ app.get('/', function (req, res) {
  * 登录接口
  */
 app.get('/login', function (req, res) {
-  console.log('login');
   request.post({
     url: host + '/master/login',
     json: true,
@@ -64,7 +63,7 @@ app.get('/login', function (req, res) {
       userPassword: '123456'
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       let cookie = response.headers['set-cookie'][0];
       let jsessionid = cookie.split(';');
       res.send({
@@ -74,6 +73,8 @@ app.get('/login', function (req, res) {
           sessionid: jsessionid[0]
         }
       });
+    }else{
+      console.log('登录(/master/login)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -91,13 +92,15 @@ app.post('/getStudentList', function (req, res) {
       'cookie': req.headers.sessionid
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         count: body.count,
         msg: '请求成功',
         data: body.rows
       });
+    }else{
+      console.log('获取参赛选手数据(/master/Interface/getStudentList)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -116,13 +119,15 @@ app.post('/getActivityInfo', function (req, res) {
       activeUuid: req.body.uuid
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         count: body.count,
         msg: '请求成功',
         data: body.rows
       });
+    }else{
+      console.log('获取活动详情(/master/Interface/getActiveList)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -141,12 +146,14 @@ app.post('/getWxUserInfo', function (req, res) {
       openId: req.body.openId
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
         data: body
       });
+    }else{
+      console.log('获取微信用户信息(/master/Interface/selectWxUserInfo)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -165,12 +172,14 @@ app.post('/pv', function (req, res) {
       activeId: req.body.activeId
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         pv: body,
         msg: '请求成功'
       });
+    }else{
+      console.log('访问量(/master/Interface/watchNumb)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -186,17 +195,22 @@ app.post('/getStuAndAct', function (req, res) {
       'cookie': req.headers.sessionid
     },
     form: {
-      activeUuid: req.body.uuid
+      activeUuid: req.body.uuid,
+      page:req.body.page,//页码
+      rows:req.body.rows//条数
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
+        data:body,
         activity: body.sysActiveList,
         student: body.sysStudentList,
         voteNum: body.numb
       });
+    }else{
+      console.log('获取参赛选手信息和活动信息(/master/Interface/getStudentAndActive)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -217,12 +231,14 @@ app.post('/getUserGiftList',function (req,res) {
       studentId:req.body.studentId
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
         data:body
       });
+    }else{
+      console.log('被赠送礼物的列表(/master/Interface/getwxUserToGift)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -243,12 +259,14 @@ app.post('/getStudentDetail',function (req,res) {
       studentId:req.body.studentId
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
         data:body
       });
+    }else{
+      console.log('获取选手详情(/master/Interface/selectStudentBySid)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -270,10 +288,12 @@ app.post('/vote', function (req, res) {
       studentid: req.body.studentid
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: body.errorCode
       });
+    }else{
+      console.log('投票(/master/Interface/addVote)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -295,9 +315,9 @@ app.post('/search', function (req, res) {
       activeUuid: req.body.uuid
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       let rank = '';
-      if (response.body.studentRank != null || response.body.studentRank != undefined) {
+      if (response.body.studentRank != null || response.body.studentRank !== undefined) {
         rank = response.body.studentRank;
       }
       res.send({
@@ -306,6 +326,8 @@ app.post('/search', function (req, res) {
         rank: rank,
         data: body.rows
       });
+    }else{
+      console.log('根据id或名字查询用户(/master/Interface/getStudentByName)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -330,12 +352,14 @@ app.post('/sign', function (req, res) {
     },
     json: true
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
         data: body
       });
+    }else{
+      console.log('活动报名(/master/Interface/addStudent)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -343,6 +367,19 @@ app.post('/sign', function (req, res) {
  * 赠送礼物
  */
 app.post('/sendGift', function (req, res) {
+  console.log('赠送礼物',JSON.stringify({
+    nickname:req.body.nickName,//微信用户昵称
+    headimgurl:req.body.headImgUrl,//微信用户头像
+    sex:req.body.sex,//微信用户性别
+    uuId:req.body.uuid,//当前活动uuid
+    openId:req.body.openId,
+    accountUsercode: req.body.openId,
+    accountAmt: req.body.accountAmt,
+    accountGiftid: req.body.accountGiftId,
+    accountStudentid: req.body.accountStudentId,
+    accountNumb: req.body.accountNumb,
+    ticketCount:req.body.ticketCount
+  }))
   //request 请求
   request.post({
     url: host + '/master/Interface/sendGift',
@@ -351,16 +388,17 @@ app.post('/sendGift', function (req, res) {
       'cookie': req.headers.sessionid
     },
     form: {
-      nickname:req.body.nickName,
-      headimgurl:req.body.headImgUrl,
-      sex:req.body.sex,
-      uuId:req.body.uuid,
+      nickname:req.body.nickName,//微信用户昵称
+      headimgurl:req.body.headImgUrl,//微信用户头像
+      sex:req.body.sex,//微信用户性别
+      uuId:req.body.uuid,//当前活动uuid
       openId:req.body.openId,
       accountUsercode: req.body.openId,
       accountAmt: req.body.accountAmt,
       accountGiftid: req.body.accountGiftId,
       accountStudentid: req.body.accountStudentId,
-      accountNumb: req.body.accountNumb
+      accountNumb: req.body.accountNumb,
+      ticketCount:req.body.ticketCount
     }
   }, function (error, response, body) {
     if (!error && response.statusCode === 200) {
@@ -369,6 +407,8 @@ app.post('/sendGift', function (req, res) {
         msg: '请求成功',
         data: body
       });
+    }else{
+      console.log('赠送礼物(/master/Interface/sendGift)：',response.statusCode+' 报错：'+error);
     }
   });
 
@@ -386,13 +426,14 @@ app.get('/getGiftList', function (req, res) {
     },
     json: true,
   }, function (error, response, body) {
-    console.log('statusCode:' + response.statusCode);
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
         data: body.rows
       });
+    }else{
+      console.log('获取礼物列表(/master/Gift/getGiftList)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -411,12 +452,14 @@ app.post('/rank', function (req, res) {
       activeUuid: req.body.uuid
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
         data: body.rankList
       });
+    }else{
+      console.log('排行榜(/master/Interface/getRankList)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -441,6 +484,8 @@ app.post('/prize', function (req, res) {
         msg: '请求成功',
         data: body
       });
+    }else{
+      console.log('奖品(/master/Interface/getPrizeList)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -456,21 +501,25 @@ app.post('/activityImg', function (req, res) {
       'cookie': req.headers.sessionid
     },
     form: {
-      activeName: req.body.activeName
+      activeName: req.body.activeName,
+      page:1,
+      rows:20
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
         data: body.rows
       });
+    }else{
+      console.log('活动图片(/master/Active/getActiveImgList)：',response.statusCode+' 报错：'+error);
     }
   });
 });
 
 /**
- * 活动图片
+ * 微信支付
  */
 app.post('/wxPay', function (req, res) {
 
@@ -488,12 +537,14 @@ app.post('/wxPay', function (req, res) {
       totalFee: req.body.totalFee
     }
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       res.send({
         code: 0,
         msg: '请求成功',
         data: body
       });
+    }else{
+      console.log('微信支付(/master/userPay)：',response.statusCode+' 报错：'+error);
     }
   });
 });
@@ -510,11 +561,15 @@ app.get('/getTicket', function (req, res) {
       'cookie': req.headers.sessionid
     }
   }, function (error, response, body) {
-    res.send({
-      code: 0,
-      msg: '请求成功',
-      data: body[0]
-    });
+    if (!error && response.statusCode === 200) {
+      res.send({
+        code: 0,
+        msg: '请求成功',
+        data: body[0]
+      });
+    }else{
+      console.log('获取ticket(/master/getToken)：',response.statusCode+' 报错：'+error);
+    }
   });
 });
 

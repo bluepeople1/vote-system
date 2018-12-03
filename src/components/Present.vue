@@ -17,7 +17,7 @@
           <ul style="text-align:left;font-size:14px">
             <li>姓名：{{userInfo.studentName}}</li>
             <li>编号：{{userInfo.studentNumb}}</li>
-            <li>票数：{{userInfo.studentTicket}} 票</li>
+            <li>票数：{{userInfo.studentTicket||0}} 票</li>
             <!-- <li>排名：</li> -->
           </ul>
         </div>
@@ -140,7 +140,6 @@
         };
         search(params, res => {
           this.userInfo = res.data[0];
-          console.log('赠送礼物界面', res);
         });
       },
       //dialog 的监听方法
@@ -173,20 +172,21 @@
               },
               function (res) {
                 if (res.err_msg === 'get_brand_wcpay_request:ok') {
-                  that.title = '赠送成功';
-                  that.content = '成功给该选手增加了' + that.giftTicket * that.num + '票';
-                  that.dialog = 'block';
                   sendGift({
-                    nickName: that.wxUserInfo.nickname,
-                    headImgUrl: that.wxUserInfo.headimgurl,
-                    sex: that.wxUserInfo.sex,
+                    nickName: store.wxUserInfo.nickName,
+                    headImgUrl: store.wxUserInfo.headImgUrl,
+                    sex: store.wxUserInfo.sex,
                     uuid: store.state.uuid,
                     openId: store.state.openId,
                     accountAmt: that.price,
                     accountGiftId: that.giftId,
                     accountStudentId: that.userInfo.studentId,
-                    accountNumb: that.num
+                    accountNumb: that.num,
+                    ticketCount:that.giftTicket * that.num
                   }, function () {
+                    that.title = '赠送成功';
+                    that.content = '成功给该选手增加了' + that.giftTicket * that.num + '票';
+                    that.dialog = 'block';
                     that.refreshUserInfo();
                   });
                 }
@@ -259,7 +259,7 @@
         let that = this;
         getGiftList(res => {
           that.dataList = res.data;
-          that.getWxUserInfo();
+          // that.getWxUserInfo();
         });
       }
     },

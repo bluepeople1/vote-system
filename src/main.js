@@ -5,10 +5,17 @@ import App from './App';
 import router from './router';
 import axios from 'axios';
 import jquery from 'jquery';
-import {login} from '@/api/Service';
 import './assets/css/weui.min.css';
 import './assets/css/common.css';
-import store from './assets/js/store'
+import store from './assets/js/store';
+import vueLazyLoad from 'vue-lazyload';
+
+Vue.use(vueLazyLoad,{
+  preLoad:1.3,
+  error:'./assets/img/errorImg.png',
+  loading:'./assets/img/loading.gif'
+});
+
 
 /*
 *  1.超时处理

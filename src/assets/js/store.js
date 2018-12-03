@@ -3,6 +3,7 @@ const store = {
   debug: true,
   base_url: 'https://www.hzrtpxt.top/nserver',
   img_url: 'https://www.hzrtpxt.top',
+  wxUserInfo:{},
   state: {
     appId: 'wxb36f7c6095549952',
     uuid: '',
@@ -12,6 +13,14 @@ const store = {
     sharedUrl: '',
     sharedImg: '',
     activity: {}
+  },
+  /**
+   * 微信用户信息
+   * @param wxUserInfo
+   */
+  setWxUserInfo(wxUserInfo){
+    this.wxUserInfo=wxUserInfo;
+    sessionStorage.setItem('wxUserInfo', JSON.stringify(wxUserInfo));
   },
   setActivity: function (activity) {
     this.state.activity = activity;
