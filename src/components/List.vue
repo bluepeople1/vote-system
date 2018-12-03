@@ -19,8 +19,8 @@
             </div>
 
             <div class="fl grid marL10">
-              <img v-if="item.studentImg===null" src="../assets/img/user.jpg" style="width: 45px;height: 45px;"> >
-              <my-img v-else :imageSrc="path+item.studentImg" errorType="user" width="45px" height="45px"/>
+              <!--<img v-if="item.studentImg===null" src="../assets/img/user.jpg" style="width: 45px;height: 45px;"> -->
+              <my-img :imageSrc="path+item.studentImg" errorType="user" width="45px" height="45px"/>
             </div>
             <div class="fl grid marL10">
               <div class="userName">
