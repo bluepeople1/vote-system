@@ -2,10 +2,12 @@
   <div id="container">
     <!-- {{wxcode}} -->
     <div class="marquee-title">
-      <marquee>{{activityInfo.activeName?activityInfo.activeName:''}}
-        活动时间：{{activityInfo.activeBegintime?activityInfo.activeBegintime:''}} ~
-        {{activityInfo.activeEndtime?activityInfo.activeEndtime:''}}
-      </marquee>
+      <!--<marquee scrollamount="2">{{activityInfo.activeName?activityInfo.activeName:''}}-->
+        <!--活动时间：{{activityInfo.activeBegintime?activityInfo.activeBegintime:''}} ~-->
+        <!--{{activityInfo.activeEndtime?activityInfo.activeEndtime:''}}-->
+      <!--</marquee>-->
+      <my-marquee :content="activityInfo.activeName+'  活动时间：'+activityInfo.activeBegintime+' ~ '+activityInfo.activeEndtime"></my-marquee>
+      <!--<music-player></music-player>-->
     </div>
     <keep-alive>
       <router-view class="child"/>
@@ -62,10 +64,14 @@
   import { signs } from '@/assets/js/sign';
   import store from '@/assets/js/store';
   import wx from 'weixin-js-sdk';
+  import MusicPlayer from './common/MusicPlayer'
+  import MyMarquee from './common/MyMarquee'
 
   export default {
+    components:{MusicPlayer,MyMarquee},
     data () {
       return {
+        title:'暂无信息',
         selectedTab: 1,
         uuid: '',
         activityInfo: '',
@@ -99,6 +105,9 @@
       }
       newLogin(function (data) {
         that.activityInfo = data;
+        that.title=((activityInfo.activeName)?(activityInfo.activeName):'')+"  活动时间："
+        +((activityInfo.activeBegintime)?(activityInfo.activeBegintime):'')+" ~ "
+        +((activityInfo.activeEndtime)?(activityInfo.activeEndtime):'')
         //设置显示标题
         document.title = store.state.activity.activeName;
         getActivityImg({activeName: store.state.activity.activeName}, res => {
@@ -288,23 +297,21 @@
     width: 100%;
     background: #f7f7fa;
     position: fixed;
-    bottom: 0px;
-    margin: 0px;
+    bottom: 0;
+    margin: 0;
     z-index: 1000;
     border-top: 1px solid #e2e2e2;
   }
 
   .marquee-title {
     height: 30px;
+    line-height: 30px;
     position: fixed;
-    top: 0px;
-    margin: 0px;
+    top: 0;
+    margin: 0;
     width: 100%;
     color: #fff;
     background: rgba(9, 187, 7, 0.65);
     z-index: 1000;
-    & > marquee {
-      line-height: 30px;
-    }
   }
 </style>

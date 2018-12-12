@@ -220,11 +220,18 @@
       toDetailPage: function (userInfo) {
         //活动开始时间戳
         let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'));
+        //活动结束时间戳
+        let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'));
         //当前时间戳
         let nowTime = moment().valueOf();
         //如果当前活动还未开始，不让投票
         if (store.isActivityNotBegin(nowTime, beginTime)) {
           [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block'];
+          return;
+        }
+        //如果活动已经结束了，不让投票
+        if (store.isActivityEnd(nowTime, endTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block'];
           return;
         }
 
@@ -242,7 +249,6 @@
         };
         this.$http.post('https://www.hzrtpxt.top/master/Interface/getStudentByMh?studentName=' + this.keywords + '&activeUuid=' + store.state.uuid, params)
           .then(res => {
-            console.log('模糊查询', res);
             let data = res.resultMap;
             if (data && data.length !== 0) {
               that.dataList = data;

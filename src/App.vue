@@ -1,6 +1,8 @@
 <template>
   <div id="app">
+
     <div id="appContainer">
+      <music-player></music-player>
       <router-view/>
     </div>
     <loading :isShow="isShowLoading"></loading>
@@ -9,18 +11,16 @@
 
 <script>
   import loading from './components/common/Loading'
+  import MusicPlayer from './components/common/MusicPlayer'
   export default {
     name: 'App',
     components:{
-      loading
+      loading,MusicPlayer
     },
     computed:{
       isShowLoading(){
         return this.$store.getters.isShowLoading
       }
-    },
-    created(){
-      console.log(this)
     }
   }
 </script>

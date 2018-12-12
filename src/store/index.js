@@ -5,11 +5,20 @@ Vue.use(Vuex)
 
 const stores = new Vuex.Store({
   state: {
-    isShowLoading: false
+    isShowLoading: false,
+    isPlay: true// 音乐的播放暂停
   },
   getters: {
     isShowLoading: state => {
       return state.isShowLoading
+    },
+    /**
+     * 返回播放状态
+     * @param state
+     * @returns {getters.isPlay|(function(*))|boolean|*}
+     */
+    isPlay: state => {
+      return state.isPlay
     }
   },
   mutations: {
@@ -26,7 +35,14 @@ const stores = new Vuex.Store({
     hideLoading (state) {
       state.isShowLoading = false
     }
-
+    ,
+    /**
+     * 播放/暂停音乐
+     * @param state
+     */
+    playOrPausePlayer (state) {
+      state.isPlay = !state.isPlay
+    }
   },
   actions: {
     /**
@@ -49,6 +65,13 @@ const stores = new Vuex.Store({
      */
     hideLoading(context){
       context.commit('hideLoading')
+    },
+    /**
+     * 提交播放/暂停音乐动作
+     * @param context
+     */
+    playOrPausePlayer (context) {
+      context.commit('playOrPausePlayer')
     }
   }
 })
