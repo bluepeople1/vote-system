@@ -32,7 +32,7 @@ export default {
     };
   },
   created: function() {
-    console.log(this.$route.params);
+    // console.log(this.$route.params);
     this.data = this.$route.params.payInfo;
   },
   methods: {

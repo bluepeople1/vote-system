@@ -29,7 +29,7 @@ axios.defaults.timeout = 5000
 
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {
-  console.log('发请求')
+  // console.log('发请求')
   stores.dispatch('showLoading')
   // 在发送请求之前做些什么
   config.headers = {
@@ -44,7 +44,7 @@ axios.interceptors.request.use(function (config) {
 
 // 添加响应拦截器
 axios.interceptors.response.use(function (response) {
-  console.log('请求回来')
+  // console.log('请求回来')
   stores.dispatch('hideLoading')
   // 对响应数据做点什么
   // if (response.data.code === 1000) {
@@ -62,7 +62,7 @@ Vue.prototype.$jquery = jquery
 Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
-console.log(stores)
+// console.log(stores)
 
 /* eslint-disable no-new */
 new Vue({

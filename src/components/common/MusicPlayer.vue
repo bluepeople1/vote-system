@@ -21,17 +21,18 @@
       return {}
     },
     created () {
-      wx.config({
-        debug: false,
-        appId: '',
-        timestamp: '',
-        nonceStr: '',
-        signature: '',
-        jsApiList: []
-      })
+      // wx.config({
+      //   debug: false,
+      //   appId: '',
+      //   timestamp: '',
+      //   nonceStr: '',
+      //   signature: '',
+      //   jsApiList: []
+      // })
     },
     mounted () {
-      this.player
+      this.playerCtrl()
+      this.animationCtrl()
     },
     methods: {
       /**
@@ -39,8 +40,8 @@
        */
       animationCtrl(){
         let music= document.getElementById('music')
-        if (this.isPlay) {
-          music.className='restart'
+        if (!this.isPlay) {
+          music.className='play'
         } else {
           music.className='pause'
         }
@@ -51,14 +52,14 @@
       playerCtrl(){
         let _this = this
         let audio = document.getElementById('player')
-        this.$store.dispatch('playOrPausePlayer')
         wx.ready(function () {
-          if (_this.isPlay) {
+          if (!_this.isPlay) {
             audio.play()
           } else {
             audio.pause()
           }
         })
+        this.$store.dispatch('playOrPausePlayer')
       },
       handle () {
         // this.$store.dispatch('playOrPausePlayer')
@@ -69,18 +70,6 @@
     computed: {
       isPlay () {
         return this.$store.getters.isPlay
-      },
-      player () {
-        let _this = this
-        let audio = document.getElementById('player')
-        let music= document.getElementById('music')
-        wx.ready(function () {
-          if (_this.isPlay) {
-            audio.play()
-            music.className='play'
-          }
-        })
-
       }
     }
   }

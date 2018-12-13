@@ -251,9 +251,9 @@
         }
         for (let i = 0, len = files.length; i < len; ++i) {
           let file = files[i];
-          console.log('file', file);
+          // console.log('file', file);
           let fileMaxSize = 1024 * 1024;
-          console.log('file', file.size / fileMaxSize);
+          // console.log('file', file.size / fileMaxSize);
           if ((file.size / fileMaxSize) > 20) {
             that.title = '提示';
             that.content = '图片大小不能超过5M';
@@ -313,10 +313,10 @@
           studentTicket: 0,
           activityId: sessionStorage.getItem('activityId')
         };
-        console.log(params);
+        // console.log(params);
         //报名接口
         sign(params, res => {
-          console.log('报名返回', res);
+          // console.log('报名返回', res);
           if (res.data === 1) {
             that.deleteImg();
             that.userName = '';

@@ -105,9 +105,6 @@
       }
       newLogin(function (data) {
         that.activityInfo = data;
-        that.title=((activityInfo.activeName)?(activityInfo.activeName):'')+"  活动时间："
-        +((activityInfo.activeBegintime)?(activityInfo.activeBegintime):'')+" ~ "
-        +((activityInfo.activeEndtime)?(activityInfo.activeEndtime):'')
         //设置显示标题
         document.title = store.state.activity.activeName;
         getActivityImg({activeName: store.state.activity.activeName}, res => {
@@ -138,7 +135,7 @@
                 link: store.state.sharedUrl, // 分享链接
                 imgUrl: store.img_url + store.state.sharedImg, // 分享图标
                 success: function () {
-                  console.log('成功');
+                  // console.log('成功');
                 },
                 cancel: function () {
                   // alert('失败');
@@ -150,7 +147,7 @@
                 link: store.state.sharedUrl, // 分享链接
                 imgUrl: store.img_url + store.state.sharedImg, // 分享图标
                 success: function () {
-                  console.log('成功');
+                  // console.log('成功');
                 },
                 cancel: function () {
                   // alert('失败');
@@ -162,7 +159,7 @@
                 link: store.state.sharedUrl, // 分享链接
                 imgUrl: store.img_url + store.state.sharedImg, // 分享图标
                 success: function () {
-                  console.log('成功');
+                  // console.log('成功');
                 },
                 cancel: function () {
                   // alert('失败');
@@ -175,7 +172,7 @@
                 link: store.state.sharedUrl, // 分享链接
                 imgUrl: store.img_url + store.state.sharedImg, // 分享图标
                 success: function () {
-                  console.log('成功');
+                  // console.log('成功');
                 },
                 cancel: function () {
                   // alert('失败');

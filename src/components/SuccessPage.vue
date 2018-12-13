@@ -32,7 +32,7 @@ export default {
     };
   },
   created: function() {
-    console.log(this.$route.params);
+    // console.log(this.$route.params);
     this.data = this.$route.params.payInfo;
   },
   methods: {
@@ -51,7 +51,7 @@ export default {
   computed: {
     ticketNum: function() {
       if(this.data.price===2){
-        
+
       }
       return this.data.price * 5 * this.data.num;
     }

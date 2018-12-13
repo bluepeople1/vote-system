@@ -76,9 +76,9 @@
       },
       toDetailPage: function (userInfo) {
         //活动开始时间戳
-        let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'));
+        let beginTime = moment(store.state.activity.activeBegintime.replace(/-/g, '/'));
         //活动结束时间戳
-        let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'));
+        let endTime = moment(store.state.activity.activeEndtime.replace(/-/g, '/'));
         //当前时间戳
         let nowTime = moment().valueOf();
         //如果当前活动还未开始，不让投票
