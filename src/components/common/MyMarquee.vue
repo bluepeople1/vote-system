@@ -1,53 +1,57 @@
 <template>
   <div id="container">
     <div id="marquee">
-      <span id="title">{{content}}</span>
+      <span id="title" :class="content?'play':''">{{content}}</span>
     </div>
   </div>
 </template>
 
 <script>
-export default {
-  name: 'MyMarquee',
-  props: {
-    content: {
-      type: String,
-      default: '暂无信息'
+  export default {
+    name: 'MyMarquee',
+    props: {
+      content: String
     }
   }
-}
 </script>
 
 <style scoped lang="less">
   #container {
-    position: relative;
+    position: fixed;
+    top: 0;
     width: 100%;
     height: 30px;
-    /*background-color: rgba(9, 187, 7, 0.65);*/
+    background-color: rgba(9, 187, 7, 0.65);
     overflow: hidden;
     z-index: 1500;
     #marquee {
+      width: 100%;
       position: relative;
       height: 30px;
       line-height: 30px;
       color: #fff;
       #title {
-        width: 100%;
+        min-width: 100%;
         height: 30px;
         white-space: nowrap;
         position: absolute;
         text-wrap: none;
-        animation: marquee-title 60s linear infinite;
+        /*animation: marquee-title 35s linear infinite;*/
       }
     }
   }
 
   @keyframes marquee-title {
     from {
-      right: -100%;
+      transform: translateX(25%);
     }
     to {
-      right: 100%;
+      transform: translateX(-100%);
     }
+  }
+
+  /*动画开始*/
+  .play {
+    animation: marquee-title 25s linear infinite;
   }
 </style>

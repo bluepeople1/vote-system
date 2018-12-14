@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-
     <div id="appContainer">
       <music-player></music-player>
       <router-view/>
@@ -26,6 +25,10 @@
 </script>
 
 <style lang="less">
+  * {
+    margin: 0;
+    padding: 0;
+  }
 
   #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -33,11 +36,6 @@
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    /*width: 100vw;*/
-    /*height: 100vh;*/
-    min-height: 100vh;
-    /*overflow: auto;*/
-    background: #ecf0f5;
-
+    height: 100vh;
   }
 </style>
