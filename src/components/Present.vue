@@ -73,10 +73,9 @@
   import Header from './common/Header';
   import Dialog from './common/Dialog';
   import { getGiftList, wxPay, sendGift, search, getWxUserInfo } from '../api/Service';
-  import { config } from '../assets/js/config';
-  import store from '../assets/js/store';
   import { sign } from '@/assets/js/sign';
   import ImageError from './common/ImageError';
+  import CommonService from '../assets/js/common'
 
   export default {
     components: {

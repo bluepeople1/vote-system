@@ -72,7 +72,7 @@
                     </li> -->
                   </ul>
                   <div class="weui-uploader__input-box">
-                    <div id="uploaderInput" @click="selectImg()" class="weui-uploader__input" ></div>
+                    <div id="uploaderInput" @click="selectImg()" class="weui-uploader__input"></div>
                     <!--<input id="uploaderInput" @change="upload" class="weui-uploader__input" type="file" accept="image/*" multiple/>-->
                   </div>
                 </div>
@@ -96,17 +96,16 @@
 
 <script>
 
-  import {login, sign, getJsApiTicket} from '@/api/Service';
-  import Dialog from './common/Dialog';
-  import wx from 'weixin-js-sdk';
-  import { signs } from '@/assets/js/sign';
-  import store from '@/assets/js/store';
+  import { getJsApiTicket, login, sign } from '@/api/Service'
+  import Dialog from './common/Dialog'
+  import wx from 'weixin-js-sdk'
+  import { signs } from '@/assets/js/sign'
 
   export default {
     components: {
       'my-dialog': Dialog
     },
-    data() {
+    data () {
       return {
         userName: '',
         userSex: 1,
@@ -117,18 +116,18 @@
         userImg: '',
         imgNum: 0,
         localId: 0,
-        localIds:'',
-        access_token:''
-      };
+        localIds: '',
+        access_token: ''
+      }
     },
     created: function () {
-      let that=this;
+      let that = this
       getJsApiTicket(function (res) {
-        that.access_token=res.data.access_token;
-        const config = signs(res.data.jsapi_ticket, window.location.href.split('#')[0]);
+        that.access_token = res.data.access_token
+        const config = signs(res.data.jsapi_ticket, window.location.href.split('#')[0])
         wx.config({
           debug: false,
-          appId: store.state.appId,
+          appId: this.config._appId,
           timestamp: config.timestamp,
           nonceStr: config.noncestr,
           signature: config.signature,
@@ -137,171 +136,170 @@
             'previewImage',
             'uploadImage'
           ]
-        });
-      });
+        })
+      })
     },
-    mounted(){
-      let that=this;
+    mounted () {
+      let that = this
       let $gallery = $('#gallery'),
-          $galleryImg = $('#galleryImg'),
-          $uploaderFiles = $('#uploaderFiles');
+        $galleryImg = $('#galleryImg'),
+        $uploaderFiles = $('#uploaderFiles')
       $uploaderFiles.on('click', 'li', function () {
-        if(that.isIosDevice()){
+        if (that.isIosDevice()) {
           wx.getLocalImgData({
             localId: that.localIds[0], // 图片的localID
             success: function (res) {
-              $galleryImg.html(`<img src="${res.localData}" class="previewImg" />`);
+              $galleryImg.html(`<img src="${res.localData}" class="previewImg" />`)
             }
-          });
-        }else{
-          $galleryImg.html(`<img src="${that.localIds}" class="previewImg" />`);
+          })
+        } else {
+          $galleryImg.html(`<img src="${that.localIds}" class="previewImg" />`)
         }
 
-        $galleryImg.attr('style', this.getAttribute('style'));
-        $gallery.fadeIn(100);
-      });
+        $galleryImg.attr('style', this.getAttribute('style'))
+        $gallery.fadeIn(100)
+      })
       $gallery.on('click', function () {
-        $gallery.fadeOut(100);
-      });
+        $gallery.fadeOut(100)
+      })
     },
     methods: {
       //判断是什么设备打开的网页
       isIosDevice: function () {
         if (navigator.appVersion.includes('iPhone')) {
-          console.log('iPhone');
-          return true;
+          console.log('iPhone')
+          return true
         } else if (navigator.appVersion.includes('Android')) {
-          console.log('Android');
-          return false;
+          console.log('Android')
+          return false
         }
       },
       //适配ios设备localId展示图片
-      getLocalImgData(localId){
-        let that=this;
+      getLocalImgData (localId) {
+        let that = this
         wx.getLocalImgData({
           localId: localId, // 图片的localID
           success: function (res) {
-            let localData = res.localData; // localData是图片的base64数据，可以用img标签显示
-            let tmpl = `<li><img class="weui-uploader__file" src="${localData}"></li>`;
-            $('#uploaderFiles').html(tmpl);
-            that.imgNum = 1;
+            let localData = res.localData // localData是图片的base64数据，可以用img标签显示
+            let tmpl = `<li><img class="weui-uploader__file" src="${localData}"></li>`
+            $('#uploaderFiles').html(tmpl)
+            that.imgNum = 1
           }
-        });
+        })
       },
       //上传图片
-      uploadImg(localIds) {
-        let that=this;
+      uploadImg (localIds) {
+        let that = this
         wx.uploadImage({
           localId: localIds[0], // 需要上传的图片的本地ID，由chooseImage接口获得
           isShowProgressTips: 1,// 默认为1，显示进度提示
           success: function (res) {
             //let serverId = res.serverId; // 返回图片的服务器端ID
-            that.userImg=res.serverId;
+            that.userImg = res.serverId
           }
-        });
+        })
       },
       //选择图片
-      selectImg() {
-        let that = this;
+      selectImg () {
+        let that = this
         wx.chooseImage({
           count: 1, // 默认9
           sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
           sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
           success: function (res) {
-            that.localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
-            that.uploadImg(res.localIds);
-            if(that.isIosDevice()){
-              that.getLocalImgData(res.localIds[0]);
-            }else{
-              let tmpl = `<li><img class="weui-uploader__file" src="${res.localIds[0]}"></li>`;
-              $('#uploaderFiles').html(tmpl);
-              that.imgNum = 1;
+            that.localIds = res.localIds // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+            that.uploadImg(res.localIds)
+            if (that.isIosDevice()) {
+              that.getLocalImgData(res.localIds[0])
+            } else {
+              let tmpl = `<li><img class="weui-uploader__file" src="${res.localIds[0]}"></li>`
+              $('#uploaderFiles').html(tmpl)
+              that.imgNum = 1
             }
           }
-        });
+        })
       },
       //删除选中图片
-      deleteImg() {
+      deleteImg () {
         $('#uploaderFiles')
           .children('li')
-          .remove();
-        this.localIds='';
-        this.imgNum = 0;
-        this.userImg = '';
+          .remove()
+        this.localIds = ''
+        this.imgNum = 0
+        this.userImg = ''
       },
       //dialog 的监听方法
       dialogListener: function (data) {
-        this.dialog = data.hide;
+        this.dialog = data.hide
       },
       toIndex: function () {
-        this.$router.push('/index');
+        this.$router.push('/index')
       },
       //上传图片
       upload: function (e) {
-        const that = this;
-        let tmpl = '<li class="weui-uploader__file" style="background-image:url(#url#)"></li>';
+        const that = this
+        let tmpl = '<li class="weui-uploader__file" style="background-image:url(#url#)"></li>'
         let src,
           url = window.URL || window.webkitURL || window.mozURL,
-          files = e.target.files;
+          files = e.target.files
         if (that.imgNum !== 0) {
-          that.title = '提示';
-          that.content = '只能上传一张图片';
-          that.dialog = 'block'; //显示dialog
-          return;
+          that.title = '提示'
+          that.content = '只能上传一张图片'
+          that.dialog = 'block' //显示dialog
+          return
         }
         for (let i = 0, len = files.length; i < len; ++i) {
-          let file = files[i];
+          let file = files[i]
           // console.log('file', file);
-          let fileMaxSize = 1024 * 1024;
+          let fileMaxSize = 1024 * 1024
           // console.log('file', file.size / fileMaxSize);
           if ((file.size / fileMaxSize) > 20) {
-            that.title = '提示';
-            that.content = '图片大小不能超过5M';
-            that.dialog = 'block'; //显示dialog
-            return;
+            that.title = '提示'
+            that.content = '图片大小不能超过5M'
+            that.dialog = 'block' //显示dialog
+            return
           }
           if (url) {
-            src = url.createObjectURL(file);
+            src = url.createObjectURL(file)
           } else {
-            src = e.target.result;
+            src = e.target.result
           }
-          let reader = new FileReader();
-          reader.readAsDataURL(file);
+          let reader = new FileReader()
+          reader.readAsDataURL(file)
           reader.onload = function (e) {
-            let image_base64 = this.result.split(',')[1];
             //就是base64
-            that.userImg = image_base64;
-          };
-          $('#uploaderFiles').append($(tmpl.replace('#url#', src)));
-          that.imgNum = 1;
+            that.userImg = this.result.split(',')[1]
+          }
+          $('#uploaderFiles').append($(tmpl.replace('#url#', src)))
+          that.imgNum = 1
         }
       },
       //报名方法
       sign: function () {
-        let that = this;
+        let that = this
         if (!this.userName) {
-          this.title = '错误提示';
-          this.content = '请填写参赛选手姓名';
-          this.dialog = 'block'; //显示dialog
-          return;
+          this.title = '错误提示'
+          this.content = '请填写参赛选手姓名'
+          this.dialog = 'block' //显示dialog
+          return
         }
         if (!this.userAge) {
-          this.title = '错误提示';
-          this.content = '请填写参赛选手年龄';
-          this.dialog = 'block'; //显示dialog
-          return;
+          this.title = '错误提示'
+          this.content = '请填写参赛选手年龄'
+          this.dialog = 'block' //显示dialog
+          return
         }
         if (!this.userImg) {
-          this.title = '错误提示';
-          this.content = '请选择一张参赛选手图片';
-          this.dialog = 'block'; //显示dialog
-          return;
+          this.title = '错误提示'
+          this.content = '请选择一张参赛选手图片'
+          this.dialog = 'block' //显示dialog
+          return
         }
         if (!this.userSex) {
-          this.title = '错误提示';
-          this.content = '请填写参赛选手性别';
-          this.dialog = 'block'; //显示dialog
-          return;
+          this.title = '错误提示'
+          this.content = '请填写参赛选手性别'
+          this.dialog = 'block' //显示dialog
+          return
         }
 
         //请求参数
@@ -312,31 +310,37 @@
           studentContext: this.userSex,
           studentTicket: 0,
           activityId: sessionStorage.getItem('activityId')
-        };
+        }
         // console.log(params);
         //报名接口
         sign(params, res => {
           // console.log('报名返回', res);
           if (res.data === 1) {
-            that.deleteImg();
-            that.userName = '';
-            that.userAge = '';
-            this.title = '报名成功';
-            this.content = '您已成功参加活动';
-            this.dialog = 'block'; //显示dialog
+            that.deleteImg()
+            that.userName = ''
+            that.userAge = ''
+            this.title = '报名成功'
+            this.content = '您已成功参加活动'
+            this.dialog = 'block' //显示dialog
           }
-        });
+        })
+      }
+    },
+    computed: {
+      config () {
+        return this.$store.getters.config
       }
     }
-  };
+  }
 </script>
 
 <style scoped>
-  .previewImg{
+  .previewImg {
     width: 80%;
     height: auto;
     margin: auto;
   }
+
   #main {
     background: #ecf0f5;
     min-height: 100vh;

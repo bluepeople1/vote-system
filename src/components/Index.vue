@@ -144,15 +144,12 @@
     getActivityImg,
     getJsapiTicket,
     searchByFuzzy
-  } from '@/api/Service';
-  import Dialog from './common/Dialog';
-  import ImageError from './common/ImageError';
-  import NoneData from './common/NoneData';
-  import WaterFall from 'vue-waterfall-easy';
-  import store from '@/assets/js/store';
-  import { config } from '../assets/js/config';
-
-  import moment from 'moment';
+  } from '@/api/Service'
+  import Dialog from './common/Dialog'
+  import ImageError from './common/ImageError'
+  import NoneData from './common/NoneData'
+  import WaterFall from 'vue-waterfall-easy'
+  import moment from 'moment'
 
   export default {
     components: {
@@ -184,32 +181,23 @@
         path: config.img_url,
         studentData: false,
         isLoadMore: true,//是否显示加载更多
-        isShowAllStudent:false,//是否显示加载全部
+        isShowAllStudent: false,//是否显示加载全部
         imageData: false,
         page: 1//当前页码
-      };
-    },
-    created: function () {
-      //判断用户是否登录
-      if (store.state.sessionid) {
-        this.getDataList();
-      } else {
-        //用户登录，获取sessionid
-        login(res => {
-          store.setSessionId(res.data.sessionid);
-          this.getDataList();
-        });
-
       }
     },
-    mounted () {
-
+    created: function () {
+      console.log('index created', this.config)
+      login(res => {
+        this.$store.dispatch('config', new Map().set('_sessionId', res.data.sessionid))
+        this.getDataList()
+      })
     },
     // 监听,当路由发生变化的时候执行
     watch: {
       $route: {
         handler: function (val, oldVal) {
-          this.getDataList();
+          this.getDataList()
         },
         // 深度观察监听
         deep: true
@@ -218,166 +206,138 @@
     methods: {
       //跳转到详情页面
       toDetailPage: function (userInfo) {
-        //活动开始时间戳
-        let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'));
-        //活动结束时间戳
-        let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'));
-        //当前时间戳
-        let nowTime = moment().valueOf();
         //如果当前活动还未开始，不让投票
-        if (store.isActivityNotBegin(nowTime, beginTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block'];
-          return;
+        if (store.isActivityNotBegin(this.nowTime, this.beginTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block']
+          return
         }
         //如果活动已经结束了，不让投票
-        if (store.isActivityEnd(nowTime, endTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block'];
-          return;
+        if (store.isActivityEnd(this.nowTime, this.endTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block']
+          return
         }
 
         this.$router.push({
-          name: 'Detail',
-          params: {userInfo: userInfo}
-        });
+          path: '/detail',
+          query: {stuName: userInfo.studentName, stuId: userInfo.studentId}
+        })
       },
       //搜索
       search: function () {
-        let that = this;
+        let that = this
         let params = {
           key: this.keywords,
-          uuid: store.state.uuid
-        };
-        this.$http.post('https://www.hzrtpxt.top/master/Interface/getStudentByMh?studentName=' + this.keywords + '&activeUuid=' + store.state.uuid, params)
+          uuid: this.config._uuid
+        }
+        this.$http.post('https://www.hzrtpxt.top/master/Interface/getStudentByMh?studentName=' + this.keywords + '&activeUuid=' + this.config._uuid, params)
           .then(res => {
-            let data = res.resultMap;
+            let data = res.resultMap
             if (data && data.length !== 0) {
-              that.dataList = data;
-              that.isLoadMore=false;
+              that.dataList = data
+              that.isLoadMore = false
             } else {
-              that.isLoadMore=true;
-              this.getDataList();
+              that.isLoadMore = true
+              this.getDataList()
               // this.imageData = true;
-              this.title = '提示';
-              this.content = '没有找到该选手';
-              this.dialog = 'block'; //显示dialog
+              this.title = '提示'
+              this.content = '没有找到该选手'
+              this.dialog = 'block' //显示dialog
             }
-          });
+          })
 
       },
       //投票方法
       vote: function (studentId) {
-        //活动开始时间戳
-        let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'));
-        //活动结束时间戳
-        let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'));
-        //当前时间戳
-        let nowTime = moment().valueOf();
         //如果当前活动还未开始，不让投票
-        if (store.isActivityNotBegin(nowTime, beginTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block'];
-          return;
+        if (store.isActivityNotBegin(this.nowTime, this.beginTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block']
+          return
         }
         //如果活动已经结束了，不让投票
-        if (store.isActivityEnd(nowTime, endTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block'];
-          return;
+        if (store.isActivityEnd(this.nowTime, this.endTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block']
+          return
         }
 
         //接口请求参数
         let params = {
-          openId: store.state.openId,
+          openId: this.config._openId,
           studentid: studentId
-        };
+        }
 
         //调用投票接口
         vote(params, res => {
           if (res.code === 7) {
-            this.title = '温馨提示';
-            this.content = '您已给该选手投过票了哦~\n去给TA赠送礼物吧~';
+            this.title = '温馨提示'
+            this.content = '您已给该选手投过票了哦~\n去给TA赠送礼物吧~'
           } else if (res.code === 0) {
-            this.title = '投票成功';
-            this.content = '感谢您的参与，您已给该选手增加了宝贵一票';
+            this.title = '投票成功'
+            this.content = '感谢您的参与，您已给该选手增加了宝贵一票'
           } else if (res.code === 8) {
-            this.title = '温馨提示';
-            this.content = '您一天只能投三票哦~\n去给TA赠送礼物吧~';
+            this.title = '温馨提示'
+            this.content = '您一天只能投三票哦~\n去给TA赠送礼物吧~'
           }
-          this.dialog = 'block'; //显示dialog
-        });
+          this.dialog = 'block' //显示dialog
+        })
       },
       //dialog 的监听方法
       dialogListener: function (data) {
-        this.dialog = data.hide;
+        this.dialog = data.hide
       },
       //获取数据
       getDataList: function () {
-        let that = this;
-        this.page = 1;
+        console.log('getDataList')
+        let that = this
+        this.page = 1
         let params = {
-          uuid: store.state.uuid,
+          uuid: this.config._uuid,
           page: this.page,
           rows: 10
-        };
+        }
+        console.log(params)
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
           if (res) {
-            let activity = res.data.sysActiveList;
-            let voteNum = res.data.numb || 0;
-            let students = res.data.sysStudentList || [];
-            let studentCount = res.data.studentCount || 0;
+            let activity = res.data.sysActiveList
+            let voteNum = res.data.numb || 0
+            let students = res.data.sysStudentList || []
+            let studentCount = res.data.studentCount || 0
             if (!activity) {
-              that.title = '温馨提示';
-              that.content = '暂无活动信息，请联系管理员确认是否有此活动哦~';
-              that.dialog = 'block'; //显示dialog
-              return;
+              that.title = '温馨提示'
+              that.content = '暂无活动信息，请联系管理员确认是否有此活动哦~'
+              that.dialog = 'block' //显示dialog
+              return
             }
             if (!students && students.length === 0) {
-              return;
+              return
             }
-            sessionStorage.setItem('activityId', activity.activeId);
-            that.voteNum = voteNum;
-            that.activityInfo = activity;
-            document.title = that.activityInfo.activeName;
+            sessionStorage.setItem('activityId', activity.activeId)
+            that.voteNum = voteNum
+            that.activityInfo = activity
+            document.title = that.activityInfo.activeName
             //倒计时
-            that.timeDiff;
-            that.dataList = students;
-            that.studentData = !!this.dataList;
-            that.count = studentCount;
-            that.isShowLoadMoreBtn(studentCount, that.page);
-            let activeName = activity.activeName;
+            that.timeDiff
+            that.dataList = students
+            that.studentData = !!this.dataList
+            that.count = studentCount
+            that.isShowLoadMoreBtn(studentCount, that.page)
+            let activeName = activity.activeName
             //获取活动访问量
             pv({activeId: this.activityInfo.activeId}, res => {
-                that.pv = res.pv;
+                that.pv = res.pv
                 //获取活动图片
                 getActivityImg({activeName: activeName}, res => {
                   if (res && res.data.length !== 0) {
-                    store.setSharedImg(res.data[0].imgSource);
-                    that.banner = res.data[0].imgSource;
-                    that.imgList = res.data;
-                    that.imageData = !!that.imgList;
+                    store.setSharedImg(res.data[0].imgSource)
+                    that.banner = res.data[0].imgSource
+                    that.imgList = res.data
+                    that.imageData = !!that.imgList
                   }
-                });
+                })
               }
-            );
+            )
           }
-        });
-        //获取选手列表
-        // getStudentList(params,res=>{
-        //   console.log(res);
-        //   this.count=res.count;
-        //   this.dataList=res.data;
-        // });
-        //获取活动信息
-        // getActivityInfo(params,res=>{
-        //   console.log(res);
-        //   this.activityInfo=res.data[0];
-        //   pv({
-        //     jessionid:sessionStorage.getItem("jessionid"),
-        //     activeId:this.activityInfo.activeId
-        //   },res=>{
-        //     console.log(res);
-        //     this.pv=res.pv;
-        //   });
-        // });
+        })
       },
       /**
        * 是否显示加载更多按钮
@@ -385,81 +345,101 @@
        * @param curPage
        */
       isShowLoadMoreBtn (total, curPage) {
-        let totalPage = Math.ceil(total / 10);
-        if (curPage < totalPage) {
-          this.isLoadMore = true;
-        } else {
-          this.isLoadMore = false;
-        }
+        let totalPage = Math.ceil(total / 10)
+        this.isLoadMore = curPage < totalPage
       },
       //加载更多学生
       loadMoreStudent () {
-        let that = this;
+        let that = this
         let params = {
-          uuid: store.state.uuid,
+          uuid: this.config._uuid,
           page: this.page + 1,
           rows: 10
-        };
+        }
         //获取活动信息和参赛选手信息
         getStuAndAct(params, res => {
-          let students = res.data.sysStudentList;
-          let count = res.data.studentCount;
+          let students = res.data.sysStudentList
+          let count = res.data.studentCount
           if (students && students.length !== 0) {
-            that.page += 1;
-            that.dataList = that.dataList.concat(students);
-            that.studentData = !!that.dataList;
-            that.isShowLoadMoreBtn(count, that.page);
+            that.page += 1
+            that.dataList = that.dataList.concat(students)
+            that.studentData = !!that.dataList
+            that.isShowLoadMoreBtn(count, that.page)
           }
-        });
+        })
       }
     },
     computed: {
+      /**
+       * 活动开始时间
+       * @returns {*|moment.Moment}
+       */
+      beginTime () {
+        return moment(this.activityInfo.activeBegintime.replace(/-/g, '/'))
+      },
+      /**
+       * 活动结束时间
+       * @returns {*}
+       */
+      endTime () {
+        return this.activityInfo.activeEndtime.replace(/-/g, '/')
+      },
+      /**
+       * 当前时间
+       * @returns {number}
+       */
+      nowTime () {
+        return moment().valueOf()
+      },
+      config () {
+        return this.$store.getters.config
+      },
       //倒计时
       timeDiff: function () {
-        let that = this;
+        let that = this
         //活动开始时间戳
-        let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'));
+        let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'))
         //活动结束时间戳
-        let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'));
+        let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'))
         let timeCount = setInterval(() => {
           //当前时间戳
-          let nowTime = moment().valueOf();
-          let timeDiff = '';
+          let nowTime = moment().valueOf()
+          let timeDiff = ''
           if (store.isActivityNotBegin(nowTime, beginTime)) {
             //活动还未开始
-            that.timeCountTitle = '距活动开始倒计时';
-            timeDiff = beginTime - nowTime;
+            that.timeCountTitle = '距活动开始倒计时'
+            timeDiff = beginTime - nowTime
           } else {
             if (!store.isActivityEnd(nowTime, endTime)) {
               //活动开始且未结束
-              that.timeCountTitle = '距活动结束倒计时';
-              timeDiff = endTime - nowTime;
+              that.timeCountTitle = '距活动结束倒计时'
+              timeDiff = endTime - nowTime
             } else {
               if (!timeDiff) {
                 clearInterval(timeCount);
                 [that.days, that.hours, that.minutes, that.seconds] = [0, 0, 0, 0];
-                [that.title, that.content, that.dialog] = ['提示', '当前活动已结束', 'block'];
-                return;
+                [that.title, that.content, that.dialog] = ['提示', '当前活动已结束', 'block']
+                return
               }
             }
           }
 
           //计算出相差天数
-          let days = Math.floor(timeDiff / (24 * 3600 * 1000));
+          let days = Math.floor(timeDiff / (24 * 3600 * 1000))
           //计算出小时数
-          let temp1 = timeDiff % (24 * 3600 * 1000); //计算天数后剩余的毫秒数
-          let hours = Math.floor(temp1 / (3600 * 1000));
+          let temp1 = timeDiff % (24 * 3600 * 1000) //计算天数后剩余的毫秒数
+          let hours = Math.floor(temp1 / (3600 * 1000))
           //计算相差分钟数
-          let temp2 = temp1 % (3600 * 1000); //计算小时数后剩余的毫秒数
-          let minutes = Math.floor(temp2 / (60 * 1000));
+          let temp2 = temp1 % (3600 * 1000) //计算小时数后剩余的毫秒数
+          let minutes = Math.floor(temp2 / (60 * 1000))
           //计算相差秒数
-          let temp3 = temp2 % (60 * 1000); //计算分钟数后剩余的毫秒数
+          let temp3 = temp2 % (60 * 1000) //计算分钟数后剩余的毫秒数
           let seconds = Math.round(temp3 / 1000);
-          [that.days, that.hours, that.minutes, that.seconds] = [days, hours, minutes, seconds];
-        }, 1000);
+          [that.days, that.hours, that.minutes, that.seconds] = [days, hours, minutes, seconds]
+        }, 1000)
       }
     }
-  };
+  }
 </script>
 
 <style scoped lang="less">
