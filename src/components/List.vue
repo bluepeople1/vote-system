@@ -44,10 +44,9 @@
   import { login, getRankingList } from '@/api/Service';
   import Dialog from './common/Dialog';
   import NoneData from './common/NoneData';
-  import { config } from '../assets/js/config';
   import ImageError from './common/ImageError';
-  import store from '@/assets/js/store';
   import moment from 'moment';
+  import CommonService from '../assets/js/common'
 
   export default {
     components: {
@@ -60,9 +59,8 @@
         title:'',
         content:'',
         dialog:'none',
-        jessionid: '',
         dataList: [],
-        path: config.img_url,
+        path: this.config._img_url,
         noneData: false//暂无数据，默认false
       };
     },
@@ -75,19 +73,14 @@
         this.dialog = data.hide;
       },
       toDetailPage: function (userInfo) {
-        //活动开始时间戳
-        let beginTime = moment(store.state.activity.activeBegintime.replace(/-/g, '/'));
-        //活动结束时间戳
-        let endTime = moment(store.state.activity.activeEndtime.replace(/-/g, '/'));
-        //当前时间戳
-        let nowTime = moment().valueOf();
+
         //如果当前活动还未开始，不让投票
-        if (store.isActivityNotBegin(nowTime, beginTime)) {
+        if (CommonService.isActivityNotBegin(this.nowTime, this.beginTime)) {
           [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block'];
           return;
         }
         //如果活动已经结束了，不让投票
-        if (store.isActivityEnd(nowTime, endTime)) {
+        if (CommonService.isActivityEnd(this.nowTime, this.endTime)) {
           [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block'];
           return;
         }
@@ -98,11 +91,37 @@
       },
       //获取排行榜列表
       getRankingList () {
-        getRankingList({uuid: store.state.uuid}, res => {
+        getRankingList({uuid: this.config._uuid}, res => {
             this.dataList = res.data;
             this.noneData = !!this.dataList;
           }
         );
+      }
+    },
+    computed:{
+      /**
+       * 活动开始时间
+       * @returns {*|moment.Moment}
+       */
+      beginTime () {
+        return moment(this.activityInfo.activeBegintime.replace(/-/g, '/'))
+      },
+      /**
+       * 活动结束时间
+       * @returns {*}
+       */
+      endTime () {
+        return this.activityInfo.activeEndtime.replace(/-/g, '/')
+      },
+      /**
+       * 当前时间
+       * @returns {number}
+       */
+      nowTime () {
+        return moment().valueOf()
+      },
+      config () {
+        return this.$store.getters.config
       }
     }
   };

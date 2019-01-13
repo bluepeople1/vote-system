@@ -65,8 +65,6 @@
   import { getPrizeList } from '@/api/Service';
   import NoneData from './common/NoneData';
   import ImageError from './common/ImageError';
-  import {config} from '../assets/js/config';
-  import store from '@/assets/js/store';
 
   export default {
     components: {
@@ -76,18 +74,21 @@
     data () {
       return {
         dataList: [],
-        path: config.img_url,
+        path: this.config._img_url,
         noneData: false//没有数据,默认false
       }
     },
     created: function () {
-      getPrizeList({uuid: store.state.uuid}, res => {
+      getPrizeList({uuid: this.config._uuid}, res => {
         // console.log('prize',res)
         if(res.data.sysPrizes){
           this.dataList = res.data.sysPrizes;
           this.noneData = !!this.dataList;
         }
       });
+    },
+    config () {
+      return this.$store.getters.config
     }
   }
 </script>

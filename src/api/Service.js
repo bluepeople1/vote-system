@@ -1,9 +1,8 @@
 import $http from 'axios';
 import { post, get } from './Request';
+import stores from '../store/index'
 
 let qs = require('qs');
-import store from '../assets/js/store';
-
 let url = 'https://www.hzrtpxt.top/nserver';
 
 //-----------Begin----------------
@@ -16,14 +15,14 @@ let url = 'https://www.hzrtpxt.top/nserver';
  */
 export const newLogin = function (callback) {
   $http.get(url + '/login').then(function (res1) {
-    store.setSessionId(res1.data.sessionid);
+    stores.dispatch('config', new Map().set("_sessionId",res1.data.sessionid))
     let params = {
-      uuid: store.state.uuid
+      uuid: stores.getters.config._uuid
     };
     $http.post(url + '/getActivityInfo', params).then(function (res2) {
       let data = res2.data;
       if (data) {
-        store.setActivity(data);
+        stores.dispatch('config', new Map().set("_activity",data))
         callback(data);
       }
     }).catch(function (err) {
@@ -269,7 +268,7 @@ export const getUserGiftList = (params, callback) => {
  */
 export const getJsApiTicket = (callback) => {
   $http.get(url + '/getTicket').then((res) => {
-    store.setJsApiTicket(res.data.jsapi_ticket);
+    stores.dispatch('config', new Map().set("_jsApiTicket",res.data.jsapi_ticket))
     callback(res);
   });
 };

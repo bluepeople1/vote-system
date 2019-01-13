@@ -7,7 +7,6 @@ import axios from 'axios'
 import jquery from 'jquery'
 import './assets/css/weui.min.css'
 import './assets/css/common.css'
-import store from './assets/js/store'
 import vueLazyLoad from 'vue-lazyload'
 import stores from './store/index'
 
@@ -33,7 +32,7 @@ axios.interceptors.request.use(function (config) {
   stores.dispatch('showLoading')
   // 在发送请求之前做些什么
   config.headers = {
-    'SessionId': store.state.sessionId
+    'SessionId': stores.getters.config._sessionId
   }
   return config
 }, function (error) {

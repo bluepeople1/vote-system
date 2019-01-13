@@ -12,9 +12,9 @@
         <!--<img v-else :src="path+data.studentImg" width="100%"/>-->
       </div>
       <!--<div @click="toPresentPage">-->
-        <!--<div style="color:#0db52b">-->
-          <!--去给TA加油打气>>-->
-        <!--</div>-->
+      <!--<div style="color:#0db52b">-->
+      <!--去给TA加油打气>>-->
+      <!--</div>-->
       <!--</div>-->
     </div>
     <!--内容-->
@@ -64,33 +64,34 @@
       </div>
       <!--礼物赠送列表-->
       <div id="list">
-          <div class="menu">
-              <div class="menu-icon">
-                  <img src="../assets/img/menu-list.png" class="marL10"  />
-              </div>
+        <div class="menu">
+          <div class="menu-icon">
+            <img src="../assets/img/menu-list.png" class="marL10"/>
+          </div>
 
-              <span class="menu-name">收到的礼物</span>
+          <span class="menu-name">收到的礼物</span>
+        </div>
+        <div id="giftList">
+          <ul v-if="(giftList.length)!==0">
+            <li class="card-item flex" v-for="item in giftList" :key="item.id">
+              <div class="fl grid marL10">
+                <my-img :imageSrc="item.headImgUrl" errorType="user" width="35" height="35"/>
+              </div>
+              <div class="fl grid marL10">
+                <div style="text-align: left">
+                  <span style="color:#26a69a;text-align: left">{{item.nickName}}</span>
+                </div>
+                <div style="text-align: left">
+                  <span
+                    style="color: #a22232;font-size: 12px;">赠送了{{item.giftCount||0}}个{{item.giftName||'未知礼物'}}</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <div v-else class="card-item flex" style="justify-content: center;align-content: center">
+            <div style="color: #ec8b89;line-height: 56px;">暂时还未收到礼物</div>
           </div>
-          <div id="giftList">
-              <ul  v-if="(giftList.length)!==0" >
-                  <li class="card-item flex" v-for="item in giftList" :key="item.id">
-                      <div class="fl grid marL10">
-                        <my-img :imageSrc="item.headImgUrl" errorType="user" width="35" height="35"/>
-                      </div>
-                      <div class="fl grid marL10">
-                          <div style="text-align: left">
-                              <span style="color:#26a69a;text-align: left">{{item.nickName}}</span>
-                          </div>
-                          <div style="text-align: left">
-                              <span style="color: #a22232;font-size: 12px;">赠送了{{item.giftCount||0}}个{{item.giftName||'未知礼物'}}</span>
-                          </div>
-                      </div>
-                  </li>
-              </ul>
-            <div v-else class="card-item flex" style="justify-content: center;align-content: center">
-                <div style="color: #ec8b89;line-height: 56px;">暂时还未收到礼物</div>
-            </div>
-          </div>
+        </div>
       </div>
 
     </div>
@@ -102,7 +103,7 @@
           <div class="placeholder" style="margin:0 15px;"><a class="weui-btn weui-btn_default flex-grow">投票</a></div>
         </div>
         <div class="weui-flex__item" @click="toPresentPage">
-            <div class="placeholder" style="margin:0 15px;"><a class="weui-btn weui-btn_primary flex-grow">送礼物</a></div>
+          <div class="placeholder" style="margin:0 15px;"><a class="weui-btn weui-btn_primary flex-grow">送礼物</a></div>
         </div>
       </div>
     </div>
@@ -111,19 +112,18 @@
 </template>
 
 <script>
-  import { config } from '../assets/js/config';
-  import Header from './common/Header';
-  import Dialog from './common/Dialog';
-  import ImageError from './common/ImageError';
-  import {search, vote , getUserGiftList} from '../api/Service';
-  import store from '../assets/js/store';
-  import moment from 'moment';
+  import Header from './common/Header'
+  import Dialog from './common/Dialog'
+  import ImageError from './common/ImageError'
+  import { search, vote, getUserGiftList } from '../api/Service'
+  import moment from 'moment'
+  import CommonService from '../assets/js/common'
 
   export default {
     components: {
       'my-dialog': Dialog,
       'my-header': Header,
-      'my-img': ImageError,
+      'my-img': ImageError
     },
     data () {
       return {
@@ -133,127 +133,143 @@
         title: '',
         path: config.img_url,
         content: '',
-        giftList:[]
-      };
+        giftList: []
+      }
     },
-    created: function () {
-      this.data = this.$route.params.userInfo;
-    },
-    mounted:function(){
-      this.getUserInfo();
-      window.addEventListener("popstate", function(e) {  //popstate监听返回按钮
-        this.goBack();
-      }, false);
+    mounted: function () {
+      this.getUserInfo()
+      window.addEventListener('popstate', function (e) {  //popstate监听返回按钮
+        this.goBack()
+      }, false)
     },
     methods: {
       //刷新选手信息
-      refreshUserInfo:function(){
+      refreshUserInfo: function () {
         let params = {
-          key: this.data.studentName,
-          id: this.data.studentId,
-          uuid: store.state.uuid
-        };
+          key: this.$route.query.stuName,
+          id: this.$route.query.stuId,
+          uuid: this.config._uuid
+        }
         search(params, res => {
-          this.data=res.data[0];
-        });
+          this.data = res.data[0]
+        })
       },
       //返回首页
       goBack: function () {
-          window.history.length > 1
-            ? this.$router.go(-1)
-            : this.$router.push('/index')
+        window.history.length > 1
+          ? this.$router.go(-1)
+          : this.$router.push('/index')
       },
       //跳转去礼物页面
       toPresentPage: function (userId) {
-        this.$router.push({name: 'Present', params: {userInfo: this.data}});
+        this.$router.push({name: 'Present', params: {userInfo: this.data}})
       },
       //投票
       vote: function () {
-
-        //活动开始时间戳
-        let beginTime = moment(store.state.activity.activeBegintime.replace(/-/g, '/'));
-        //活动结束时间戳
-        let endTime = moment(store.state.activity.activeEndtime.replace(/-/g, '/'));
-        //当前时间戳
-        let nowTime = moment().valueOf();
         //如果当前活动还未开始，不让投票
-        if (store.isActivityNotBegin(nowTime, beginTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block'];
-          return;
+        if (CommonService.isActivityNotBegin(this.nowTime, this.beginTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block']
+          return
         }
         //如果活动已经结束了，不让投票
-        if (store.isActivityEnd(nowTime, endTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block'];
-          return;
+        if (CommonService.isActivityEnd(this.nowTime, this.endTime)) {
+          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block']
+          return
         }
         //接口请求参数
         let params = {
-          jessionid: store.state.sessionId,
-          openId: store.state.openId,
+          jessionid: this.config._sessionId,
+          openId: this.config._openId,
           studentid: this.data.studentId
-        };
+        }
 
         //调用投票接口
         vote(params, res => {
           if (res.code === 7) {
-            this.title = '温馨提示';
-            this.content = '您已给该选手投过票了哦~\n去给TA赠送礼物吧~';
+            this.title = '温馨提示'
+            this.content = '您已给该选手投过票了哦~\n去给TA赠送礼物吧~'
           } else if (res.code === 0) {
-            this.title = '投票成功';
-            this.content = '感谢您的参与，您已给该选手增加了宝贵一票';
-            this.refreshUserInfo();
+            this.title = '投票成功'
+            this.content = '感谢您的参与，您已给该选手增加了宝贵一票'
+            this.refreshUserInfo()
           } else if (res.code === 8) {
-            this.title = '温馨提示';
-            this.content = '您一天只能投三票哦~\n去给TA赠送礼物吧~';
+            this.title = '温馨提示'
+            this.content = '您一天只能投三票哦~\n去给TA赠送礼物吧~'
           }
-          this.dialog = 'block'; //显示dialog
-        });
+          this.dialog = 'block' //显示dialog
+        })
       },
       //dialog 事件监听器
       dialogListener: function (data) {
-        this.dialog = data.hide;
+        this.dialog = data.hide
       },
       //获取用户的信息
       getUserInfo () {
-        let that=this;
+        let that = this
         let params = {
-          key: this.data.studentName,
-          id: this.data.studentId,
-          uuid: store.state.uuid
-        };
+          key: this.$route.query.stuName,
+          id: this.$route.query.stuId,
+          uuid: this.config._uuid
+        }
         search(params, res => {
-          this.data = res.data[0];
-          this.rank = res.rank;
-          // this.dataList = [];
-          // this.dataList.push(res.data);
+          this.data = res.data[0]
+          this.rank = res.rank
 
           getUserGiftList({
-            uuid: store.state.uuid,
-            studentId: that.data.studentId,
-          },function (res) {
-            that.giftList=res.data.resultMap;
-          });
-        });
+            uuid: this.config._uuid,
+            studentId: that.$route.query.stuId
+          }, function (res) {
+            that.giftList = res.data.resultMap
+          })
+        })
+      }
+    },
+    computed:{
+      /**
+       * 活动开始时间
+       * @returns {*|moment.Moment}
+       */
+      beginTime () {
+        return moment(this.activityInfo.activeBegintime.replace(/-/g, '/'))
+      },
+      /**
+       * 活动结束时间
+       * @returns {*}
+       */
+      endTime () {
+        return this.activityInfo.activeEndtime.replace(/-/g, '/')
+      },
+      /**
+       * 当前时间
+       * @returns {number}
+       */
+      nowTime () {
+        return moment().valueOf()
+      },
+      config () {
+        return this.$store.getters.config
       }
     },
     beforeDestroy () {
       // this.$jquery(window).off('popstate');
-      window.removeEventListener('popstate',function () {
-        ;
-      },false);
+      window.removeEventListener('popstate', function () {
+
+      }, false)
     }
 
-  };
+  }
 </script>
 
 <style scoped lang="less">
-  #userImg{
-    background:url("../assets/img/thum.png") no-repeat;
+  #userImg {
+    background: url("../assets/img/thum.png") no-repeat;
     background-size: cover;
   }
-  #header{
+
+  #header {
     margin-top: 44px;
   }
+
   #main {
     background: #ecf0f5;
     min-height: calc(100% - 44px);
@@ -322,7 +338,6 @@
 
   .box {
     height: 44px;
-    display: inline-flex;
     display: table;
   }
 
