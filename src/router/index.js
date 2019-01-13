@@ -8,7 +8,7 @@ import ListPage from '@/components/List'; //榜单列表页
 import DetailPage from '@/components/Detail'; //详情页
 import PresentPage from '@/components/Present'; //礼物赠送页
 import RegisterPage from '@/components/Register'; //报名
-import VumPage from '@/components/Vum'; //报名
+import SharePage from '@/components/Share'; //报名
 import SuccessPage from '@/components/SuccessPage'; //操作成功页面
 import FailurePage from '@/components/FailurePage'; //操作失败页面
 
@@ -72,9 +72,10 @@ export default new Router({
     },
 
     {
-      path: '/vum',
-      name: 'Vum',
-      component: VumPage,
+      path: '/share/:id',
+      name: 'SharePage',
+      component: SharePage,
+      props: true
     },
 
     {

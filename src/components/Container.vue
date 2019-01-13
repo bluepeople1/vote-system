@@ -3,10 +3,11 @@
     <!-- {{wxcode}} -->
     <div class="marquee-title">
       <!--<marquee scrollamount="2">{{activityInfo.activeName?activityInfo.activeName:''}}-->
-        <!--活动时间：{{activityInfo.activeBegintime?activityInfo.activeBegintime:''}} ~-->
-        <!--{{activityInfo.activeEndtime?activityInfo.activeEndtime:''}}-->
+      <!--活动时间：{{activityInfo.activeBegintime?activityInfo.activeBegintime:''}} ~-->
+      <!--{{activityInfo.activeEndtime?activityInfo.activeEndtime:''}}-->
       <!--</marquee>-->
-      <my-marquee :content="activityInfo.activeName+'  活动时间：'+activityInfo.activeBegintime+' ~ '+activityInfo.activeEndtime"></my-marquee>
+      <my-marquee
+        :content="activityInfo.activeName+'  活动时间：'+activityInfo.activeBegintime+' ~ '+activityInfo.activeEndtime"></my-marquee>
       <!--<music-player></music-player>-->
     </div>
     <keep-alive>
@@ -64,14 +65,14 @@
   import { signs } from '@/assets/js/sign';
   import store from '@/assets/js/store';
   import wx from 'weixin-js-sdk';
-  import MusicPlayer from './common/MusicPlayer'
-  import MyMarquee from './common/MyMarquee'
+  import MusicPlayer from './common/MusicPlayer';
+  import MyMarquee from './common/MyMarquee';
 
   export default {
-    components:{MusicPlayer,MyMarquee},
+    components: {MusicPlayer, MyMarquee},
     data () {
       return {
-        title:'暂无信息',
+        title: '暂无信息',
         selectedTab: 1,
         uuid: '',
         activityInfo: '',
@@ -90,9 +91,9 @@
         let params = path.split('&');
         let openId = params[0].split('=')[1];
         let uuid = params[1].split('=')[1];
-        let nickName = decodeURI(params[2].split('=')[1]) ;
+        let nickName = decodeURI(params[2].split('=')[1]);
         let headImgUrl = decodeURIComponent(params[3].split('=')[1]);
-        let sex = (params[4].split('=')[1])==='1'?'男':'女';
+        let sex = (params[4].split('=')[1]) === '1' ? '男' : '女';
         let sharedUrl = 'http://www.hzrtpxt.top/master/wxlogin?uuid=' + uuid;
         store.setWxUserInfo({
           nickName: nickName,
@@ -101,7 +102,7 @@
         });
         store.setOpenId(openId);
         store.setUuid(uuid);
-        store.setSharedUrl(sharedUrl);
+        store.setSharedUrl(this.shareUrlParamsFilter(sharedUrl));
       }
       newLogin(function (data) {
         that.activityInfo = data;
@@ -111,7 +112,6 @@
           if (res.data.length !== 0) {
             store.setSharedImg(res.data[0].imgSource);
           }
-
           getJsApiTicket(function (res) {
             const config = signs(res.data.jsapi_ticket, window.location.href.split('#')[0]);
             wx.config({
@@ -185,6 +185,7 @@
       //this.device();
     },
     mounted: function () {
+
       // if (window.history && window.history.pushState) {
       //   window.addEventListener('popstate',function () {
       //     window.history.pushState('forward', null, '#');
@@ -195,6 +196,10 @@
       // window.history.forward(1);
     },
     methods: {
+      shareUrlParamsFilter(s){
+        // 过滤掉pay，openId参数
+        return s.replace(/&pay=\w+/, '').replace(/[(\?)|(&)]openId=.*/, '');
+      },
       currentTab: function () {
         const href = window.location.href;
         const currentPage = href.split('/#/')[1];
