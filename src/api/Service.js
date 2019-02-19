@@ -3,6 +3,6 @@ import { post, get } from './Request';
 import stores from '../store/index'
 
 let qs = require('qs');
-let url = 'https://www.hzrtpxt.top/nserver';
+let url = 'http://www.yaqinkeji.top';
 
 

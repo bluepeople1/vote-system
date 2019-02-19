@@ -8,7 +8,6 @@ const config = require('../../static/config');
  * @param {回调函数} callback
  */
 export const get = (path, callback) => {
-
   axios.get(config.request_ip + path).then(res => {
     callback(res);
   }).catch(err => {
