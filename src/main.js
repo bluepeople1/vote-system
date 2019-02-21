@@ -4,6 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import axios from 'axios'
+import VueAxios from 'vue-axios'
 import jquery from 'jquery'
 import './assets/css/weui.min.css'
 import './assets/css/common.css'
@@ -17,6 +18,7 @@ Vue.use(vueLazyLoad, {
   attempt:3
 })
 
+Vue.use(VueAxios, axios)
 /*
 *  1.超时处理
 *  2.post设置

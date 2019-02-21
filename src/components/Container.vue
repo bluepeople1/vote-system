@@ -39,7 +39,7 @@
 </template>
 
 <script>
-  import { wxlogin, login, getActivityInfo, wxAuth, getJsApiTicket, newLogin, getActivityImg } from '@/api/Service'
+  import apiService from '@/api/Service'
   import { signs } from '@/assets/js/sign'
   import wx from 'weixin-js-sdk'
   import MusicPlayer from './common/MusicPlayer'
@@ -76,8 +76,10 @@
     },
     created: function () {
       let that = this
+
       //页面刷新后，判断当前页面所在tab
       // this.currentTab()
+
       if (!this.config._uuid) {
         //如果uuid不存在，就从url中截取
         let path = window.location.href.split('/index/')[1]
@@ -149,6 +151,164 @@
       //this.device();
     },
     methods: {
+      init(){
+        let path = window.location.href.split('/index/')[1]
+        let openId = CommonService.getQuery('openId')
+        let nickName = CommonService.getQuery('nickName')
+        let headImgUrl = CommonService.getQuery('headimgurl')
+        let activityId = CommonService.getQuery('activityId')
+        let loginId = CommonService.getQuery('loginId')
+        let sharedUrl = 'www.yaqinkeji.top/homeschool/wxInterface/wxToGrantAuthorization?aid='+ activityId +'&bid=' + loginId
+        let map =new Map()
+        map.set("_wxUserInfo",{
+          nickName: nickName,
+          headImgUrl: headImgUrl,
+          sex: sex
+        })
+        map.set("_openId",openId)
+        map.set("_uuid",uuid)
+        map.set("_sharedUrl",sharedUrl)
+        this.$store.dispatch('config', map)
+        console.log(this.$store.getters.config)
+
+        let data = {
+          loginId: loginId, // 登录用户Id
+          activityId: activityId // 当前所在活动Id
+        }
+        let ajaxArr = [
+          this.getCurrentActivityInfo(data),
+          this.getCurrentActivitySlideshowImg(data),
+          this.getCurrentActivityPropaganda(data),
+          this.getCurrentActivityStuList({
+            loginId: loginId, // 登录用户Id
+            activityId: activityId, // 当前所在活动Id
+            page: 1,
+            pageSize: 15,
+            studentName: ''
+          }),
+          this.getJsTicketAndToken()
+        ]
+        Promise.all(ajaxArr).then(data => {
+          console.log(data)
+        }, error => {
+          console.log(error)
+        })
+      },
+      /**
+       * 获取当前活动的信息
+       * @param params
+       * @response resultNumber 0:成功 非0:失败
+       * @response resultMsg 结果消息
+       * @response resultObject.studentCount 报名个数
+       * @response resultObject.studentTicketCount 总票数
+       * @response resultObject.ActivityBrowseVolume 浏览量
+       * @response resultObject.id 活动id
+       * @response resultObject.activityName 活动名
+       * @response resultObject.activityContent 活动内容
+       * @response resultObject.activityStartTime 开始时间
+       * @response resultObject.activityEndTime 结束时间
+       * @response resultObject.onlineApplication 0-允许在线报名 1-不允许
+       */
+      getCurrentActivityInfo (params) {
+        apiService.getActiityInfo(this, params).then(success => {
+          return Promise.resolve(success)
+        }, err => {
+          return Promise.reject(err)
+        })
+      },
+      /**
+       * 获取当前活动首页轮播图片
+       * @param params
+       * @response resultNumber 0:成功 非0:失败
+       * @response resultMsg 结果消息
+       * @response resultObject.headImgUrl 首页轮播图路径
+       */
+      getCurrentActivitySlideshowImg (params) {
+        apiService.getActivitySlideshow(this, params).then(success => {
+          return Promise.resolve(success)
+        }, err => {
+          return Promise.reject(err)
+        })
+      },
+      /**
+       * 获取当前活动首页宣传图
+       * @param params
+       * @response resultNumber 0:成功 非0:失败
+       * @response resultMsg 结果消息
+       * @response resultObject.contentImgUrl 图片路径
+       */
+      getCurrentActivityPropaganda (params) {
+        apiService.getActivityContentImg(this, params).then(success => {
+          return Promise.resolve(success)
+        }, err => {
+          return Promise.reject(err)
+        })
+      },
+      /**
+       * 查询当前活动学生
+       * @params {
+       *     loginId:用户id
+       *     activityId:活动id
+       *     page:当前页码
+       *     pageSize:显示个数
+       *     studentName:搜索文本内容-模糊查询使用
+       * }
+       */
+      getCurrentActivityStuList (params) {
+        apiService.getActivityStudents(this, params).then(success => {
+          return Promise.resolve(success)
+        }, err => {
+          return Promise.reject(err)
+        })
+      },
+      /**
+       * 获取微信 js_ticket 和 token
+       */
+      getJsTicketAndToken () {
+        apiService.getTokenAndTicket(this).then(success => {
+          return Promise.resolve(success)
+        }, err => {
+          return Promise.reject(err)
+        })
+      },
+      /**
+       * 微信分享配置信息
+       * @param jsapi_ticket
+       */
+      setWxShareConfig (jsapi_ticket) {
+        const config = signs(jsapi_ticket, window.location.href.split('#')[0])
+        wx.config({
+          debug: false,
+          appId: that.config._appId,
+          timestamp: config.timestamp,
+          nonceStr: config.noncestr,
+          signature: config.signature,
+          jsApiList: [
+            'onMenuShareTimeline',
+            'onMenuShareAppMessage',
+            'updateAppMessageShareData',
+            'updateTimelineShareData'
+          ]
+        })
+        let shareConfig = {
+          title: that.config._activity.activeName, // 分享标题
+          desc: that.config._activity.activeContext || '我们正在做活动，快点进来看看吧！',
+          link: that.config._sharedUrl, // 分享链接
+          imgUrl: that.config._img_url + that.config._state.sharedImg, // 分享图标
+          success: function () {
+            // console.log('成功');
+          },
+          cancel: function () {
+            // alert('失败');
+          }
+        }
+        wx.ready(function () {
+          wx.onMenuShareTimeline(shareConfig)
+          wx.onMenuShareAppMessage(shareConfig)
+          wx.updateAppMessageShareData(shareConfig)
+          wx.updateTimelineShareData(shareConfig)
+        })
+      }
       shareUrlParamsFilter(s){
         // 过滤掉pay，openId参数
         return s.replace(/&pay=\w+/, '').replace(/[(\?)|(&)]openId=.*/, '');
