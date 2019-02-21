@@ -1,8 +1,10 @@
-import $http from 'axios';
-import { post, get } from './Request';
-import stores from '../store/index'
 
 let qs = require('qs');
 let url = 'http://www.yaqinkeji.top';
+
+export default {
+  getActivityInfo: (vm, data) => vm.axios.get('model/get', {params: data}),
+
+}
 
 
