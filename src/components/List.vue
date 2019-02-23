@@ -20,14 +20,14 @@
 
             <div class="fl grid marL10">
               <!--<img v-if="item.studentImg===null" src="../assets/img/user.jpg" style="width: 45px;height: 45px;"> -->
-              <my-img :imageSrc="path+item.studentImg" errorType="user" width="45px" height="45px"/>
+              <my-img :imageSrc="config.img_url + item.studentHeadIma" errorType="user" width="45px" height="45px"/>
             </div>
             <div class="fl grid marL10">
               <div class="userName">
                 <span>{{item.studentName}}</span>
               </div>
               <div>
-                <span style="color: #a22232;font-size: 12px;">总票数：{{item.studentTicket}}</span>
+                <span style="color: #a22232;font-size: 12px;">总票数：{{item.studentVoteNumber || 0}}</span>
               </div>
             </div>
           </li>
@@ -41,7 +41,7 @@
 </template>
 
 <script>
-  import { login, getRankingList } from '@/api/Service';
+  import apiService from '@/api/Service';
   import Dialog from './common/Dialog';
   import NoneData from './common/NoneData';
   import ImageError from './common/ImageError';
@@ -59,9 +59,7 @@
         title:'',
         content:'',
         dialog:'none',
-        dataList: [],
-        path: this.config._img_url,
-        noneData: false//暂无数据，默认false
+        dataList: []
       };
     },
     created: function () {
@@ -91,27 +89,47 @@
       },
       //获取排行榜列表
       getRankingList () {
-        getRankingList({uuid: this.config._uuid}, res => {
-            this.dataList = res.data;
-            this.noneData = !!this.dataList;
-          }
-        );
+        apiService.getActivityStudents(this, {
+          loginId: this.config.loginId, // 登录用户Id
+          activityId: this.config.activityId, // 当前所在活动Id
+          page: 0,
+          pageSize: 10,
+          studentName: ''
+        }).then(success => {
+          console.log(success)
+          this.dataList = success.resultObject.studentInfo;
+        }, err => {
+          console.log(err)
+        })
       }
     },
     computed:{
+      noneData () {
+        return this.dataList.length !== 0
+      },
       /**
        * 活动开始时间
        * @returns {*|moment.Moment}
        */
       beginTime () {
-        return moment(this.activityInfo.activeBegintime.replace(/-/g, '/'))
+        if (this.activityInfo.detail) {
+          let time = this.activityInfo.detail.activityStartTime
+          if (time) {
+            return moment(time.replace(/-/g, '/')).valueOf()
+          }
+        }
       },
       /**
        * 活动结束时间
        * @returns {*}
        */
       endTime () {
-        return this.activityInfo.activeEndtime.replace(/-/g, '/')
+        if (this.activityInfo.detail) {
+          let time = this.activityInfo.detail.activityEndTime
+          if (time) {
+            return moment(time.replace(/-/g, '/')).valueOf()
+          }
+        }
       },
       /**
        * 当前时间
@@ -122,6 +140,22 @@
       },
       config () {
         return this.$store.getters.config
+      },
+      /**
+       * 当前活动信息
+       * @returns {{detail: *, loginId: (string), activityId: (string), count: (*|number), pv: (*|number), voteNum: (*|number)}}
+       */
+      activityInfo () {
+        let activityInfo = this.config.activityInfo
+        let flag = Object.keys(activityInfo).length !== 0
+        return {
+          detail: flag ? activityInfo.ActivityInfo : null,
+          loginId: this.config.loginId,
+          activityId: this.config.activityId,
+          count: flag ? activityInfo.studentCount : 0, //报名人数
+          pv: flag ? activityInfo.ActivityBrowseVolume : 0, //访问量
+          voteNum: flag ? activityInfo.studentTicketCount : 0 //投票总数
+        }
       }
     }
   };

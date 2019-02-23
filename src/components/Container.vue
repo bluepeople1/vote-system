@@ -9,7 +9,7 @@
     <div id="tabBar">
       <ul class="tab">
         <li>
-          <router-link :to="{name:'Index',params:{uuid: uuid}}" tag="div" class="li-item">
+          <router-link :to="{name:'Index'}" tag="div" class="li-item">
             <img :src="(selectedTab===1)?selectImg.index.selected:selectImg.index.unselected" class="li-item-icon"/>
             <span :class="(selectedTab===1)?'selected-tab-font':'unselected-tab-font'">首页</span>
           </router-link>
@@ -39,333 +39,306 @@
 </template>
 
 <script>
-  import apiService from '@/api/Service'
-  import { signs } from '@/assets/js/sign'
-  import wx from 'weixin-js-sdk'
-  import MusicPlayer from './common/MusicPlayer'
-  import MyMarquee from './common/MyMarquee'
-  import CommonService from '@/assets/js/common'
+import apiService from '@/api/Service'
+import {signs} from '@/assets/js/sign'
+import wx from 'weixin-js-sdk'
+import MusicPlayer from './common/MusicPlayer'
+import MyMarquee from './common/MyMarquee'
+import CommonService from '@/assets/js/common'
 
-  export default {
-    components: {MusicPlayer, MyMarquee},
-    data () {
-      return {
-        selectImg: {
-          index: {
-            selected: require('../assets/img/index_selected.png'),
-            unselected: require('../assets/img/index_unselected.png')
-          },
-          prize: {
-            selected: require('../assets/img/prize_selected.png'),
-            unselected: require('../assets/img/prize_unselected.png')
-          }
-          ,
-          list: {
-            selected: require('../assets/img/ranking_list_selected.png'),
-            unselected: require('../assets/img/ranking_list_unselected.png')
-          },
-          register: {
-            selected: require('../assets/img/apply_selected.png'),
-            unselected: require('../assets/img/apply_unselected.png')
-          }
+export default {
+  components: {MusicPlayer, MyMarquee},
+  data () {
+    return {
+      selectImg: {
+        index: {
+          selected: require('../assets/img/index_selected.png'),
+          unselected: require('../assets/img/index_unselected.png')
         },
-        selectedTab: 1,
-        uuid: '',
-        activityInfo: ''
-      }
+        prize: {
+          selected: require('../assets/img/prize_selected.png'),
+          unselected: require('../assets/img/prize_unselected.png')
+        }
+        ,
+        list: {
+          selected: require('../assets/img/ranking_list_selected.png'),
+          unselected: require('../assets/img/ranking_list_unselected.png')
+        },
+        register: {
+          selected: require('../assets/img/apply_selected.png'),
+          unselected: require('../assets/img/apply_unselected.png')
+        }
+      },
+      selectedTab: 1
+    }
+  },
+  created: function () {
+    console.log('container')
+    //页面刷新后，判断当前页面所在tab
+    this.currentTab()
+    this.init()
+
+    // if (!this.config._uuid) {
+    //   //如果uuid不存在，就从url中截取
+    //   let path = window.location.href.split('/index/')[1]
+    //   let params = path.split('&')
+    //   let openId = params[0].split('=')[1]
+    //   let uuid = params[1].split('=')[1]
+    //   let nickName = decodeURI(params[2].split('=')[1])
+    //   let headImgUrl = decodeURIComponent(params[3].split('=')[1])
+    //   let sex = (params[4].split('=')[1]) === '1' ? '男' : '女'
+    //   let sharedUrl = 'http://www.hzrtpxt.top/master/wxlogin?uuid=' + uuid
+    //   let map = new Map()
+    //   map.set('_wxUserInfo', {
+    //     nickName: nickName,
+    //     headImgUrl: headImgUrl,
+    //     sex: sex
+    //   })
+    //   map.set('_openId', openId)
+    //   map.set('_uuid', uuid)
+    //   map.set('_sharedUrl', sharedUrl)
+    //   this.$store.dispatch('config', map)
+    //   console.log(this.$store.getters.config)
+    // }
+    // newLogin(function (data) {
+    //   that.activityInfo = data
+    //   //设置显示标题
+    //   document.title = that.config._activity.activeName
+    //   getActivityImg({activeName: that.config._activity.activeName}, res => {
+    //     console.log('getActivityImg')
+    //     if (res.data.length !== 0) {
+    //       this.$store.dispatch('config', new Map().set('_sharedImg', res.data[0].imgSource))
+    //     }
+    //     getJsApiTicket(function (res) {
+    //       const config = signs(res.data.jsapi_ticket, window.location.href.split('#')[0])
+    //       wx.config({
+    //         debug: false,
+    //         appId: that.config._appId,
+    //         timestamp: config.timestamp,
+    //         nonceStr: config.noncestr,
+    //         signature: config.signature,
+    //         jsApiList: [
+    //           'onMenuShareTimeline',
+    //           'onMenuShareAppMessage',
+    //           'updateAppMessageShareData',
+    //           'updateTimelineShareData'
+    //         ]
+    //       })
+    //       let shareConfig = {
+    //         title: that.config._activity.activeName, // 分享标题
+    //         desc: that.config._activity.activeContext || '我们正在做活动，快点进来看看吧！',
+    //         link: that.config._sharedUrl, // 分享链接
+    //         imgUrl: that.config._img_url + that.config._state.sharedImg, // 分享图标
+    //         success: function () {
+    //           // console.log('成功');
+    //         },
+    //         cancel: function () {
+    //           // alert('失败');
+    //         }
+    //       }
+    //
+    //       wx.ready(function () {
+    //         wx.onMenuShareTimeline(shareConfig)
+    //         wx.onMenuShareAppMessage(shareConfig)
+    //         wx.updateAppMessageShareData(shareConfig)
+    //         wx.updateTimelineShareData(shareConfig)
+    //       })
+    //     })
+    //   })
+    // })
+    //this.device();
+  },
+  methods: {
+    init () {
+      // let path = window.location.href.split('/index/')[1]
+      // let openId = CommonService.getQuery('openId')
+      // let nickName = CommonService.getQuery('nickName')
+      // let headImgUrl = CommonService.getQuery('headimgurl')
+      // let activityId = CommonService.getQuery('activityId')
+      // let loginId = CommonService.getQuery('loginId')
+      let activityId = 'w2xBGXmFlf9oF4qJ9ykFjeUe8ZXaEQbl'
+      let loginId = 'MCpXlCFJcutr5bWzC6sAilPyHNJglLu5'
+      let sharedUrl = 'www.yaqinkeji.top/homeschool/wxInterface/wxToGrantAuthorization?aid=' + activityId + '&bid=' + loginId
+
+      let map = new Map()
+      // map.set('wxUserInfo', {
+      //   nickName: nickName || '',
+      //   headImgUrl: headImgUrl || ''
+      // })
+      // map.set('openId', openId)
+      map.set('loginId', loginId)
+      map.set('sharedUrl', sharedUrl)
+      map.set('activityId', activityId)
+      this.$store.dispatch('config', map)
+      this.loadData()
     },
-    created: function () {
-      let that = this
-
-      //页面刷新后，判断当前页面所在tab
-      // this.currentTab()
-
-      if (!this.config._uuid) {
-        //如果uuid不存在，就从url中截取
-        let path = window.location.href.split('/index/')[1]
-        let params = path.split('&')
-        let openId = params[0].split('=')[1]
-        let uuid = params[1].split('=')[1]
-        let nickName = decodeURI(params[2].split('=')[1])
-        let headImgUrl = decodeURIComponent(params[3].split('=')[1])
-        let sex = (params[4].split('=')[1]) === '1' ? '男' : '女'
-        let sharedUrl = 'http://www.hzrtpxt.top/master/wxlogin?uuid=' + uuid
-        let map =new Map()
-        map.set("_wxUserInfo",{
-          nickName: nickName,
-          headImgUrl: headImgUrl,
-          sex: sex
-        })
-        map.set("_openId",openId)
-        map.set("_uuid",uuid)
-        map.set("_sharedUrl",sharedUrl)
-        this.$store.dispatch('config', map)
-        console.log(this.$store.getters.config)
+    loadData () {
+      let data = {
+        loginId: this.config.loginId, // 登录用户Id
+        activityId: this.config.activityId // 当前所在活动Id
       }
-      newLogin(function (data) {
-        that.activityInfo = data
-        //设置显示标题
-        document.title = that.config._activity.activeName
-        getActivityImg({activeName: that.config._activity.activeName}, res => {
-          console.log('getActivityImg')
-          if (res.data.length !== 0) {
-            this.$store.dispatch('config', new Map().set("_sharedImg",res.data[0].imgSource))
-          }
-          getJsApiTicket(function (res) {
-            const config = signs(res.data.jsapi_ticket, window.location.href.split('#')[0])
-            wx.config({
-              debug: false,
-              appId: that.config._appId,
-              timestamp: config.timestamp,
-              nonceStr: config.noncestr,
-              signature: config.signature,
-              jsApiList: [
-                'onMenuShareTimeline',
-                'onMenuShareAppMessage',
-                'updateAppMessageShareData',
-                'updateTimelineShareData'
-              ]
-            })
-            let shareConfig = {
-              title: that.config._activity.activeName, // 分享标题
-              desc: that.config._activity.activeContext || '我们正在做活动，快点进来看看吧！',
-              link: that.config._sharedUrl, // 分享链接
-              imgUrl: that.config._img_url + that.config._state.sharedImg, // 分享图标
-              success: function () {
-                // console.log('成功');
-              },
-              cancel: function () {
-                // alert('失败');
-              }
-            }
-
-            wx.ready(function () {
-              wx.onMenuShareTimeline(shareConfig)
-              wx.onMenuShareAppMessage(shareConfig)
-              wx.updateAppMessageShareData(shareConfig)
-              wx.updateTimelineShareData(shareConfig)
-            })
-          })
+      let ajaxArr = [
+        this.getMusic(this, data),
+        this.getCurrentActivityInfo(this, data),
+        this.getJsTicketAndToken(this)
+      ]
+      Promise.all(ajaxArr).then(data => {
+        let m = new Map()
+        m.set('activityInfo', data[1].resultObject)
+        m.set('musicUrl', 'https://www.yaqinkeji.top' + data[0].resultObject.musicPath)
+        document.title = data[1].resultObject.ActivityInfo.activityName
+        this.$store.dispatch('config', new Map().set('activityInfo', data[1].resultObject))
+      }, error => {
+        console.log(error)
+      })
+    },
+    /**
+     * 获取活动背景音乐
+     */
+    getMusic (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActivityMusic(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
         })
       })
-      //this.device();
-    },
-    methods: {
-      init(){
-        let path = window.location.href.split('/index/')[1]
-        let openId = CommonService.getQuery('openId')
-        let nickName = CommonService.getQuery('nickName')
-        let headImgUrl = CommonService.getQuery('headimgurl')
-        let activityId = CommonService.getQuery('activityId')
-        let loginId = CommonService.getQuery('loginId')
-        let sharedUrl = 'www.yaqinkeji.top/homeschool/wxInterface/wxToGrantAuthorization?aid='+ activityId +'&bid=' + loginId
-        let map =new Map()
-        map.set("_wxUserInfo",{
-          nickName: nickName,
-          headImgUrl: headImgUrl,
-          sex: sex
-        })
-        map.set("_openId",openId)
-        map.set("_uuid",uuid)
-        map.set("_sharedUrl",sharedUrl)
-        this.$store.dispatch('config', map)
-        console.log(this.$store.getters.config)
 
-        let data = {
-          loginId: loginId, // 登录用户Id
-          activityId: activityId // 当前所在活动Id
-        }
-        let ajaxArr = [
-          this.getCurrentActivityInfo(data),
-          this.getCurrentActivitySlideshowImg(data),
-          this.getCurrentActivityPropaganda(data),
-          this.getCurrentActivityStuList({
-            loginId: loginId, // 登录用户Id
-            activityId: activityId, // 当前所在活动Id
-            page: 1,
-            pageSize: 15,
-            studentName: ''
-          }),
-          this.getJsTicketAndToken()
+    },
+    /**
+     * 获取当前活动的信息
+     * @param params
+     * @response resultNumber 0:成功 非0:失败
+     * @response resultMsg 结果消息
+     * @response resultObject.studentCount 报名个数
+     * @response resultObject.studentTicketCount 总票数
+     * @response resultObject.ActivityBrowseVolume 浏览量
+     * @response resultObject.id 活动id
+     * @response resultObject.activityName 活动名
+     * @response resultObject.activityContent 活动内容
+     * @response resultObject.activityStartTime 开始时间
+     * @response resultObject.activityEndTime 结束时间
+     * @response resultObject.onlineApplication 0-允许在线报名 1-不允许
+     */
+    getCurrentActivityInfo (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActiityInfo(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
+        })
+      })
+    },
+    /**
+     * 获取微信 js_ticket 和 token
+     */
+    getJsTicketAndToken (that) {
+      return new Promise(function (resolve, reject) {
+        apiService.getTokenAndTicket(that).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
+        })
+      })
+    },
+    /**
+     * 微信分享配置信息
+     * @param jsapi_ticket
+     */
+    setWxShareConfig (data) {
+      const config = signs(data.jsapi_ticket, window.location.href.split('#')[0])
+      wx.config({
+        debug: false,
+        appId: data.appId,
+        timestamp: config.timestamp,
+        nonceStr: config.noncestr,
+        signature: config.signature,
+        jsApiList: [
+          'onMenuShareTimeline',
+          'onMenuShareAppMessage',
+          'updateAppMessageShareData',
+          'updateTimelineShareData'
         ]
-        Promise.all(ajaxArr).then(data => {
-          console.log(data)
-        }, error => {
-          console.log(error)
-        })
-      },
-      /**
-       * 获取当前活动的信息
-       * @param params
-       * @response resultNumber 0:成功 非0:失败
-       * @response resultMsg 结果消息
-       * @response resultObject.studentCount 报名个数
-       * @response resultObject.studentTicketCount 总票数
-       * @response resultObject.ActivityBrowseVolume 浏览量
-       * @response resultObject.id 活动id
-       * @response resultObject.activityName 活动名
-       * @response resultObject.activityContent 活动内容
-       * @response resultObject.activityStartTime 开始时间
-       * @response resultObject.activityEndTime 结束时间
-       * @response resultObject.onlineApplication 0-允许在线报名 1-不允许
-       */
-      getCurrentActivityInfo (params) {
-        apiService.getActiityInfo(this, params).then(success => {
-          return Promise.resolve(success)
-        }, err => {
-          return Promise.reject(err)
-        })
-      },
-      /**
-       * 获取当前活动首页轮播图片
-       * @param params
-       * @response resultNumber 0:成功 非0:失败
-       * @response resultMsg 结果消息
-       * @response resultObject.headImgUrl 首页轮播图路径
-       */
-      getCurrentActivitySlideshowImg (params) {
-        apiService.getActivitySlideshow(this, params).then(success => {
-          return Promise.resolve(success)
-        }, err => {
-          return Promise.reject(err)
-        })
-      },
-      /**
-       * 获取当前活动首页宣传图
-       * @param params
-       * @response resultNumber 0:成功 非0:失败
-       * @response resultMsg 结果消息
-       * @response resultObject.contentImgUrl 图片路径
-       */
-      getCurrentActivityPropaganda (params) {
-        apiService.getActivityContentImg(this, params).then(success => {
-          return Promise.resolve(success)
-        }, err => {
-          return Promise.reject(err)
-        })
-      },
-      /**
-       * 查询当前活动学生
-       * @params {
-       *     loginId:用户id
-       *     activityId:活动id
-       *     page:当前页码
-       *     pageSize:显示个数
-       *     studentName:搜索文本内容-模糊查询使用
-       * }
-       */
-      getCurrentActivityStuList (params) {
-        apiService.getActivityStudents(this, params).then(success => {
-          return Promise.resolve(success)
-        }, err => {
-          return Promise.reject(err)
-        })
-      },
-      /**
-       * 获取微信 js_ticket 和 token
-       */
-      getJsTicketAndToken () {
-        apiService.getTokenAndTicket(this).then(success => {
-          return Promise.resolve(success)
-        }, err => {
-          return Promise.reject(err)
-        })
-      },
-      /**
-       * 微信分享配置信息
-       * @param jsapi_ticket
-       */
-      setWxShareConfig (jsapi_ticket) {
-        const config = signs(jsapi_ticket, window.location.href.split('#')[0])
-        wx.config({
-          debug: false,
-          appId: that.config._appId,
-          timestamp: config.timestamp,
-          nonceStr: config.noncestr,
-          signature: config.signature,
-          jsApiList: [
-            'onMenuShareTimeline',
-            'onMenuShareAppMessage',
-            'updateAppMessageShareData',
-            'updateTimelineShareData'
-          ]
-        })
-        let shareConfig = {
-          title: that.config._activity.activeName, // 分享标题
-          desc: that.config._activity.activeContext || '我们正在做活动，快点进来看看吧！',
-          link: that.config._sharedUrl, // 分享链接
-          imgUrl: that.config._img_url + that.config._state.sharedImg, // 分享图标
-          success: function () {
-            // console.log('成功');
-          },
-          cancel: function () {
-            // alert('失败');
-          }
-        }
-        wx.ready(function () {
-          wx.onMenuShareTimeline(shareConfig)
-          wx.onMenuShareAppMessage(shareConfig)
-          wx.updateAppMessageShareData(shareConfig)
-          wx.updateTimelineShareData(shareConfig)
-        })
-      }
-      shareUrlParamsFilter(s){
-        // 过滤掉pay，openId参数
-        return s.replace(/&pay=\w+/, '').replace(/[(\?)|(&)]openId=.*/, '');
-      },
-      currentTab: function () {
-        const href = window.location.href
-        const currentPage = href.split('/#/')[1]
-        switch (currentPage) {
-          case 'Index':
-            this.changeTab(1)
-            return
-          case 'prize':
-            this.changeTab(2)
-            return
-          case 'list':
-            this.changeTab(3)
-            return
-          case 'register':
-            this.changeTab(4)
-            return
-        }
-      },
-      changeTab: function (tab) {
-        this.selectedTab = tab
-      }
-    },
-    watch: {
-      $route: {
-        handler: function (val, oldVal) {
-          let tab = val.name
-          if (tab === 'Index') {
-            this.changeTab(1)
-          } else if (tab === 'Prize') {
-            this.changeTab(2)
-          } else if (tab === 'List') {
-            this.changeTab(3)
-          } else if (tab === 'Register') {
-            this.changeTab(4)
-          }
+      })
+      let shareConfig = {
+        title: this.config._activity.activeName, // 分享标题
+        desc: this.config._activity.activeContext || '我们正在做活动，快点进来看看吧！',
+        link: this.config._sharedUrl, // 分享链接
+        imgUrl: this.config._img_url + this.config._state.sharedImg, // 分享图标
+        success: function () {
+          // console.log('成功');
         },
-        // 深度观察监听
-        deep: true
+        cancel: function () {
+          // alert('失败');
+        }
+      }
+      wx.ready(function () {
+        wx.onMenuShareTimeline(shareConfig)
+        wx.onMenuShareAppMessage(shareConfig)
+        wx.updateAppMessageShareData(shareConfig)
+        wx.updateTimelineShareData(shareConfig)
+      })
+    },
+    shareUrlParamsFilter (s) {
+      // 过滤掉pay，openId参数
+      return s.replace(/&pay=\w+/, '').replace(/[(\?)|(&)]openId=.*/, '')
+    },
+    currentTab: function () {
+      const href = window.location.href
+      const currentPage = href.split('/#/')[1]
+      switch (currentPage) {
+        case 'Index':
+          this.changeTab(1)
+          return
+        case 'prize':
+          this.changeTab(2)
+          return
+        case 'list':
+          this.changeTab(3)
+          return
+        case 'register':
+          this.changeTab(4)
+          return
       }
     },
-    computed: {
-      config(){
-        return this.$store.getters.config
-      },
-      title () {
-        let str = ''
-        if (this.activityInfo.activeName && this.activityInfo.activeBegintime && this.activityInfo.activeEndtime) {
-          str = this.activityInfo.activeName + '  活动时间：' + this.activityInfo.activeBegintime + ' ~ ' + this.activityInfo.activeEndtime
+    changeTab: function (tab) {
+      this.selectedTab = tab
+    }
+  },
+  watch: {
+    $route: {
+      handler: function (val, oldVal) {
+        let tab = val.name
+        if (tab === 'Index') {
+          this.changeTab(1)
+        } else if (tab === 'Prize') {
+          this.changeTab(2)
+        } else if (tab === 'List') {
+          this.changeTab(3)
+        } else if (tab === 'Register') {
+          this.changeTab(4)
         }
-        return str
+      },
+      // 深度观察监听
+      deep: true
+    }
+  },
+  computed: {
+    config () {
+      return this.$store.getters.config
+    },
+    title () {
+      if (Object.keys(this.config.activityInfo).length !== 0) {
+        let activityName = this.config.activityInfo.ActivityInfo.activityName
+        let activityStartTime = this.config.activityInfo.ActivityInfo.activityStartTime
+        let activityEndTime = this.config.activityInfo.ActivityInfo.activityEndTime
+        if (activityName && activityStartTime && activityEndTime) {
+          return activityName + '  活动时间：' + activityStartTime + ' ~ ' + activityEndTime
+        }
       }
     }
   }
+}
 </script>
 
 <style scoped lang="less">

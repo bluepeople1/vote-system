@@ -4,7 +4,7 @@
     <div id="banner">
       <!--海报图-->
       <div id="image">
-        <my-img :imageSrc="path+banner" errorType="img" class="banner-img" width="100%" height="170px"/>
+        <my-img :imageSrc="path + banner" errorType="img" class="banner-img" width="100%" height="170px"/>
       </div>
       <!--已报名、累计投票、访问量-->
       <div id="counter">
@@ -16,7 +16,7 @@
                 <span> 报名人数</span>
               </div>
               <div>
-                <span>{{count||0}}</span>
+                <span>{{activityInfo.count}}</span>
               </div>
             </div>
           </div>
@@ -27,7 +27,7 @@
                 <span> 累计投票</span>
               </div>
               <div>
-                <span>{{voteNum||0}}</span>
+                <span>{{activityInfo.voteNum}}</span>
               </div>
             </div>
           </div>
@@ -38,7 +38,7 @@
                 <span> 访问量</span>
               </div>
               <div>
-                <span>{{pv||0}}</span>
+                <span>{{activityInfo.pv}}</span>
               </div>
             </div>
           </div>
@@ -75,26 +75,26 @@
         </div>
       </div>
       <!--列表-->
-      <div id="list" v-if="studentData===true">
+      <div id="list" v-if="isShowStudentList">
         <div class="item" v-for="(item,index) in dataList" :key="index">
           <div @click="toDetailPage(item)">
             <div class="item-header">
-              <span class="sort">{{item.studentNumb}}</span>
-              <span class="ticket">{{item.studentTicket}}票</span>
+              <span class="sort">{{item.studentCode}} 号选手</span>
+              <span class="ticket">{{item.studentVoteNumber}}票</span>
             </div>
 
             <!--<img class="item-pic" v-lazy="path+item.studentImg" width="100%" height="170" />-->
-            <my-img :imageSrc="path+item.studentImg" errorType="user" width="100%" height="170"/>
+            <my-img :imageSrc="path + item.studentHeadIma" errorType="user" width="100%" height="170"/>
           </div>
           <div class="item-bottom">
             <span>{{item.studentName}} </span>
-            <span class="vote" @click="vote(item.studentId)">投票</span>
+            <span class="vote" @click="vote(item.id)">投票</span>
           </div>
         </div>
       </div>
       <none-data class="index-none-data" v-else/>
 
-      <div class="marTop15" v-show="isLoadMore===true">
+      <div class="marTop15" v-show="isLoadMore === true">
         <div class="weui-flex">
           <div class="weui-flex__item" @click="loadMoreStudent">
             <div class="placeholder" style="margin:0 15px;">
@@ -118,11 +118,11 @@
           </div>
         </div>
       </div>
-      <div class="marTop30" v-if="imageData===true">
+      <div class="marTop30" v-if="isShowImgList">
         <ul>
           <li v-for="(it,idx) in imgList" :key="idx">
             <!--<img v-if="idx!==0" :src="path+it.imgSource" width="100%">-->
-            <my-img v-if="idx!==0" :imageSrc="path+it.imgSource" errorType="img" width="100%"/>
+            <my-img v-if="idx!==0" :imageSrc="path + it" errorType="img" width="100%"/>
           </li>
         </ul>
       </div>
@@ -134,312 +134,518 @@
 </template>
 
 <script>
-  import {
-    newLogin,
-    vote,
-    pv,
-    login,
-    getStuAndAct,
-    search,
-    getActivityImg,
-    getJsapiTicket,
-    searchByFuzzy
-  } from '@/api/Service'
-  import Dialog from './common/Dialog'
-  import ImageError from './common/ImageError'
-  import NoneData from './common/NoneData'
-  import WaterFall from 'vue-waterfall-easy'
-  import moment from 'moment'
+import apiService from '@/api/Service'
+import Dialog from './common/Dialog'
+import ImageError from './common/ImageError'
+import NoneData from './common/NoneData'
+import WaterFall from 'vue-waterfall-easy'
+import moment from 'moment'
+import store from '../assets/js/common'
 
-  export default {
-    components: {
-      'my-dialog': Dialog,
-      'my-img': ImageError,
-      'none-data': NoneData,
-      'img-waterfall': WaterFall
-    },
-    data () {
-      return {
-        timeCountTitle: '活动倒计时',
-        isToGiftPage: false,
-        time: '',
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        imgList: [],
-        banner: '',
-        count: 0, //报名人数
-        dataList: [], //学生列表
-        activityInfo: {}, //活动信息
-        pv: 0, //访问量
-        voteNum: 0, //投票总数
-        title: '', //dialog title 信息
-        content: '', //dialog 显示提示内容
-        keywords: '', //搜索关键字
-        dialog: 'none',
-        path: config.img_url,
-        studentData: false,
-        isLoadMore: true,//是否显示加载更多
-        isShowAllStudent: false,//是否显示加载全部
-        imageData: false,
-        page: 1//当前页码
-      }
-    },
-    created: function () {
-      console.log('index created', this.config)
-      login(res => {
-        this.$store.dispatch('config', new Map().set('_sessionId', res.data.sessionid))
-        this.getDataList()
+export default {
+  components: {
+    'my-dialog': Dialog,
+    'my-img': ImageError,
+    'none-data': NoneData,
+    'img-waterfall': WaterFall
+  },
+  data () {
+    return {
+      timeCountTitle: '活动倒计时',
+      isToGiftPage: false,
+      time: '',
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      imgList: [],
+      banner: '',
+      dataList: [], //学生列表
+      title: '', //dialog title 信息
+      content: '', //dialog 显示提示内容
+      keywords: '', //搜索关键字
+      dialog: 'none',
+      path: 'http://www.yaqinkeji.top',
+      isLoadMore: true,//是否显示加载更多
+      isShowAllStudent: false,//是否显示加载全部
+      page: 1//当前页码
+    }
+  },
+  created: function () {
+    let data = {
+      loginId: this.activityInfo.loginId, // 登录用户Id
+      activityId: this.activityInfo.activityId // 当前所在活动Id
+    }
+    let ajaxArr = [
+      // this.getCurrentActivityInfo(this, data),
+      this.getCurrentActivitySlideshowImg(this, data),
+      this.getCurrentActivityPropaganda(this, data),
+      this.getCurrentActivityStuList(this, {
+        loginId: this.activityInfo.loginId, // 登录用户Id
+        activityId: this.activityInfo.activityId, // 当前所在活动Id
+        page: 1,
+        pageSize: 15,
+        studentName: ''
+      })
+    ]
+    Promise.all(ajaxArr).then(data => {
+      this.timeDiff() // 倒计时
+      this.banner = data[0].resultObject.headImgUrl[0]
+      this.imgList = data[1].resultObject.contentImgUrl
+      this.dataList = data[2].resultObject.studentInfo
+      this.isShowLoadMoreBtn(data[2].resultObject.studentCount, data[2].resultObject.page)
+    }, error => {
+      console.log(error)
+    })
+  },
+  methods: {
+    /**
+     * 获取当前活动的信息
+     * @param that
+     * @param params
+     * @response resultNumber 0:成功 非0:失败
+     * @response resultMsg 结果消息
+     * @response resultObject.studentCount 报名个数
+     * @response resultObject.studentTicketCount 总票数
+     * @response resultObject.ActivityBrowseVolume 浏览量
+     * @response resultObject.id 活动id
+     * @response resultObject.activityName 活动名
+     * @response resultObject.activityContent 活动内容
+     * @response resultObject.activityStartTime 开始时间
+     * @response resultObject.activityEndTime 结束时间
+     * @response resultObject.onlineApplication 0-允许在线报名 1-不允许
+     */
+    getCurrentActivityInfo (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActiityInfo(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
+        })
       })
     },
-    // 监听,当路由发生变化的时候执行
-    watch: {
-      $route: {
-        handler: function (val, oldVal) {
-          this.getDataList()
-        },
-        // 深度观察监听
-        deep: true
-      }
-    },
-    methods: {
-      //跳转到详情页面
-      toDetailPage: function (userInfo) {
-        //如果当前活动还未开始，不让投票
-        if (store.isActivityNotBegin(this.nowTime, this.beginTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block']
-          return
-        }
-        //如果活动已经结束了，不让投票
-        if (store.isActivityEnd(this.nowTime, this.endTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block']
-          return
-        }
-
-        this.$router.push({
-          path: '/detail',
-          query: {stuName: userInfo.studentName, stuId: userInfo.studentId}
+    /**
+     * 获取当前活动首页轮播图片
+     * @param that
+     * @param params
+     * @response resultNumber 0:成功 非0:失败
+     * @response resultMsg 结果消息
+     * @response resultObject.headImgUrl 首页轮播图路径
+     */
+    getCurrentActivitySlideshowImg (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActivitySlideshow(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
         })
-      },
-      //搜索
-      search: function () {
-        let that = this
-        let params = {
-          key: this.keywords,
-          uuid: this.config._uuid
-        }
-        this.$http.post('https://www.hzrtpxt.top/master/Interface/getStudentByMh?studentName=' + this.keywords + '&activeUuid=' + this.config._uuid, params)
-          .then(res => {
-            let data = res.resultMap
-            if (data && data.length !== 0) {
-              that.dataList = data
-              that.isLoadMore = false
-            } else {
-              that.isLoadMore = true
-              this.getDataList()
-              // this.imageData = true;
-              this.title = '提示'
-              this.content = '没有找到该选手'
-              this.dialog = 'block' //显示dialog
-            }
-          })
-
-      },
-      //投票方法
-      vote: function (studentId) {
-        //如果当前活动还未开始，不让投票
+      })
+    },
+    /**
+     * 获取当前活动首页宣传图
+     * @param that
+     * @param params
+     * @response resultNumber 0:成功 非0:失败
+     * @response resultMsg 结果消息
+     * @response resultObject.contentImgUrl 图片路径
+     */
+    getCurrentActivityPropaganda (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActivityContentImg(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
+        })
+      })
+    },
+    /**
+     * 查询当前活动学生
+     * @params {
+     *     loginId:用户id
+     *     activityId:活动id
+     *     page:当前页码
+     *     pageSize:显示个数
+     *     studentName:搜索文本内容-模糊查询使用
+     * }
+     */
+    getCurrentActivityStuList (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActivityStudents(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
+        })
+      })
+    },
+    //倒计时
+    timeDiff () {
+      let timeCount = setInterval(() => {
+        let timeDiff = ''
         if (store.isActivityNotBegin(this.nowTime, this.beginTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block']
-          return
-        }
-        //如果活动已经结束了，不让投票
-        if (store.isActivityEnd(this.nowTime, this.endTime)) {
-          [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block']
-          return
+          //活动还未开始
+          this.timeCountTitle = '距活动开始倒计时'
+          timeDiff = this.beginTime - this.nowTime
+        } else {
+          if (!store.isActivityEnd(this.nowTime, this.endTime)) {
+            //活动开始且未结束
+            this.timeCountTitle = '距活动结束倒计时'
+            timeDiff = this.endTime - this.nowTime
+          } else {
+            if (!timeDiff) {
+              clearInterval(timeCount);
+              [this.days, this.hours, this.minutes, this.seconds] = [0, 0, 0, 0];
+              [this.title, this.content, this.dialog] = ['提示', '当前活动已结束', 'block']
+              return
+            }
+          }
         }
 
-        //接口请求参数
-        let params = {
-          openId: this.config._openId,
-          studentid: studentId
-        }
-
-        //调用投票接口
-        vote(params, res => {
-          if (res.code === 7) {
+        //计算出相差天数
+        let days = Math.floor(timeDiff / (24 * 3600 * 1000))
+        //计算出小时数
+        let temp1 = timeDiff % (24 * 3600 * 1000) //计算天数后剩余的毫秒数
+        let hours = Math.floor(temp1 / (3600 * 1000))
+        //计算相差分钟数
+        let temp2 = temp1 % (3600 * 1000) //计算小时数后剩余的毫秒数
+        let minutes = Math.floor(temp2 / (60 * 1000))
+        //计算相差秒数
+        let temp3 = temp2 % (60 * 1000) //计算分钟数后剩余的毫秒数
+        let seconds = Math.round(temp3 / 1000)
+        this.days = days
+        this.hours = hours
+        this.minutes = minutes
+        this.seconds = seconds
+      }, 1000)
+    },
+    /**
+     * 调用投票接口
+     */
+    vote (studentId) {
+      //如果当前活动还未开始，不让投票
+      if (store.isActivityNotBegin(this.nowTime, this.beginTime)) {
+        [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block']
+        return
+      }
+      //如果活动已经结束了，不让投票
+      if (store.isActivityEnd(this.nowTime, this.endTime)) {
+        [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block']
+        return
+      }
+      apiService.vote(this, {
+        loginId: this.activityInfo.loginId,
+        activityId: this.activityInfo.activityId,
+        studentId: studentId,
+        openId: this.config.openId,
+        nickName: this.config.nickName,
+        headImgUrl: this.config.headImgUrl
+      }).then(data => {
+        //2001-当天已经跟该选手投票 2002-当天投票机会用完 2003-投票成功
+        switch (Number(data.resultObject.code)) {
+          case 2001:
             this.title = '温馨提示'
             this.content = '您已给该选手投过票了哦~\n去给TA赠送礼物吧~'
-          } else if (res.code === 0) {
-            this.title = '投票成功'
-            this.content = '感谢您的参与，您已给该选手增加了宝贵一票'
-          } else if (res.code === 8) {
+            break
+          case 2002:
             this.title = '温馨提示'
             this.content = '您一天只能投三票哦~\n去给TA赠送礼物吧~'
-          }
+            break
+          case 2003:
+            this.title = '投票成功'
+            this.content = '感谢您的参与，您已给该选手增加了宝贵一票'
+            break
+        }
+        this.dialog = 'block' //显示dialog
+      })
+    },
+    /**
+     * 搜索框
+     */
+    search () {
+      this.getStudentList(res => {
+        console.log(res)
+        if (res.studentInfo && res.studentInfo.length) {
+          this.dataList = res.studentInfo
+          this.isLoadMore = false
+        } else {
+          this.isLoadMore = true
+          this.getStudentList(res => {
+            this.dataList = res.studentInfo
+          })
+          this.title = '提示'
+          this.content = '没有找到该选手'
           this.dialog = 'block' //显示dialog
-        })
-      },
-      //dialog 的监听方法
-      dialogListener: function (data) {
-        this.dialog = data.hide
-      },
-      //获取数据
-      getDataList: function () {
-        console.log('getDataList')
-        let that = this
-        this.page = 1
-        let params = {
-          uuid: this.config._uuid,
-          page: this.page,
-          rows: 10
         }
-        console.log(params)
-        //获取活动信息和参赛选手信息
-        getStuAndAct(params, res => {
-          if (res) {
-            let activity = res.data.sysActiveList
-            let voteNum = res.data.numb || 0
-            let students = res.data.sysStudentList || []
-            let studentCount = res.data.studentCount || 0
-            if (!activity) {
-              that.title = '温馨提示'
-              that.content = '暂无活动信息，请联系管理员确认是否有此活动哦~'
-              that.dialog = 'block' //显示dialog
-              return
-            }
-            if (!students && students.length === 0) {
-              return
-            }
-            sessionStorage.setItem('activityId', activity.activeId)
-            that.voteNum = voteNum
-            that.activityInfo = activity
-            document.title = that.activityInfo.activeName
-            //倒计时
-            that.timeDiff
-            that.dataList = students
-            that.studentData = !!this.dataList
-            that.count = studentCount
-            that.isShowLoadMoreBtn(studentCount, that.page)
-            let activeName = activity.activeName
-            //获取活动访问量
-            pv({activeId: this.activityInfo.activeId}, res => {
-                that.pv = res.pv
-                //获取活动图片
-                getActivityImg({activeName: activeName}, res => {
-                  if (res && res.data.length !== 0) {
-                    store.setSharedImg(res.data[0].imgSource)
-                    that.banner = res.data[0].imgSource
-                    that.imgList = res.data
-                    that.imageData = !!that.imgList
-                  }
-                })
-              }
-            )
-          }
+      }, true)
+    },
+    /**
+     * 是否显示加载更多按钮
+     * @param total
+     * @param curPage
+     */
+    isShowLoadMoreBtn (total, curPage) {
+      let totalPage = Math.ceil(total / 10)
+      this.isLoadMore = curPage < totalPage
+    },
+    //加载更多学生
+    loadMoreStudent () {
+      this.getStudentList(res => {
+        this.page += 1
+        this.dataList = this.dataList.concat(res.studentInfo)
+        this.isShowLoadMoreBtn(count, res.page)
+      })
+    },
+    /**
+     * 查询学生
+     */
+    getStudentList (callback, isSearch = false) {
+      Promise.all([this.getCurrentActivityStuList(this, {
+        loginId: this.activityInfo.loginId,
+        activityId: this.activityInfo.activityId,
+        page: 1,
+        pageSize: 15,
+        studentName: isSearch ? this.keywords : ''
+      })]).then(data => {
+        callback(data[0].resultObject)
+      })
+    },
+    //跳转到详情页面
+    toDetailPage: function (userInfo) {
+      //如果当前活动还未开始，不让投票
+      if (store.isActivityNotBegin(this.nowTime, this.beginTime)) {
+        [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block']
+        return
+      }
+      //如果活动已经结束了，不让投票
+      if (store.isActivityEnd(this.nowTime, this.endTime)) {
+        [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block']
+        return
+      }
+
+      this.$router.push({
+        path: '/detail',
+        query: {stuName: userInfo.studentName, stuId: userInfo.studentId}
+      })
+    },
+    //dialog 的监听方法
+    dialogListener: function (data) {
+      this.dialog = data.hide
+    }
+  },
+  // 监听,当路由发生变化的时候执行
+  watch: {
+    $route: {
+      handler: function (val, oldVal) {
+        this.getStudentList(res => {
+          this.dataList = res.studentInfo
         })
       },
-      /**
-       * 是否显示加载更多按钮
-       * @param total
-       * @param curPage
-       */
-      isShowLoadMoreBtn (total, curPage) {
-        let totalPage = Math.ceil(total / 10)
-        this.isLoadMore = curPage < totalPage
-      },
-      //加载更多学生
-      loadMoreStudent () {
-        let that = this
-        let params = {
-          uuid: this.config._uuid,
-          page: this.page + 1,
-          rows: 10
+      // 深度观察监听
+      deep: true
+    }
+  },
+  // methods: {
+  //   //跳转到详情页面
+  //   toDetailPage: function (userInfo) {
+  //     //如果当前活动还未开始，不让投票
+  //     if (store.isActivityNotBegin(this.nowTime, this.beginTime)) {
+  //       [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block']
+  //       return
+  //     }
+  //     //如果活动已经结束了，不让投票
+  //     if (store.isActivityEnd(this.nowTime, this.endTime)) {
+  //       [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block']
+  //       return
+  //     }
+  //
+  //     this.$router.push({
+  //       path: '/detail',
+  //       query: {stuName: userInfo.studentName, stuId: userInfo.studentId}
+  //     })
+  //   },
+  //   //搜索
+  //   search: function () {
+  //     let that = this
+  //     let params = {
+  //       key: this.keywords,
+  //       uuid: this.config._uuid
+  //     }
+  //     this.$http.post('https://www.hzrtpxt.top/master/Interface/getStudentByMh?studentName=' + this.keywords + '&activeUuid=' + this.config._uuid, params)
+  //       .then(res => {
+  //         let data = res.resultMap
+  //         if (data && data.length !== 0) {
+  //           that.dataList = data
+  //           that.isLoadMore = false
+  //         } else {
+  //           that.isLoadMore = true
+  //           this.getDataList()
+  //           // this.imageData = true;
+  //           this.title = '提示'
+  //           this.content = '没有找到该选手'
+  //           this.dialog = 'block' //显示dialog
+  //         }
+  //       })
+  //
+  //   },
+  //   //投票方法
+  //   vote: function (studentId) {
+  //     //如果当前活动还未开始，不让投票
+  //     if (store.isActivityNotBegin(this.nowTime, this.beginTime)) {
+  //       [this.title, this.content, this.dialog] = ['温馨提示', '活动还未开始呢~', 'block']
+  //       return
+  //     }
+  //     //如果活动已经结束了，不让投票
+  //     if (store.isActivityEnd(this.nowTime, this.endTime)) {
+  //       [this.title, this.content, this.dialog] = ['温馨提示', '活动已经结束啦~', 'block']
+  //       return
+  //     }
+  //
+  //     //接口请求参数
+  //     let params = {
+  //       openId: this.config._openId,
+  //       studentid: studentId
+  //     }
+  //
+  //     //调用投票接口
+  //     vote(params, res => {
+  //       if (res.code === 7) {
+  //         this.title = '温馨提示'
+  //         this.content = '您已给该选手投过票了哦~\n去给TA赠送礼物吧~'
+  //       } else if (res.code === 0) {
+  //         this.title = '投票成功'
+  //         this.content = '感谢您的参与，您已给该选手增加了宝贵一票'
+  //       } else if (res.code === 8) {
+  //         this.title = '温馨提示'
+  //         this.content = '您一天只能投三票哦~\n去给TA赠送礼物吧~'
+  //       }
+  //       this.dialog = 'block' //显示dialog
+  //     })
+  //   },
+
+  //   //获取数据
+  //   getDataList: function () {
+  //     console.log('getDataList')
+  //     let that = this
+  //     this.page = 1
+  //     let params = {
+  //       uuid: this.config._uuid,
+  //       page: this.page,
+  //       rows: 10
+  //     }
+  //     console.log(params)
+  //     //获取活动信息和参赛选手信息
+  //     getStuAndAct(params, res => {
+  //       if (res) {
+  //         let activity = res.data.sysActiveList
+  //         let voteNum = res.data.numb || 0
+  //         let students = res.data.sysStudentList || []
+  //         let studentCount = res.data.studentCount || 0
+  //         if (!activity) {
+  //           that.title = '温馨提示'
+  //           that.content = '暂无活动信息，请联系管理员确认是否有此活动哦~'
+  //           that.dialog = 'block' //显示dialog
+  //           return
+  //         }
+  //         if (!students && students.length === 0) {
+  //           return
+  //         }
+  //         sessionStorage.setItem('activityId', activity.activeId)
+  //         that.voteNum = voteNum
+  //         that.activityInfo = activity
+  //         document.title = that.activityInfo.activeName
+  //         //倒计时
+  //         that.timeDiff
+  //         that.dataList = students
+  //         that.studentData = !!this.dataList
+  //         that.count = studentCount
+  //         that.isShowLoadMoreBtn(studentCount, that.page)
+  //         let activeName = activity.activeName
+  //         //获取活动访问量
+  //         pv({activeId: this.activityInfo.activeId}, res => {
+  //             that.pv = res.pv
+  //             //获取活动图片
+  //             getActivityImg({activeName: activeName}, res => {
+  //               if (res && res.data.length !== 0) {
+  //                 store.setSharedImg(res.data[0].imgSource)
+  //                 that.banner = res.data[0].imgSource
+  //                 that.imgList = res.data
+  //                 that.imageData = !!that.imgList
+  //               }
+  //             })
+  //           }
+  //         )
+  //       }
+  //     })
+  //   },
+
+  // },
+  computed: {
+    /**
+     * 是否展示学生列表
+     */
+    isShowStudentList () {
+      return !!this.dataList
+    },
+    /**
+     * 是否展示图片列表
+     */
+    isShowImgList () {
+      return !!this.imgList
+    },
+    /**
+     * 活动开始时间
+     * @returns {*|moment.Moment}
+     */
+    beginTime () {
+      if (this.activityInfo.detail) {
+        let time = this.activityInfo.detail.activityStartTime
+        if (time) {
+          return moment(time.replace(/-/g, '/')).valueOf()
         }
-        //获取活动信息和参赛选手信息
-        getStuAndAct(params, res => {
-          let students = res.data.sysStudentList
-          let count = res.data.studentCount
-          if (students && students.length !== 0) {
-            that.page += 1
-            that.dataList = that.dataList.concat(students)
-            that.studentData = !!that.dataList
-            that.isShowLoadMoreBtn(count, that.page)
-          }
-        })
       }
     },
-    computed: {
-      /**
-       * 活动开始时间
-       * @returns {*|moment.Moment}
-       */
-      beginTime () {
-        return moment(this.activityInfo.activeBegintime.replace(/-/g, '/'))
-      },
-      /**
-       * 活动结束时间
-       * @returns {*}
-       */
-      endTime () {
-        return this.activityInfo.activeEndtime.replace(/-/g, '/')
-      },
-      /**
-       * 当前时间
-       * @returns {number}
-       */
-      nowTime () {
-        return moment().valueOf()
-      },
-      config () {
-        return this.$store.getters.config
-      },
-      //倒计时
-      timeDiff: function () {
-        let that = this
-        //活动开始时间戳
-        let beginTime = moment(this.activityInfo.activeBegintime.replace(/-/g, '/'))
-        //活动结束时间戳
-        let endTime = moment(this.activityInfo.activeEndtime.replace(/-/g, '/'))
-        let timeCount = setInterval(() => {
-          //当前时间戳
-          let nowTime = moment().valueOf()
-          let timeDiff = ''
-          if (store.isActivityNotBegin(nowTime, beginTime)) {
-            //活动还未开始
-            that.timeCountTitle = '距活动开始倒计时'
-            timeDiff = beginTime - nowTime
-          } else {
-            if (!store.isActivityEnd(nowTime, endTime)) {
-              //活动开始且未结束
-              that.timeCountTitle = '距活动结束倒计时'
-              timeDiff = endTime - nowTime
-            } else {
-              if (!timeDiff) {
-                clearInterval(timeCount);
-                [that.days, that.hours, that.minutes, that.seconds] = [0, 0, 0, 0];
-                [that.title, that.content, that.dialog] = ['提示', '当前活动已结束', 'block']
-                return
-              }
-            }
-          }
-
-          //计算出相差天数
-          let days = Math.floor(timeDiff / (24 * 3600 * 1000))
-          //计算出小时数
-          let temp1 = timeDiff % (24 * 3600 * 1000) //计算天数后剩余的毫秒数
-          let hours = Math.floor(temp1 / (3600 * 1000))
-          //计算相差分钟数
-          let temp2 = temp1 % (3600 * 1000) //计算小时数后剩余的毫秒数
-          let minutes = Math.floor(temp2 / (60 * 1000))
-          //计算相差秒数
-          let temp3 = temp2 % (60 * 1000) //计算分钟数后剩余的毫秒数
-          let seconds = Math.round(temp3 / 1000);
-          [that.days, that.hours, that.minutes, that.seconds] = [days, hours, minutes, seconds]
-        }, 1000)
+    /**
+     * 活动结束时间
+     * @returns {*}
+     */
+    endTime () {
+      if (this.activityInfo.detail) {
+        let time = this.activityInfo.detail.activityEndTime
+        if (time) {
+          return moment(time.replace(/-/g, '/')).valueOf()
+        }
+      }
+    },
+    /**
+     * 当前时间
+     * @returns {number}
+     */
+    nowTime () {
+      return moment().valueOf()
+    },
+    /**
+     * 当前配置信息
+     */
+    config () {
+      return this.$store.getters.config
+    },
+    /**
+     * 当前活动信息
+     * @returns {{detail: *, loginId: (string), activityId: (string), count: (*|number), pv: (*|number), voteNum: (*|number)}}
+     */
+    activityInfo () {
+      let activityInfo = this.config.activityInfo
+      let flag = Object.keys(activityInfo).length !== 0
+      return {
+        detail: flag ? activityInfo.ActivityInfo : null,
+        loginId: this.config.loginId,
+        activityId: this.config.activityId,
+        count: flag ? activityInfo.studentCount : 0, //报名人数
+        pv: flag ? activityInfo.ActivityBrowseVolume : 0, //访问量
+        voteNum: flag ? activityInfo.studentTicketCount : 0 //投票总数
       }
     }
   }
+}
 </script>
 
 <style scoped lang="less">

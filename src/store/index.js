@@ -6,17 +6,18 @@ Vue.use(Vuex)
 const stores = new Vuex.Store({
   state: {
     config: {
-      _appId: 'wxb36f7c6095549952',
-      _wxUserInfo: {},
-      _uuid: '',
-      _openId: '',
-      _sessionId: '',
-      _jsApiTicket: '',
-      _sharedUrl: '',
-      _sharedImg: '',
-      _activity: {},
-      _base_url: 'https://www.hzrtpxt.top/nserver',
-      _img_url: 'https://www.hzrtpxt.top',
+      appId: 'wxb36f7c6095549952',
+      wxUserInfo: {},
+      loginId: '',
+      openId: '',
+      activityId: '',
+      jsApiTicket: '',
+      sharedUrl: '',
+      sharedImg: '',
+      activityInfo: {},
+      base_url: 'https://www.hzrtpxt.top/nserver',
+      img_url: 'http://www.yaqinkeji.top',
+      musicUrl: null,
       set setParams (d) {
         for (let [key, value] of d) {
           this[key] = value

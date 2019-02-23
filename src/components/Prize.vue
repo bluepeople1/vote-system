@@ -9,7 +9,7 @@
             <div class="title">
               <div style="height:30px">奖品展示</div>
             </div>
-            <div v-if="noneData===true">
+            <div v-if="noneData">
               <div>
                 <ul class="margin10">
                   <li v-for="item in dataList" :key="item.id" style="display: unset!important;width:100%">
@@ -18,7 +18,10 @@
                     </div>
                     <div>
                       <!--<img v-if="item.prizeImg!==null" :src="path+item.prizeImg" width="65%">-->
-                      <my-img :imageSrc="path+item.prizeImg" errorType="img" width="100%" height="auto"/>
+                      <my-img :imageSrc="config.img_url + item.prizeIma"
+                              errorType="img"
+                              width="100%"
+                              height="auto"/>
                     </div>
                   </li>
                 </ul>
@@ -35,7 +38,7 @@
             <div>
               <ul style="text-align:left;margin:10px">
                 <!--<li>-->
-                  <!--(一)【礼物功能郑重声明】赠送一点礼物为一元钱可自动兑换票数5票(每个礼物对应的点数不同)。赠送礼物除增加票数外无任何其他功能，所有礼物均为用户自愿购买，购买礼物后本平台不退不换，参与投票奖品价值有限，不要恶意攀比，恶意竞争，本平台不承担任何法律责任。-->
+                <!--(一)【礼物功能郑重声明】赠送一点礼物为一元钱可自动兑换票数5票(每个礼物对应的点数不同)。赠送礼物除增加票数外无任何其他功能，所有礼物均为用户自愿购买，购买礼物后本平台不退不换，参与投票奖品价值有限，不要恶意攀比，恶意竞争，本平台不承担任何法律责任。-->
                 <!--</li>-->
                 <li>【温馨提示】</li>
                 <li>1.活动期间每个微信号每天可投3票，给同一选手一天限投1票。</li>
@@ -62,35 +65,41 @@
 </template>
 
 <script>
-  import { getPrizeList } from '@/api/Service';
-  import NoneData from './common/NoneData';
-  import ImageError from './common/ImageError';
+import apiService from '@/api/Service'
+import NoneData from './common/NoneData'
+import ImageError from './common/ImageError'
 
-  export default {
-    components: {
-      'none-data': NoneData,
-      'my-img': ImageError
-    },
-    data () {
-      return {
-        dataList: [],
-        path: this.config._img_url,
-        noneData: false//没有数据,默认false
+export default {
+  components: {
+    'none-data': NoneData,
+    'my-img': ImageError
+  },
+  data () {
+    return {
+      dataList: []
+    }
+  },
+  created: function () {
+    apiService.getActivityPrize(this, {
+      loginId: this.config.loginId,
+      activityId: this.config.activityId
+    }).then(res => {
+      console.log(res)
+      if (res.resultObject.activityPrize && res.resultObject.activityPrize.length) {
+        this.dataList = res.resultObject.activityPrize
       }
-    },
-    created: function () {
-      getPrizeList({uuid: this.config._uuid}, res => {
-        // console.log('prize',res)
-        if(res.data.sysPrizes){
-          this.dataList = res.data.sysPrizes;
-          this.noneData = !!this.dataList;
-        }
-      });
+    })
+  },
+  computed: {
+    noneData () {
+      return this.dataList.length !== 0
     },
     config () {
       return this.$store.getters.config
     }
   }
+
+}
 </script>
 
 <style scoped>
@@ -115,7 +124,7 @@
     color: #fff;
   }
 
-  .prizeName{
+  .prizeName {
     font-size: 18px;
     padding: 5px;
     background: #ff3b30;

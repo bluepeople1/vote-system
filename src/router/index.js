@@ -16,7 +16,7 @@ Vue.use(Router)
  * @type {{path: string, name: string, component, meta: {keepAlive: boolean}, beforeEnter: index.beforeEnter}}
  */
 const index = {
-  path: '/index/:uuid',
+  path: '/index',
   name: 'Index',
   component: IndexPage,
   meta: {

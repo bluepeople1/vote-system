@@ -1,12 +1,12 @@
 <template>
   <div id="container">
     <div id="music-player">
-      <audio id="player" src="https://www.hzrtpxt.top/shaonianqiang.mp3" autoplay preload loop controls>
+      <audio id="player" :src="config.musicUrl" autoplay preload loop controls>
         <!--<source src="/static/audio/dream.mp3" type="audio/mpeg"/>-->
         Your browser does not support the audio element.
       </audio>
       <div id="player-ctrl">
-        <img id="music" :class="isPlay?'play':'pause'" src="../../assets/img/music.png" alt="" @click="playerCtrl">
+        <img id="music" :class="isPlay ? 'play' : 'pause'" src="../../assets/img/music.png" alt="" @click="playerCtrl">
       </div>
     </div>
   </div>
@@ -14,9 +14,15 @@
 
 <script>
   import wx from 'weixin-js-sdk'
+  import apiService from '@/api/Service'
 
   export default {
     name: 'MusicPlayer',
+    data(){
+      return {
+        musicUrl:'https://www.hzrtpxt.top/shaonianqiang.mp3'
+      }
+    },
     mounted () {
       let audio = document.getElementById('player')
       wx.ready(function () {
@@ -43,6 +49,9 @@
     computed: {
       isPlay () {
         return this.$store.getters.isPlay
+      },
+      config () {
+        return this.$store.getters.config
       }
     }
   }

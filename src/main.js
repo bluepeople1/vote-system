@@ -24,7 +24,7 @@ Vue.use(VueAxios, axios)
 *  2.post设置
 *  3.开发环境与正式环境的区别
 */
-axios.defaults.timeout = 5000
+axios.defaults.timeout = 15000
 // axios.defaults.baseURL =  'http://www.hzrtpxt.top/'
 // axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 
@@ -33,9 +33,9 @@ axios.interceptors.request.use(function (config) {
   // console.log('发请求')
   stores.dispatch('showLoading')
   // 在发送请求之前做些什么
-  config.headers = {
-    'SessionId': stores.getters.config._sessionId
-  }
+  // config.headers = {
+  //   'SessionId': stores.getters.config._sessionId
+  // }
   return config
 }, function (error) {
   // 对请求错误做些什么
@@ -60,7 +60,7 @@ axios.interceptors.response.use(function (response) {
   return Promise.reject(error)
 })
 Vue.prototype.$jquery = jquery
-Vue.prototype.$http = axios
+// Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
 // console.log(stores)
