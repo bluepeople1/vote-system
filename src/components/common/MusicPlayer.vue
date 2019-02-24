@@ -1,7 +1,7 @@
 <template>
   <div id="container">
     <div id="music-player">
-      <audio id="player" :src="config.musicUrl" autoplay preload loop controls>
+      <audio id="player" :src="musicUrl" autoplay preload loop controls>
         <!--<source src="/static/audio/dream.mp3" type="audio/mpeg"/>-->
         Your browser does not support the audio element.
       </audio>

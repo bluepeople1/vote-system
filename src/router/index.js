@@ -67,9 +67,12 @@ const container = {
   component: Container,
   children: [index, prize, list, register]
 }
-
+/**
+ * 选手详情
+ * @type {{path: string, name: string, title: string, component, meta: {pageTitle: string, keepAlive: boolean}}}
+ */
 const detail = {
-  path: '/detail',
+  path: '/detail/:loginId/:activityId/:studentId',
   name: 'Detail',
   title: '选手详情',
   component: DetailPage,
@@ -78,9 +81,12 @@ const detail = {
     keepAlive: true
   }
 }
-
+/**
+ * 礼物赠送
+ * @type {{path: string, name: string, component}}
+ */
 const present = {
-  path: '/present/:userInfo',
+  path: '/present/:loginId/:activityId/:studentId',
   name: 'Present',
   component: PresentPage
 }

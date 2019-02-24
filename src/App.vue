@@ -9,19 +9,20 @@
 </template>
 
 <script>
-  import loading from './components/common/Loading'
-  import MusicPlayer from './components/common/MusicPlayer'
-  export default {
-    name: 'App',
-    components:{
-      loading,MusicPlayer
-    },
-    computed:{
-      isShowLoading(){
-        return this.$store.getters.isShowLoading
-      }
+import loading from './components/common/Loading'
+import MusicPlayer from './components/common/MusicPlayer'
+
+export default {
+  name: 'App',
+  components: {
+    loading, MusicPlayer
+  },
+  computed: {
+    isShowLoading () {
+      return this.$store.getters.isShowLoading
     }
   }
+}
 </script>
 
 <style lang="less">
@@ -36,6 +37,9 @@
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    height: 100vh;
+    height: 100%;
+    #appContainer {
+      height: 100%;
+    }
   }
 </style>

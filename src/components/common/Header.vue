@@ -26,8 +26,7 @@ export default {
   },
   methods: {
     back: function() {
-      const host = "http://localhost:8080";
-      this.$router.push("/index/"+sessionStorage.getItem('uuid'));
+      this.$router.push("/index");
     }
   }
 };

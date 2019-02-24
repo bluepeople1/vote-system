@@ -10,6 +10,12 @@ import './assets/css/weui.min.css'
 import './assets/css/common.css'
 import vueLazyLoad from 'vue-lazyload'
 import stores from './store/index'
+import VueAwesomeSwiper from 'vue-awesome-swiper'
+
+// require styles
+import 'swiper/dist/css/swiper.css'
+
+Vue.use(VueAwesomeSwiper, /* { default global options } */)
 
 Vue.use(vueLazyLoad, {
   preLoad: 1.3,
