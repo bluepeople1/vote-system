@@ -23,6 +23,7 @@ Vue.use(vueLazyLoad, {
   loading: require('./assets/img/loading.gif'),
   attempt:3
 })
+Vue.use(VueAxios, axios)
 
 Vue.use(VueAxios, axios)
 /*
