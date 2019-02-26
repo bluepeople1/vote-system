@@ -11,9 +11,17 @@ import './assets/css/common.css'
 import vueLazyLoad from 'vue-lazyload'
 import stores from './store/index'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
-
 // require styles
 import 'swiper/dist/css/swiper.css'
+import VueVideoPlayer from 'vue-video-player'
+// require videojs style
+import 'video.js/dist/video-js.css'
+// import 'vue-video-player/src/custom-theme.css'
+
+Vue.use(VueVideoPlayer, /* {
+  options: global default options,
+  events: global videojs events
+} */)
 
 Vue.use(VueAwesomeSwiper, /* { default global options } */)
 

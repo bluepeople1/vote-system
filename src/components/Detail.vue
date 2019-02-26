@@ -4,16 +4,16 @@
     <my-header title="详情页"/>
     <!--头部用户信息-->
     <!--<div id="header">-->
-      <!--&lt;!&ndash;照片&ndash;&gt;-->
-      <!--<div id="userImg">-->
-        <!--<swiper-banner :dataList="studentImages" :height="300" />-->
-        <!--&lt;!&ndash;<my-img :imageSrc="config.img_url + studentImages[0]" errorType="user" width="100%" height="300px"/>&ndash;&gt;-->
-      <!--</div>-->
-      <!--&lt;!&ndash;<div @click="toPresentPage">&ndash;&gt;-->
-      <!--&lt;!&ndash;<div style="color:#0db52b">&ndash;&gt;-->
-      <!--&lt;!&ndash;去给TA加油打气>>&ndash;&gt;-->
-      <!--&lt;!&ndash;</div>&ndash;&gt;-->
-      <!--&lt;!&ndash;</div>&ndash;&gt;-->
+    <!--&lt;!&ndash;照片&ndash;&gt;-->
+    <!--<div id="userImg">-->
+    <!--<swiper-banner :dataList="studentImages" :height="300" />-->
+    <!--&lt;!&ndash;<my-img :imageSrc="config.img_url + studentImages[0]" errorType="user" width="100%" height="300px"/>&ndash;&gt;-->
+    <!--</div>-->
+    <!--&lt;!&ndash;<div @click="toPresentPage">&ndash;&gt;-->
+    <!--&lt;!&ndash;<div style="color:#0db52b">&ndash;&gt;-->
+    <!--&lt;!&ndash;去给TA加油打气>>&ndash;&gt;-->
+    <!--&lt;!&ndash;</div>&ndash;&gt;-->
+    <!--&lt;!&ndash;</div>&ndash;&gt;-->
     <!--</div>-->
     <!--内容-->
     <div id="content">
@@ -67,6 +67,10 @@
         </ul>
       </div>
       <none-data class="index-none-data" v-else/>
+      <div>
+        <my-player />
+      </div>
+
       <!--礼物赠送列表-->
       <div class="list">
         <div class="menu">
@@ -140,6 +144,7 @@
 
 <script>
 // import * as _ from 'lodash'
+import VideoPlayer from './common/VideoPlayer'
 import Header from './common/Header'
 import Dialog from './common/Dialog'
 import ImageError from './common/ImageError'
@@ -156,6 +161,7 @@ export default {
     'none-data': NoneData,
     'my-img': ImageError,
     'swiper-banner': SwiperView,
+    'my-player': VideoPlayer
   },
   data () {
     return {
