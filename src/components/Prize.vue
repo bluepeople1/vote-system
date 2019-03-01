@@ -18,7 +18,7 @@
                     </div>
                     <div>
                       <!--<img v-if="item.prizeImg!==null" :src="path+item.prizeImg" width="65%">-->
-                      <my-img :imageSrc="config.img_url + item.prizeIma"
+                      <my-img :imageSrc="item.prizeIma"
                               errorType="img"
                               width="100%"
                               height="auto"/>

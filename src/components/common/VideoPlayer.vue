@@ -115,7 +115,11 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+  /deep/ .vjs_video_3-dimensions {
+    width: 100% !important;
+    height: 250px;
+  }
   .video-js .vjs-big-play-button{
     font-size: 2.5em;
     line-height: 2.3em;

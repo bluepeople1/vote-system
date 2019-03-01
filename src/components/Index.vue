@@ -4,8 +4,7 @@
     <div id="banner">
       <!--海报图-->
       <div id="image">
-        <swiper-banner :dataList="banner" :height="170" />
-        <!--<my-img :imageSrc="path + banner" errorType="img" class="banner-img" width="100%" height="170px"/>-->
+        <swiper-banner :dataList="banner" :height="170"/>
       </div>
       <!--已报名、累计投票、访问量-->
       <div id="counter">
@@ -149,7 +148,7 @@ export default {
     'my-img': ImageError,
     'none-data': NoneData,
     'img-waterfall': WaterFall,
-    'swiper-banner': SwiperView,
+    'swiper-banner': SwiperView
   },
   data () {
     return {
@@ -161,7 +160,7 @@ export default {
       minutes: 0,
       seconds: 0,
       imgList: [],
-      banner: '',
+      banner: [],
       dataList: [], //学生列表
       title: '', //dialog title 信息
       content: '', //dialog 显示提示内容
@@ -515,216 +514,189 @@ export default {
 </script>
 
 <style scoped lang="less">
-  #list {
-    display: flex;
-    align-items: safe;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-left: 15px;
-    margin-right: 15px;
-    .item {
-      position: relative;
-      transition: all 2s cubic-bezier(.17, .67, .83, .67);
-      width: 45%;
-      border-radius: 5px;
-      margin-top: 15px;
-      overflow: hidden;
-      color: #2e8b57;
-      font-size: 14px;
-      background: #fff;
-      .item-header {
-        display: flex;
-        justify-content: space-between;
-        height: 30px;
-        align-items: center;
-        border-bottom: 1px solid #eee;
-        padding-left: 2px;
-        padding-right: 4px;
-        .sort {
-          color: #007900;
-          padding: 5px;
-          font-size: 12px;
-          left: 5px;
-        }
-        .ticket {
-          color: #ff5b1b;
-          font-size: 14px;
-        }
-      }
-      .item-bottom {
-        position: relative;
-        width: 100%;
-        background: #ffffff;
-        height: 35px;
-        line-height: 35px;
-      }
-    }
-  }
-
   #main {
     width: 100%;
     background: #ecf0f5;
     height: auto;
     margin-bottom: 55px;
-  }
-
-  #banner {
-    width: 100%;
-    #image {
+    #banner {
       width: 100%;
-      height: 220px;
+      #image {
+        width: 100%;
+        height: 220px;
+      }
+      /*计数器*/
+      #counter {
+        margin-left: 15px;
+        margin-right: 15px;
+        background: #3cb371;
+        height: 55px;
+        color: #fff;
+        .weui-flex {
+          font-size: 14px;
+          padding: 5px;
+          .weui-flex__item {
+            .placeholder {
+              div {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                span {
+                  padding-left: 5px;
+                }
+              }
+            }
+          }
+        }
+      }
+      /*倒计时*/
+      #countDown {
+        margin-left: 15px;
+        margin-right: 15px;
+        background: #fff;
+        height: 80px;
+        padding-top: 10px;
+
+        & > span {
+          color: #e46112;
+        }
+        /*倒计时*/
+        .li-item-time {
+          width: 20%;
+          height: 30px;
+          margin-top: 10px;
+          background: #ffffff;
+          border: 1px solid #ececec;
+          border-radius: 3px;
+          display: flex;
+          display: -webkit-inline-flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          box-shadow: 1px 3px 14px #dcdcdc;
+          & > span > span {
+            color: red
+          }
+        }
+      }
     }
-
-  }
-
-  /*计数器*/
-  #counter {
-    margin-left: 15px;
-    margin-right: 15px;
-    background: #3cb371;
-    height: 55px;
-    color: #fff;
-    .weui-flex {
-      .weui-flex__item {
-        .placeholder {
-          div {
+    #content {
+      /*搜索*/
+      #search {
+        width: 100%;
+        height: 45px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 15px;
+      }
+      /*搜索框*/
+      #search input {
+        width: 70%;
+        height: 21px;
+        background: #ffffff;
+        border: 1px solid #ececec;
+        border-radius: 3px;
+        padding: 5px;
+        box-sizing: unset;
+      }
+      #list {
+        display: flex;
+        align-items: safe;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-left: 15px;
+        margin-right: 15px;
+        .item {
+          position: relative;
+          transition: all 2s cubic-bezier(.17, .67, .83, .67);
+          width: 45%;
+          border-radius: 5px;
+          margin-top: 15px;
+          overflow: hidden;
+          color: #2e8b57;
+          font-size: 14px;
+          background: #fff;
+          .item-header {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            height: 30px;
             align-items: center;
-            span {
-              padding-left: 5px;
+            border-bottom: 1px solid #eee;
+            padding-left: 2px;
+            padding-right: 4px;
+            .sort {
+              color: #007900;
+              padding: 5px;
+              font-size: 12px;
+              left: 5px;
+            }
+            .ticket {
+              color: #ff5b1b;
+              font-size: 14px;
+            }
+          }
+          .item-bottom {
+            position: relative;
+            width: 100%;
+            background: #ffffff;
+            height: 35px;
+            line-height: 35px;
+            /*投票按钮*/
+            .vote {
+              position: absolute;
+              top: -25px;
+              right: 10px;
+              z-index: 12;
+              width: 35px;
+              height: 35px;
+              line-height: 35px;
+              border-radius: 20px;
+              color: #fff;
+              font-size: 10px;
+              background: #2e8b57;
+              -webkit-box-shadow: 1px 2px 5px #888888;
+              box-shadow: 1px 1px 4px #888888;
+            }
+
+            /*按钮点击效果*/
+            .vote:active {
+              position: absolute;
+              top: -23px;
+              right: 9px;
+              z-index: 12;
+              width: 35px;
+              height: 35px;
+              line-height: 35px;
+              border-radius: 20px;
+              color: #fff;
+              font-size: 10px;
+              background: #2e8b57;
+              -webkit-box-shadow: 1px 2px 5px #888888;
+              box-shadow: 1px 1px 4px #888888;
             }
           }
         }
       }
     }
-
-  }
-
-  /*倒计时*/
-  #countDown {
-    margin-left: 15px;
-    margin-right: 15px;
-    background: #fff;
-    height: 80px;
-    padding-top: 10px;
-
-    & > span {
-      color: #e46112;
+    .weui-btn {
+      font-size: 14px !important;
+      margin-left: 5px;
     }
-    .li-item-time {
-      & > span > span {
-        color: red
-      }
-
+    .marTop15 {
+      margin-top: 15px;
     }
-  }
 
-  /*搜索*/
-  #search {
-    width: 100%;
-    height: 45px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 15px;
-  }
+    .marTop30 {
+      margin-top: 30px;
+    }
+    ul {
+      width: 100%;
+      list-style: none;
+    }
 
-  /*搜索框*/
-  #search input {
-    width: 70%;
-    height: 21px;
-    background: #ffffff;
-    border: 1px solid #ececec;
-    border-radius: 3px;
-    padding: 5px;
-    box-sizing: unset;
-  }
-
-  ul {
-    width: 100%;
-    list-style: none;
-  }
-
-  #counter .weui-flex {
-    font-size: 14px;
-    padding: 5px;
-  }
-
-  .li-item {
-    height: 55px;
-    font-size: 12px;
-  }
-
-  .inline-flex {
-    display: table-cell;
-    vertical-align: middle;
-  }
-
-  /*倒计时*/
-  .li-item-time {
-    width: 20%;
-    height: 30px;
-    margin-top: 10px;
-    background: #ffffff;
-    border: 1px solid #ececec;
-    border-radius: 3px;
-    display: flex;
-    display: -webkit-inline-flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 1px 3px 14px #dcdcdc;
-  }
-
-  /*投票按钮*/
-  .vote {
-    position: absolute;
-    top: -25px;
-    right: 10px;
-    z-index: 12;
-    width: 35px;
-    height: 35px;
-    line-height: 35px;
-    border-radius: 20px;
-    color: #fff;
-    font-size: 10px;
-    background: #2e8b57;
-    -webkit-box-shadow: 1px 2px 5px #888888;
-    box-shadow: 1px 1px 4px #888888;
-  }
-
-  /*按钮点击效果*/
-  .vote:active {
-    position: absolute;
-    top: -23px;
-    right: 9px;
-    z-index: 12;
-    width: 35px;
-    height: 35px;
-    line-height: 35px;
-    border-radius: 20px;
-    color: #fff;
-    font-size: 10px;
-    background: #2e8b57;
-    -webkit-box-shadow: 1px 2px 5px #888888;
-    box-shadow: 1px 1px 4px #888888;
-  }
-
-  .weui-btn {
-    font-size: 14px !important;
-    margin-left: 5px;
-  }
-
-  .line {
-    margin: 13px 0px;
-  }
-
-  .marTop15 {
-    margin-top: 15px;
-  }
-
-  .marTop30 {
-    margin-top: 30px;
+    .line {
+      margin: 13px 0;
+    }
   }
 </style>

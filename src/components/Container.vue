@@ -183,11 +183,13 @@ export default {
         this.getJsTicketAndToken(this)
       ]
       Promise.all(ajaxArr).then(data => {
+        console.log(data[0])
         let m = new Map()
         m.set('activityInfo', data[1].resultObject)
-        m.set('musicUrl', 'https://www.yaqinkeji.top' + data[0].resultObject.musicPath)
+        // m.set('musicUrl', 'https://www.yaqinkeji.top' + data[0].resultObject.musicPath)
+        m.set('musicUrl', 'https://www.hzrtpxt.top/shaonianqiang.mp3')
         document.title = data[1].resultObject.ActivityInfo.activityName
-        this.$store.dispatch('config', new Map().set('activityInfo', data[1].resultObject))
+        this.$store.dispatch('config', m)
       }, error => {
         console.log(error)
       })

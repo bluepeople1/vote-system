@@ -1,7 +1,7 @@
 <template>
   <div id="container">
     <div id="music-player">
-      <audio id="player" :src="musicUrl" autoplay preload loop controls>
+      <audio ref="player" :src="config.musicUrl" autoplay preload loop controls>
         <!--<source src="/static/audio/dream.mp3" type="audio/mpeg"/>-->
         Your browser does not support the audio element.
       </audio>
@@ -13,48 +13,39 @@
 </template>
 
 <script>
-  import wx from 'weixin-js-sdk'
-  import apiService from '@/api/Service'
+import wx from 'weixin-js-sdk'
 
-  export default {
-    name: 'MusicPlayer',
-    data(){
-      return {
-        musicUrl:'https://www.hzrtpxt.top/shaonianqiang.mp3'
-      }
+export default {
+  name: 'MusicPlayer',
+  methods: {
+    /**
+     * 音乐播放控制播放暂停
+     */
+    playerCtrl () {
+      console.log(this.isPlay)
+      this.isPlay ? this.player.play() : this.player.pause()
+      this.$store.dispatch('playOrPausePlayer')
+    }
+  },
+  computed: {
+    player () {
+      return this.$refs.player
     },
-    mounted () {
-      let audio = document.getElementById('player')
+    isPlay () {
+      return this.$store.getters.isPlay
+    },
+    config () {
+      return this.$store.getters.config
+    }
+  },
+  watch: {
+    'config.musicUrl' () {
       wx.ready(function () {
-        audio.play()
+        this.player.play()
       })
-    },
-    methods: {
-      /**
-       * 音乐播放控制播放暂停
-       */
-      playerCtrl () {
-        let _this = this
-        let audio = document.getElementById('player')
-        wx.ready(function () {
-          if (!_this.isPlay) {
-            audio.play()
-          } else {
-            audio.pause()
-          }
-        })
-        this.$store.dispatch('playOrPausePlayer')
-      }
-    },
-    computed: {
-      isPlay () {
-        return this.$store.getters.isPlay
-      },
-      config () {
-        return this.$store.getters.config
-      }
     }
   }
+}
 </script>
 
 <style scoped lang="less">

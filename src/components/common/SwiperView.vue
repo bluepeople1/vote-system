@@ -2,7 +2,7 @@
   <swiper :options="swiperOption" ref="mySwiper">
     <!-- slides -->
     <swiper-slide v-for="(item, index) in dataList" :key="index">
-      <my-img :imageSrc="path + item" errorType="img" class="banner-img" width="100%" :height="height + 'px'"/>
+      <my-img :imageSrc="item" errorType="img" class="banner-img" width="100%" :height="height + 'px'"/>
     </swiper-slide>
     <div class="swiper-pagination" slot="pagination"></div>
   </swiper>
@@ -26,14 +26,14 @@ export default {
   name: 'SwiperView',
   props: {
     dataList: Array,
-    height:Number
+    height: Number
   },
   data () {
     return {
       path: 'http://www.yaqinkeji.top',
       swiperOption: {
         pagination: {
-          el: '.swiper-pagination',
+          el: '.swiper-pagination'
         },
         autoplay: {
           delay: 3000,
@@ -57,6 +57,12 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+  .swiper-container {
+    height: 220px !important;
+  }
 
+  /deep/ .swiper-pagination-bullet-active {
+    background: #009a3f !important;
+  }
 </style>

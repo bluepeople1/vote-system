@@ -68,7 +68,7 @@
       </div>
       <none-data class="index-none-data" v-else/>
       <div>
-        <my-player />
+        <my-player/>
       </div>
 
       <!--礼物赠送列表-->
@@ -79,22 +79,23 @@
         </div>
         <div>
           <ul v-if="giftList.length !== 0">
-            <li class="card-item flex" v-for="item in giftList" :key="item.id">
-              <div class="fl grid marL10">
+            <li class="card-item" v-for="item in giftList" :key="item.id">
+              <div class="grid marL10">
                 <my-img :imageSrc="item.headImgUrl" errorType="user" width="35" height="35"/>
               </div>
-              <div class="fl grid marL10">
-                <div style="text-align: left">
-                  <span style="color:#26a69a;text-align: left">{{item.nickName}}</span>
+              <div class="item-right">
+                <div class="grid marL10">
+                  <span style="color:#26a69a;text-align: left">{{item.nickName || '暂无'}}</span>
+                  <span style="color: #a22232;font-size: 12px;">{{dataFormat(item.addTime.time)}}</span>
                 </div>
-                <div style="text-align: left">
-                  <span
-                    style="color: #a22232;font-size: 12px;">赠送了{{item.giftCount||0}}个{{item.giftName||'未知礼物'}}</span>
+                <div class="grid marL10">
+                  <span style="color:#26a69a;text-align: left">{{item.giftName || '未知礼物'}}</span>
+                  <span style="color: #a22232;font-size: 12px;">X {{item.giftCount || 0}}</span>
                 </div>
               </div>
             </li>
           </ul>
-          <div v-else class="card-item flex" style="justify-content: center;align-content: center">
+          <div v-else class="card-item" style="justify-content: center;align-content: center">
             <div style="color: #ec8b89;line-height: 56px;">暂时还未收到礼物</div>
           </div>
         </div>
@@ -106,22 +107,25 @@
         </div>
         <div>
           <ul v-if="voteCon.length !== 0">
-            <li class="card-item flex" v-for="item in voteCon" :key="item.id">
-              <div class="fl grid marL10">
+            <li class="card-item" v-for="item in voteCon" :key="item.id">
+              <div class="grid marL10">
                 <my-img :imageSrc="item.headImgUrl" errorType="user" width="35" height="35"/>
               </div>
-              <div class="fl grid marL10">
-                <div style="text-align: left">
-                  <span style="color:#26a69a;text-align: left">{{item.nickName}}</span>
+              <div class="item-right">
+                <div class="grid marL10">
+                  <span style="color:#26a69a;text-align: left">{{item.nickName || '暂无'}}</span>
+                  <span style="color: #a22232;font-size: 12px;">{{dataFormat(item.addTime.time)}}</span>
                 </div>
-                <div style="text-align: left">
-                  <span
-                    style="color: #a22232;font-size: 12px;">给你投了{{item.votingCount || 0}}票</span>
+                <div class="grid marR10">
+                  <div style="text-align: left">
+                    <span style="color:#26a69a">票数</span>
+                  </div>
+                  <span style="color: #a22232;font-size: 12px;">X {{item.votingCount || 0}}票</span>
                 </div>
               </div>
             </li>
           </ul>
-          <div v-else class="card-item flex" style="justify-content: center;align-content: center">
+          <div v-else class="card-item" style="justify-content: center;align-content: center">
             <div style="color: #ec8b89;line-height: 56px;">暂时还没有人投票</div>
           </div>
         </div>
@@ -187,6 +191,9 @@ export default {
     }, false)
   },
   methods: {
+    dataFormat (date) {
+      return moment(date).format('YYYY-MM-DD HH:mm:ss')
+    },
     getStuInfo () {
       let data = {
         loginId: this.loginId,
@@ -452,6 +459,12 @@ export default {
           background: #fff;
           width: 100%;
           height: 55px;
+          display: flex;
+          .item-right {
+            width: 100%;
+            display: flex;
+            justify-content: space-between
+          }
         }
       }
     }

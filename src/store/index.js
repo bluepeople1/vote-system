@@ -6,7 +6,7 @@ Vue.use(Vuex)
 const stores = new Vuex.Store({
   state: {
     config: {
-      appId: 'wxb36f7c6095549952',
+      appId: 'wx244b2b17c6b7901f',
       wxUserInfo: {},
       loginId: '',
       openId: '',
