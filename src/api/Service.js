@@ -95,9 +95,10 @@ export default {
   /**
    * 13、调用access_token和jsapi_ticket  -分享用到
    * @param vm
+   * @param data
    * @returns {*|AxiosPromise<any>}
    */
-  getTokenAndTicket: (vm) => vm.axios.get(host + 'wxGetToken'),
+  getTokenAndTicket: (vm, data) => vm.axios.get(host + 'wxGetToken', {params: data}),
   /**
    * 14、刷礼物-微信支付
    * @param vm

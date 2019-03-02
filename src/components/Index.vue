@@ -84,7 +84,7 @@
             </div>
 
             <!--<img class="item-pic" v-lazy="path+item.studentImg" width="100%" height="170" />-->
-            <my-img :imageSrc="path + item.studentHeadIma" errorType="user" width="100%" height="170"/>
+            <my-img :imageSrc="item.studentHeadIma" errorType="user" width="100%" height="170"/>
           </div>
           <div class="item-bottom">
             <span>{{item.studentName}} </span>
@@ -121,7 +121,7 @@
       <div class="marTop30" v-if="isShowImgList">
         <ul>
           <li v-for="(it,idx) in imgList" :key="idx">
-            <my-img v-if="idx!==0" :imageSrc="path + it" errorType="img" width="100%"/>
+            <my-img :imageSrc="it" errorType="img" width="100%"/>
           </li>
         </ul>
       </div>
@@ -341,7 +341,7 @@ export default {
         headImgUrl: this.config.headImgUrl
       }).then(data => {
         //2001-当天已经跟该选手投票 2002-当天投票机会用完 2003-投票成功
-        switch (Number(data.resultObject.code)) {
+        switch (Number(data.resultNumber)) {
           case 2001:
             this.title = '温馨提示'
             this.content = '您已给该选手投过票了哦~\n去给TA赠送礼物吧~'

@@ -7,7 +7,8 @@ const stores = new Vuex.Store({
   state: {
     config: {
       appId: 'wx244b2b17c6b7901f',
-      wxUserInfo: {},
+      nickName: '',
+      headImgUrl: '',
       loginId: '',
       openId: '',
       activityId: '',

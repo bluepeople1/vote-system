@@ -22,7 +22,6 @@ export default {
      * 音乐播放控制播放暂停
      */
     playerCtrl () {
-      console.log(this.isPlay)
       this.isPlay ? this.player.play() : this.player.pause()
       this.$store.dispatch('playOrPausePlayer')
     }
@@ -41,7 +40,9 @@ export default {
   watch: {
     'config.musicUrl' () {
       wx.ready(function () {
-        this.player.play()
+        if (this.$refs) {
+          this.$refs.player.play()
+        }
       })
     }
   }

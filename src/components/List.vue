@@ -19,7 +19,7 @@
             </div>
 
             <div class="fl grid marL10">
-              <my-img :imageSrc="config.img_url + item.studentHeadIma" errorType="user" width="45px" height="45px"/>
+              <my-img :imageSrc="item.studentHeadIma" errorType="user" width="45px" height="45px"/>
             </div>
             <div class="fl grid marL10">
               <div class="userName">

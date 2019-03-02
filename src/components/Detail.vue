@@ -62,7 +62,7 @@
       <div v-if="isShowImgList">
         <ul>
           <li v-for="(it, i) in studentImages" :key="i">
-            <my-img :imageSrc="config.img_url + it" errorType="img" width="100%"/>
+            <my-img :imageSrc="it" errorType="img" width="100%"/>
           </li>
         </ul>
       </div>
@@ -88,8 +88,10 @@
                   <span style="color:#26a69a;text-align: left">{{item.nickName || '暂无'}}</span>
                   <span style="color: #a22232;font-size: 12px;">{{dataFormat(item.addTime.time)}}</span>
                 </div>
-                <div class="grid marL10">
-                  <span style="color:#26a69a;text-align: left">{{item.giftName || '未知礼物'}}</span>
+                <div class="grid marR10">
+                  <div style="text-align: left">
+                    <span style="color:#26a69a;text-align: left">{{item.giftName || '未知礼物'}}</span>
+                  </div>
                   <span style="color: #a22232;font-size: 12px;">X {{item.giftCount || 0}}</span>
                 </div>
               </div>
@@ -315,7 +317,7 @@ export default {
         headImgUrl: this.config.headImgUrl
       }).then(data => {
         //2001-当天已经跟该选手投票 2002-当天投票机会用完 2003-投票成功
-        switch (Number(data.resultObject.code)) {
+        switch (Number(data.resultNumber)) {
           case 2001:
             this.showTip(['温馨提示', '您已给该选手投过票了哦~\n去给TA赠送礼物吧~', 'block'])
             break

@@ -9,7 +9,7 @@
           <div id="userImg">
             <!--用护照片-->
             <img v-if="studentInfo.studentHeadIma === null" src="../assets/img/user.jpg" class="userPhoto">
-            <img v-else :src="config.img_url + studentInfo.studentHeadIma" class="userPhoto"/>
+            <img v-else :src="studentInfo.studentHeadIma" class="userPhoto"/>
           </div>
         </div>
 
@@ -30,7 +30,7 @@
         <div class="dis-flex-grow gift-item " @click="changeGift(index)" v-for="(item,index) in dataList" :key="index">
           <div class="bg-white gift">
             <div>
-              <my-img :imageSrc="config.img_url + item.giftIma"
+              <my-img :imageSrc="item.giftIma"
                       errorType="img"
                       class="gift-icon"
                       width="100%"
@@ -87,7 +87,7 @@ export default {
   },
   data () {
     return {
-      studentInfo:{},
+      studentInfo: {},
       loginId: this.$route.params.loginId,
       activityId: this.$route.params.activityId,
       studentId: this.$route.params.studentId,
@@ -145,71 +145,39 @@ export default {
         outTradeNo += Math.floor(Math.random() * 10)
       }
       outTradeNo = new Date().getTime() + outTradeNo
+      console.log('ss', this.config)
       //调用微信支付
-      wxPay({
-          openId: store.state.openId,
-          body: this.giftName,
-          detail: '给用户增加' + this.giftTicket + '票',
-          outTradeNo: outTradeNo,
-          totalFee: this.num * this.price * 100
-        }, res => {
-          WeixinJSBridge.invoke(
-            'getBrandWCPayRequest', {
-              'appId': res.data.appId,     //公众号名称，由商户传入
-              'timeStamp': res.data.timeStamp,         //时间戳，自1970年以来的秒数
-              'nonceStr': res.data.nonceStr, //随机串
-              'package': res.data.package,
-              'signType': res.data.signType,         //微信签名方式：
-              'paySign': res.data.paySign //微信签名
-            },
-            function (res) {
-              if (res.err_msg === 'get_brand_wcpay_request:ok') {
-                sendGift({
-                  nickName: store.wxUserInfo.nickName,
-                  headImgUrl: store.wxUserInfo.headImgUrl,
-                  sex: store.wxUserInfo.sex,
-                  uuid: store.state.uuid,
-                  openId: store.state.openId,
-                  accountAmt: that.price,
-                  accountGiftId: that.giftId,
-                  accountStudentId: that.userInfo.studentId,
-                  accountNumb: that.num,
-                  ticketCount: that.giftTicket * that.num
-                }, function () {
-                  that.title = '赠送成功'
-                  that.content = '成功给该选手增加了' + that.giftTicket * that.num + '票'
-                  that.dialog = 'block'
-                  that.refreshUserInfo()
-                })
-              }
-            })
-        }
-      )
-
-      //成功后跳转页面
-      // this.$router.push({
-      //   name: "Success",
-      //   params: {
-      //     payInfo: {
-      //       payName: this.giftName,
-      //       price: this.price,
-      //       num: this.num,
-      //       userInfo: this.$route.params.userInfo
-      //     }
-      //   }
-      // });
-      //失败后跳转页面
-      // this.$router.push({
-      //   name: "Failure",
-      //   params: {
-      //     payInfo: {
-      //       payName: this.giftName,
-      //       price: this.price,
-      //       num: this.num,
-      //       userInfo: this.$route.params.userInfo
-      //     }
-      //   }
-      // });
+      apiService.wxPay(this, {
+        openid: this.config.openId,
+        outTradeNo: outTradeNo,
+        totalFee: 1,//this.num * this.price * 100,
+        body: this.giftName,
+        detail: '给用户增加' + this.giftTicket + '票',
+        studentId: this.studentId,
+        activityId: this.activityId,
+        loginId: this.loginId,
+        nickName: this.config.nickName,
+        headImgUrl: this.config.headImgUrl,
+        giftId: this.giftId,
+        giftCount: this.num
+      }).then(data => {
+        WeixinJSBridge.invoke(
+          'getBrandWCPayRequest', {
+            'appId': data.appId,     //公众号名称，由商户传入
+            'timeStamp': data.timeStamp,         //时间戳，自1970年以来的秒数
+            'nonceStr': data.nonceStr, //随机串
+            'package': data.package,
+            'signType': data.signType,         //微信签名方式：
+            'paySign': data.paySign //微信签名
+          }, (res) => {
+            if (res.err_msg === 'get_brand_wcpay_request:ok') {
+              that.title = '赠送成功'
+              that.content = '成功给该选手增加了' + that.giftTicket * that.num + '票'
+              that.dialog = 'block'
+              // that.refreshUserInfo()
+            }
+          })
+      })
     },
     subtract () {
       if (this.num !== 1) {
@@ -267,7 +235,8 @@ export default {
         })
       })
     }
-  },
+  }
+  ,
   beforeDestroy () {
     // this.$jquery(window).off('popstate');
     window.removeEventListener('popstate', function () {
@@ -282,6 +251,7 @@ export default {
     background: #efefef !important;
     border: 1px solid #ffc7c2 !important;
   }
+
   #main {
     background: #ecf0f5;
     min-height: calc(100% - 44px);

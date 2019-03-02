@@ -16,19 +16,19 @@
         </li>
         <li>
           <router-link to="/prize" tag="div" class="li-item">
-            <img :src="(selectedTab===2)?selectImg.prize.selected:selectImg.prize.unselected" class="li-item-icon"/>
-            <span :class="(selectedTab===2)?'selected-tab-font':'unselected-tab-font'">奖品</span>
+            <img :src="(selectedTab === 2) ? selectImg.prize.selected : selectImg.prize.unselected" class="li-item-icon"/>
+            <span :class="(selectedTab === 2)? 'selected-tab-font' : 'unselected-tab-font'">奖品</span>
           </router-link>
         </li>
         <li>
           <router-link to="/list" tag="div" class="li-item">
-            <img :src="(selectedTab===3)?selectImg.list.selected:selectImg.list.unselected" class="li-item-icon"/>
+            <img :src="(selectedTab===3) ? selectImg.list.selected : selectImg.list.unselected" class="li-item-icon"/>
             <span :class="(selectedTab===3)?'selected-tab-font':'unselected-tab-font'">排行榜</span>
           </router-link>
         </li>
         <li>
           <router-link to="/register" tag="div" class="li-item">
-            <img :src="(selectedTab===4)?selectImg.register.selected:selectImg.register.unselected"
+            <img :src="(selectedTab===4) ? selectImg.register.selected : selectImg.register.unselected"
                  class="li-item-icon"/>
             <span :class="(selectedTab===4)?'selected-tab-font':'unselected-tab-font'">报名</span>
           </router-link>
@@ -77,100 +77,24 @@ export default {
     //页面刷新后，判断当前页面所在tab
     this.currentTab()
     this.init()
-
-    // if (!this.config._uuid) {
-    //   //如果uuid不存在，就从url中截取
-    //   let path = window.location.href.split('/index/')[1]
-    //   let params = path.split('&')
-    //   let openId = params[0].split('=')[1]
-    //   let uuid = params[1].split('=')[1]
-    //   let nickName = decodeURI(params[2].split('=')[1])
-    //   let headImgUrl = decodeURIComponent(params[3].split('=')[1])
-    //   let sex = (params[4].split('=')[1]) === '1' ? '男' : '女'
-    //   let sharedUrl = 'http://www.hzrtpxt.top/master/wxlogin?uuid=' + uuid
-    //   let map = new Map()
-    //   map.set('_wxUserInfo', {
-    //     nickName: nickName,
-    //     headImgUrl: headImgUrl,
-    //     sex: sex
-    //   })
-    //   map.set('_openId', openId)
-    //   map.set('_uuid', uuid)
-    //   map.set('_sharedUrl', sharedUrl)
-    //   this.$store.dispatch('config', map)
-    //   console.log(this.$store.getters.config)
-    // }
-    // newLogin(function (data) {
-    //   that.activityInfo = data
-    //   //设置显示标题
-    //   document.title = that.config._activity.activeName
-    //   getActivityImg({activeName: that.config._activity.activeName}, res => {
-    //     console.log('getActivityImg')
-    //     if (res.data.length !== 0) {
-    //       this.$store.dispatch('config', new Map().set('_sharedImg', res.data[0].imgSource))
-    //     }
-    //     getJsApiTicket(function (res) {
-    //       const config = signs(res.data.jsapi_ticket, window.location.href.split('#')[0])
-    //       wx.config({
-    //         debug: false,
-    //         appId: that.config._appId,
-    //         timestamp: config.timestamp,
-    //         nonceStr: config.noncestr,
-    //         signature: config.signature,
-    //         jsApiList: [
-    //           'onMenuShareTimeline',
-    //           'onMenuShareAppMessage',
-    //           'updateAppMessageShareData',
-    //           'updateTimelineShareData'
-    //         ]
-    //       })
-    //       let shareConfig = {
-    //         title: that.config._activity.activeName, // 分享标题
-    //         desc: that.config._activity.activeContext || '我们正在做活动，快点进来看看吧！',
-    //         link: that.config._sharedUrl, // 分享链接
-    //         imgUrl: that.config._img_url + that.config._state.sharedImg, // 分享图标
-    //         success: function () {
-    //           // console.log('成功');
-    //         },
-    //         cancel: function () {
-    //           // alert('失败');
-    //         }
-    //       }
-    //
-    //       wx.ready(function () {
-    //         wx.onMenuShareTimeline(shareConfig)
-    //         wx.onMenuShareAppMessage(shareConfig)
-    //         wx.updateAppMessageShareData(shareConfig)
-    //         wx.updateTimelineShareData(shareConfig)
-    //       })
-    //     })
-    //   })
-    // })
     //this.device();
   },
   methods: {
     init () {
-      // let path = window.location.href.split('/index/')[1]
-      // let openId = CommonService.getQuery('openId')
-      // let nickName = CommonService.getQuery('nickName')
-      // let headImgUrl = CommonService.getQuery('headimgurl')
-      // let activityId = CommonService.getQuery('activityId')
-      // let loginId = CommonService.getQuery('loginId')
-      let activityId = 'w2xBGXmFlf9oF4qJ9ykFjeUe8ZXaEQbl'
-      let loginId = 'MCpXlCFJcutr5bWzC6sAilPyHNJglLu5'
-      let sharedUrl = 'www.yaqinkeji.top/homeschool/wxInterface/wxToGrantAuthorization?aid=' + activityId + '&bid=' + loginId
-
-      let map = new Map()
-      // map.set('wxUserInfo', {
-      //   nickName: nickName || '',
-      //   headImgUrl: headImgUrl || ''
-      // })
-      // map.set('openId', openId)
-      map.set('loginId', loginId)
-      map.set('sharedUrl', sharedUrl)
-      map.set('activityId', activityId)
-      this.$store.dispatch('config', map)
-      this.loadData()
+      if (!(this.config.activityId && this.config.loginId)) {
+        let activityId = this.$route.query.activityId
+        let loginId = this.$route.query.loginId
+        let sharedUrl = 'http://www.yaqinkeji.top/homeschool/wxInterface/wxToGrantAuthorization?aid=' + activityId + '&bid=' + loginId
+        let map = new Map()
+        map.set('nickName', this.$route.query.nickname || '')
+        map.set('headImgUrl', this.$route.query.headimgurl || '')
+        map.set('openId', this.$route.query.openId)
+        map.set('loginId', loginId)
+        map.set('sharedUrl', sharedUrl)
+        map.set('activityId', activityId)
+        this.$store.dispatch('config', map)
+        this.loadData()
+      }
     },
     loadData () {
       let data = {
@@ -180,16 +104,16 @@ export default {
       let ajaxArr = [
         this.getMusic(this, data),
         this.getCurrentActivityInfo(this, data),
-        this.getJsTicketAndToken(this)
+        this.getJsTicketAndToken(this, data)
       ]
       Promise.all(ajaxArr).then(data => {
-        console.log(data[0])
         let m = new Map()
         m.set('activityInfo', data[1].resultObject)
         // m.set('musicUrl', 'https://www.yaqinkeji.top' + data[0].resultObject.musicPath)
         m.set('musicUrl', 'https://www.hzrtpxt.top/shaonianqiang.mp3')
         document.title = data[1].resultObject.ActivityInfo.activityName
         this.$store.dispatch('config', m)
+        this.setWxShareConfig(data[2].resultObject, data[1].resultObject.ActivityInfo)
       }, error => {
         console.log(error)
       })
@@ -209,6 +133,7 @@ export default {
     },
     /**
      * 获取当前活动的信息
+     * @param that
      * @param params
      * @response resultNumber 0:成功 非0:失败
      * @response resultMsg 结果消息
@@ -234,9 +159,9 @@ export default {
     /**
      * 获取微信 js_ticket 和 token
      */
-    getJsTicketAndToken (that) {
+    getJsTicketAndToken (that, data) {
       return new Promise(function (resolve, reject) {
-        apiService.getTokenAndTicket(that).then(success => {
+        apiService.getTokenAndTicket(that, data).then(success => {
           return resolve(success)
         }, err => {
           return reject(err)
@@ -245,28 +170,29 @@ export default {
     },
     /**
      * 微信分享配置信息
-     * @param jsapi_ticket
+     * @param data
+     * @param activityInfo
      */
-    setWxShareConfig (data) {
+    setWxShareConfig (data, activityInfo) {
       const config = signs(data.jsapi_ticket, window.location.href.split('#')[0])
       wx.config({
         debug: false,
-        appId: data.appId,
+        appId: this.config.appId,
         timestamp: config.timestamp,
         nonceStr: config.noncestr,
         signature: config.signature,
         jsApiList: [
           'onMenuShareTimeline',
           'onMenuShareAppMessage',
-          'updateAppMessageShareData',
-          'updateTimelineShareData'
+          // 'updateAppMessageShareData',
+          // 'updateTimelineShareData'
         ]
       })
       let shareConfig = {
-        title: this.config._activity.activeName, // 分享标题
-        desc: this.config._activity.activeContext || '我们正在做活动，快点进来看看吧！',
-        link: this.config._sharedUrl, // 分享链接
-        imgUrl: this.config._img_url + this.config._state.sharedImg, // 分享图标
+        title: activityInfo.activityName, // 分享标题
+        desc: activityInfo.activityContent || '我们正在做活动，快点进来看看吧！',
+        link: this.config.sharedUrl, // 分享链接
+        imgUrl: data.headImgUrl || '', // 分享图标
         success: function () {
           // console.log('成功');
         },
@@ -277,8 +203,8 @@ export default {
       wx.ready(function () {
         wx.onMenuShareTimeline(shareConfig)
         wx.onMenuShareAppMessage(shareConfig)
-        wx.updateAppMessageShareData(shareConfig)
-        wx.updateTimelineShareData(shareConfig)
+        // wx.updateAppMessageShareData(shareConfig)
+        // wx.updateTimelineShareData(shareConfig)
       })
     },
     shareUrlParamsFilter (s) {
