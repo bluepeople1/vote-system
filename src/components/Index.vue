@@ -82,19 +82,17 @@
               <span class="sort">{{item.studentCode}} 号选手</span>
               <span class="ticket">{{item.studentVoteNumber}}票</span>
             </div>
-
-            <!--<img class="item-pic" v-lazy="path+item.studentImg" width="100%" height="170" />-->
             <my-img :imageSrc="item.studentHeadIma" errorType="user" width="100%" height="170"/>
           </div>
           <div class="item-bottom">
             <span>{{item.studentName}} </span>
-            <span class="vote" @click="vote(item.id)">投票</span>
+            <!--<span class="vote" @click="vote(item.id)">投票</span>-->
           </div>
         </div>
       </div>
       <none-data class="index-none-data" v-else/>
 
-      <div class="marTop15" v-show="isLoadMore === true">
+      <div class="marTop15" v-show="isLoadMore">
         <div class="weui-flex">
           <div class="weui-flex__item" @click="loadMoreStudent">
             <div class="placeholder" style="margin:0 15px;">
@@ -110,8 +108,7 @@
             <hr class="line">
           </div>
           <div class="weui-flex__item">
-            <div class="placeholder">活动详情
-            </div>
+            <div class="placeholder">活动详情</div>
           </div>
           <div class="weui-flex__item">
             <hr class="line">
@@ -126,6 +123,22 @@
         </ul>
       </div>
       <none-data class="index-none-data" v-else/>
+      <div class="marTop30">
+        <div class="weui-flex">
+          <div class="weui-flex__item">
+            <hr class="line">
+          </div>
+          <div class="weui-flex__item">
+            <div class="placeholder">活动视频</div>
+          </div>
+          <div class="weui-flex__item">
+            <hr class="line">
+          </div>
+        </div>
+      </div>
+      <div class="marTop30" v-for="(it,idx) in videoList" :key="idx" v-if="videoList.length !== 0">
+        <my-player :videoPath="it" :poster="banner[0]" />
+      </div>
     </div>
     <my-dialog :title="title" :toGiftPage="isToGiftPage" :content="content" :display="dialog"
                v-on:dialogListener="dialogListener"/>
@@ -141,6 +154,7 @@ import SwiperView from './common/SwiperView'
 import WaterFall from 'vue-waterfall-easy'
 import moment from 'moment'
 import store from '../assets/js/common'
+import VideoPlayer from './common/VideoPlayer'
 
 export default {
   components: {
@@ -148,7 +162,8 @@ export default {
     'my-img': ImageError,
     'none-data': NoneData,
     'img-waterfall': WaterFall,
-    'swiper-banner': SwiperView
+    'swiper-banner': SwiperView,
+    'my-player': VideoPlayer
   },
   data () {
     return {
@@ -166,10 +181,10 @@ export default {
       content: '', //dialog 显示提示内容
       keywords: '', //搜索关键字
       dialog: 'none',
-      path: 'http://www.yaqinkeji.top',
-      isLoadMore: true,//是否显示加载更多
       isShowAllStudent: false,//是否显示加载全部
-      page: 1//当前页码
+      page: 0, //当前页码
+      pageSize: 15,
+      videoList: []
     }
   },
   created: function () {
@@ -184,17 +199,18 @@ export default {
       this.getCurrentActivityStuList(this, {
         loginId: this.activityInfo.loginId, // 登录用户Id
         activityId: this.activityInfo.activityId, // 当前所在活动Id
-        page: 0,
+        page: this.page,
         pageSize: 15,
         studentName: ''
-      })
+      }),
+      this.getStuVideos(this, data)
     ]
     Promise.all(ajaxArr).then(data => {
       this.timeDiff() // 倒计时
       this.banner = data[0].resultObject.headImgUrl
       this.imgList = data[1].resultObject.contentImgUrl
       this.dataList = data[2].resultObject.studentInfo
-      this.isShowLoadMoreBtn(data[2].resultObject.studentCount, data[2].resultObject.page)
+      this.videoList = data[3].resultObject.videoPath
     }, error => {
       console.log(error)
     })
@@ -363,12 +379,9 @@ export default {
      */
     search () {
       this.getStudentList(res => {
-        console.log(res)
         if (res.studentInfo && res.studentInfo.length) {
           this.dataList = res.studentInfo
-          this.isLoadMore = false
         } else {
-          this.isLoadMore = true
           this.getStudentList(res => {
             this.dataList = res.studentInfo
           })
@@ -378,21 +391,12 @@ export default {
         }
       }, true)
     },
-    /**
-     * 是否显示加载更多按钮
-     * @param total
-     * @param curPage
-     */
-    isShowLoadMoreBtn (total, curPage) {
-      let totalPage = Math.ceil(total / 10)
-      this.isLoadMore = curPage < totalPage
-    },
     //加载更多学生
     loadMoreStudent () {
+      this.page += 1
       this.getStudentList(res => {
-        this.page += 1
+        console.log(res)
         this.dataList = this.dataList.concat(res.studentInfo)
-        this.isShowLoadMoreBtn(count, res.page)
       })
     },
     /**
@@ -402,7 +406,7 @@ export default {
       Promise.all([this.getCurrentActivityStuList(this, {
         loginId: this.activityInfo.loginId,
         activityId: this.activityInfo.activityId,
-        page: 0,
+        page: this.page,
         pageSize: 15,
         studentName: isSearch ? this.keywords : ''
       })]).then(data => {
@@ -426,6 +430,18 @@ export default {
         params: {loginId: this.activityInfo.loginId, activityId: this.activityInfo.activityId, studentId: studentId}
       })
     },
+    /**
+     * 获取活动视频
+     */
+    getStuVideos (that, params) {
+      return new Promise((resolve, reject) => {
+        apiService.getActivityVideo(that, params).then(success => {
+          resolve(success)
+        }, err => {
+          reject(err)
+        })
+      })
+    },
     //dialog 的监听方法
     dialogListener: function (data) {
       this.dialog = data.hide
@@ -445,10 +461,19 @@ export default {
   },
   computed: {
     /**
+     * 是否显示加载更多按钮
+     */
+    isLoadMore () {
+      if (this.dataList.length === 0) {
+        return false
+      }
+      return (this.page + 1) < Math.ceil(this.activityInfo.count / this.pageSize)
+    },
+    /**
      * 是否展示学生列表
      */
     isShowStudentList () {
-      return this.dataList !== 0
+      return this.dataList.length !== 0
     },
     /**
      * 是否展示图片列表

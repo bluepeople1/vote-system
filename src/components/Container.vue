@@ -73,7 +73,6 @@ export default {
     }
   },
   created: function () {
-    console.log('container')
     //页面刷新后，判断当前页面所在tab
     this.currentTab()
     this.init()
@@ -107,10 +106,11 @@ export default {
         this.getJsTicketAndToken(this, data)
       ]
       Promise.all(ajaxArr).then(data => {
+        console.log(data)
         let m = new Map()
         m.set('activityInfo', data[1].resultObject)
         // m.set('musicUrl', 'https://www.yaqinkeji.top' + data[0].resultObject.musicPath)
-        m.set('musicUrl', 'https://www.hzrtpxt.top/shaonianqiang.mp3')
+        m.set('musicUrl', data[0].resultObject.musicPath)
         document.title = data[1].resultObject.ActivityInfo.activityName
         this.$store.dispatch('config', m)
         this.setWxShareConfig(data[2].resultObject, data[1].resultObject.ActivityInfo)

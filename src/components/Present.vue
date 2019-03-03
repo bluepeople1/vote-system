@@ -131,6 +131,11 @@ export default {
     }, false)
   },
   methods: {
+    refreshUserInfo () {
+      Promise.all([this.getStuInfo()]).then(res => {
+        this.studentInfo = res[0].resultObject.studentInfo
+      })
+    },
     backToIndex: function () {
       this.$router.push('/index')
     },
@@ -145,7 +150,6 @@ export default {
         outTradeNo += Math.floor(Math.random() * 10)
       }
       outTradeNo = new Date().getTime() + outTradeNo
-      console.log('ss', this.config)
       //调用微信支付
       apiService.wxPay(this, {
         openid: this.config.openId,
@@ -174,7 +178,7 @@ export default {
               that.title = '赠送成功'
               that.content = '成功给该选手增加了' + that.giftTicket * that.num + '票'
               that.dialog = 'block'
-              // that.refreshUserInfo()
+              that.refreshUserInfo()
             }
           })
       })
@@ -266,7 +270,6 @@ export default {
           padding: 15px;
           .userPhoto {
             border-radius: 50px;
-            width: 100px;
           }
           & > img {
             width: 70px;

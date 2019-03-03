@@ -240,12 +240,6 @@
         let src,
           url = window.URL || window.webkitURL || window.mozURL,
           files = e.target.files
-        if (that.imgNum !== 0) {
-          that.title = '提示'
-          that.content = '只能上传一张图片'
-          that.dialog = 'block' //显示dialog
-          return
-        }
         for (let i = 0, len = files.length; i < len; ++i) {
           let file = files[i]
           // console.log('file', file);

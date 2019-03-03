@@ -2,19 +2,6 @@
   <!--详情页-->
   <div id="main">
     <my-header title="详情页"/>
-    <!--头部用户信息-->
-    <!--<div id="header">-->
-    <!--&lt;!&ndash;照片&ndash;&gt;-->
-    <!--<div id="userImg">-->
-    <!--<swiper-banner :dataList="studentImages" :height="300" />-->
-    <!--&lt;!&ndash;<my-img :imageSrc="config.img_url + studentImages[0]" errorType="user" width="100%" height="300px"/>&ndash;&gt;-->
-    <!--</div>-->
-    <!--&lt;!&ndash;<div @click="toPresentPage">&ndash;&gt;-->
-    <!--&lt;!&ndash;<div style="color:#0db52b">&ndash;&gt;-->
-    <!--&lt;!&ndash;去给TA加油打气>>&ndash;&gt;-->
-    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-    <!--</div>-->
     <!--内容-->
     <div id="content">
       <!--用户名-->
@@ -59,18 +46,13 @@
           </div> -->
         </div>
       </div>
-      <div v-if="isShowImgList">
-        <ul>
-          <li v-for="(it, i) in studentImages" :key="i">
-            <my-img :imageSrc="it" errorType="img" width="100%"/>
-          </li>
-        </ul>
+      <div v-if="isShowImgList" v-for="(it, i) in studentImages" :key="i" style="margin: 15px;">
+        <my-img :imageSrc="it" errorType="img" width="100%"/>
       </div>
       <none-data class="index-none-data" v-else/>
-      <div>
-        <my-player/>
+      <div v-for="(it,idx) in videoList" :key="idx" v-if="videoList.length !== 0">
+        <my-player :videoPath="it" :poster="studentImages[0]"/>
       </div>
-
       <!--礼物赠送列表-->
       <div class="list">
         <div class="menu">
@@ -84,18 +66,27 @@
                 <my-img :imageSrc="item.headImgUrl" errorType="user" width="35" height="35"/>
               </div>
               <div class="item-right">
-                <div class="grid marL10">
-                  <span style="color:#26a69a;text-align: left">{{item.nickName || '暂无'}}</span>
-                  <span style="color: #a22232;font-size: 12px;">{{dataFormat(item.addTime.time)}}</span>
+                <div class="grid marL10" style="flex: 1 1;">
+                  <span class="wx-name">{{item.nickName || '暂无'}}</span>
+                  <span class="time">{{dataFormat(item.addTime.time)}}</span>
                 </div>
-                <div class="grid marR10">
-                  <div style="text-align: left">
-                    <span style="color:#26a69a;text-align: left">{{item.giftName || '未知礼物'}}</span>
+                <div class="marR10" style="display: flex;align-items: center">
+                  <div class="marR10 time">赠送了</div>
+                  <my-img class="marR10"
+                          :imageSrc="item.giftImaUrl"
+                          errorType="user"
+                          width="25"
+                          height="25"/>
+                  <div class="grid" style="width: 40px;">
+                    <div class="gift-name">
+                      <span>{{item.giftName || '未知礼物'}}</span>
+                    </div>
+                    <span class="gift-num">X {{item.giftCount || 0}}</span>
                   </div>
-                  <span style="color: #a22232;font-size: 12px;">X {{item.giftCount || 0}}</span>
                 </div>
               </div>
             </li>
+            <li class="loadMore" v-if="isLoadMoreGift">点击加载更多</li>
           </ul>
           <div v-else class="card-item" style="justify-content: center;align-content: center">
             <div style="color: #ec8b89;line-height: 56px;">暂时还未收到礼物</div>
@@ -126,6 +117,7 @@
                 </div>
               </div>
             </li>
+            <li class="loadMore" v-if="isLoadMoreVoteCon">点击加载更多</li>
           </ul>
           <div v-else class="card-item" style="justify-content: center;align-content: center">
             <div style="color: #ec8b89;line-height: 56px;">暂时还没有人投票</div>
@@ -181,7 +173,8 @@ export default {
       studentId: this.$route.params.studentId,
       loginId: this.$route.params.loginId,
       activityId: this.$route.params.activityId,
-      voteCon: [] // 学生所获票数记录
+      voteCon: [], // 学生所获票数记录
+      videoList: []
     }
   },
   created () {
@@ -212,19 +205,24 @@ export default {
       let ajaxArr = [
         this.getStuBasicInfo(this, data),
         this.getStuImages(this, data),
+        this.getStuVideos(this, data),
         this.getStuVoteCon(this, listParams),
         this.getStuGiftList(this, listParams)
       ]
       Promise.all(ajaxArr).then(data => {
-        console.log(data)
         // 选手基本信息
         this.studentInfo = data[0].resultObject.studentInfo
         // 选手照片信息
         this.studentImages = data[1].resultObject.studentImaUrl
+        // 视频
+        this.videoList = data[2].resultObject.videoPath
         // 选手所获投票记录
-        this.voteCon = data[2].resultObject.studentVotingInfo
+        this.voteCon = data[3].resultObject.studentVotingInfo
         // 选手所获礼物列表
-        this.giftList = data[3].resultObject.studentToGiftInfo
+        this.giftList = data[4].resultObject.studentToGiftInfo
+
+        console.log('1', this.voteCon)
+        console.log('2', this.giftList)
       })
     },
     /**
@@ -275,6 +273,18 @@ export default {
         })
       })
     },
+    /**
+     * 获取学生视频
+     */
+    getStuVideos (that, params) {
+      return new Promise((resolve, reject) => {
+        apiService.getActivityVideo(that, params).then(success => {
+          resolve(success)
+        }, err => {
+          reject(err)
+        })
+      })
+    },
     //返回首页
     goBack: function () {
       window.history.length > 1
@@ -316,6 +326,7 @@ export default {
         nickName: this.config.nickName,
         headImgUrl: this.config.headImgUrl
       }).then(data => {
+        console.log(data)
         //2001-当天已经跟该选手投票 2002-当天投票机会用完 2003-投票成功
         switch (Number(data.resultNumber)) {
           case 2001:
@@ -324,8 +335,9 @@ export default {
           case 2002:
             this.showTip(['温馨提示', '您一天只能投三票哦~\n去给TA赠送礼物吧~', 'block'])
             break
-          case 2003:
+          case 0:
             this.showTip(['投票成功', '感谢您的参与，您已给该选手增加了宝贵一票', 'block'])
+            this.getStuInfo()
             break
         }
       })
@@ -336,6 +348,12 @@ export default {
     }
   },
   computed: {
+    isLoadMoreVoteCon () {
+      return false
+    },
+    isLoadMoreGift () {
+      return false
+    },
     /**
      * 是否展示图片列表
      */
@@ -465,8 +483,36 @@ export default {
           .item-right {
             width: 100%;
             display: flex;
-            justify-content: space-between
+            justify-content: space-between;
+
+            .wx-name {
+              color: rgb(38, 166, 154);
+              text-align: left;
+              font-size: 14px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+            .time {
+              color: #a22232;
+              font-size: 12px;
+              text-align: left;
+            }
+            .gift-num {
+              color: #a22232;
+              font-size: 12px;
+            }
+            .gift-name {
+              color: rgb(38, 166, 154);
+              font-size: 12px;
+            }
           }
+        }
+        .loadMore {
+          background: #e4e4e4;
+          font-size: 14px;
+          height: 35px;
+          line-height: 35px;
         }
       }
     }

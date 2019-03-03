@@ -13,7 +13,6 @@
                 @timeupdate="onPlayerTimeupdate($event)"
                 @canplay="onPlayerCanplay($event)"
                 @canplaythrough="onPlayerCanplaythrough($event)"
-
                 @statechanged="playerStateChanged($event)"
                 @ready="playerReadied">
   </video-player>
@@ -28,42 +27,35 @@ import '../../assets/css/custom-theme.css'
 // require('videojs-contrib-hls/dist/videojs-contrib-hls.js')
 export default {
   name: 'VideoPlayers',
+  props: {
+    videoPath: String,
+    poster: String
+  },
   data () {
     return {
       playerOptions: {
-        height: '360',
-        autoplay: true,
-        muted: true,
+        // height: '360',
+        fluid: false,
+        preload: 'auto',
+        autoplay: false, // 播放器准备好之后，是否自动播放 【默认false】
+        muted: false, // true/false 是否静音
         language: 'en',
         playbackRates: [0.7, 1.0, 1.5, 2.0],
         sources: [{
-          type: "video/mp4",
+          type: 'video/mp4',
           // mp4
-          src: "http://my.yaqinkeji.top/customerTrans/9dab29be5af5297fa1e6a894a27b1a3f/cdf64f2-16925409f0e-0006-4793-59e-da928.mp4",
+          src: this.videoPath
           // webm
           // src: "https://cdn.theguardian.tv/webM/2015/07/20/150716YesMen_synd_768k_vp8.webm"
         }],
-        poster: "https://surmon-china.github.io/vue-quill-editor/static/images/surmon-1.jpg"
+        poster: this.poster
       }
     }
   },
   mounted () {
-    setTimeout(() => {
-      console.log('dynamic change options', this.player)
-      // change src
-      // this.playerOptions.sources[0].src = 'https://cdn.theguardian.tv/webM/2015/07/20/150716YesMen_synd_768k_vp8.webm';
-      // change item
-      // this.$set(this.playerOptions.sources, 0, {
-      //   type: "video/mp4",
-      //   src: 'https://cdn.theguardian.tv/webM/2015/07/20/150716YesMen_synd_768k_vp8.webm',
-      // })
-      // change array
-      // this.playerOptions.sources = [{
-      //   type: "video/mp4",
-      //   src: 'https://cdn.theguardian.tv/webM/2015/07/20/150716YesMen_synd_768k_vp8.webm',
-      // }]
-      // this.player.muted(false)
-    }, 5000)
+    // setTimeout(() => {
+    //   console.log('dynamic change options', this.player)
+    // }, 5000)
   },
   computed: {
     player () {
@@ -79,12 +71,10 @@ export default {
       // console.log('player pause!', player)
     },
     // ...player event
-
     // or listen state event
     playerStateChanged (playerCurrentState) {
       // console.log('player current update state', playerCurrentState)
     },
-
     // player is ready
     playerReadied (player) {
       console.log('the player is readied', player)
@@ -115,12 +105,13 @@ export default {
 }
 </script>
 
-<style scoped lang="less">
-  /deep/ .vjs_video_3-dimensions {
+<style lang="less">
+  .video-js {
     width: 100% !important;
     height: 250px;
   }
-  .video-js .vjs-big-play-button{
+
+  .vjs-big-play-button {
     font-size: 2.5em;
     line-height: 2.3em;
     height: 2.5em;
@@ -129,15 +120,17 @@ export default {
     -moz-border-radius: 2.5em;
     border-radius: 2.5em;
     background-color: #73859f;
-    background-color: rgba(115,133,159,.5);
+    background-color: rgba(115, 133, 159, .5);
     border-width: 0.15em;
     margin-top: -1.25em;
     margin-left: -1.75em;
   }
+
   /* 中间的播放箭头 */
   .vjs-big-play-button .vjs-icon-placeholder {
     font-size: 1.63em;
   }
+
   /* 加载圆圈 */
   .vjs-loading-spinner {
     font-size: 2.5em;

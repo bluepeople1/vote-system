@@ -1,5 +1,5 @@
 <template>
-  <div id="error">
+  <div style="display: flex">
     <img v-if='errorType==="user"' v-lazy="imageSrc" :key="imageSrc" :onerror="userErr" :width="width" :height="height"/>
     <img v-if='errorType==="img"' v-lazy="imageSrc" :key="imageSrc" :onerror="imgErr" :width="width" :height="height" />
   </div>
