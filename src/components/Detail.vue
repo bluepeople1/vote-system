@@ -86,7 +86,7 @@
                 </div>
               </div>
             </li>
-            <li class="loadMore" v-if="isLoadMoreGift">点击加载更多</li>
+            <li class="loadMore" @click="loadMore(0)" v-if="isLoadMoreGift">点击加载更多</li>
           </ul>
           <div v-else class="card-item" style="justify-content: center;align-content: center">
             <div style="color: #ec8b89;line-height: 56px;">暂时还未收到礼物</div>
@@ -117,7 +117,7 @@
                 </div>
               </div>
             </li>
-            <li class="loadMore" v-if="isLoadMoreVoteCon">点击加载更多</li>
+            <li class="loadMore" @click="loadMore(1)" v-if="isLoadMoreVoteCon">点击加载更多</li>
           </ul>
           <div v-else class="card-item" style="justify-content: center;align-content: center">
             <div style="color: #ec8b89;line-height: 56px;">暂时还没有人投票</div>
@@ -174,7 +174,12 @@ export default {
       loginId: this.$route.params.loginId,
       activityId: this.$route.params.activityId,
       voteCon: [], // 学生所获票数记录
-      videoList: []
+      videoList: [],
+      giftPage: 1,
+      votePage: 1,
+      voteTotalCount: 0,
+      giftTotalCount: 0,
+      pageSize: 15
     }
   },
   created () {
@@ -186,6 +191,25 @@ export default {
     }, false)
   },
   methods: {
+    loadMore (type) {
+      let params = {
+        loginId: this.loginId,
+        activityId: this.activityId,
+        studentId: this.studentId,
+        pageSize: this.pageSize
+      }
+      if (type) {
+        params.page = (++this.votePage)
+        Promise.resolve(this.getStuVoteCon(this, params)).then(data => {
+          this.voteCon = [...this.voteCon, ...data.resultObject.studentVotingInfo]
+        })
+      } else {
+        params.page = (++this.giftPage)
+        Promise.resolve(this.getStuGiftList(this, params)).then(data => {
+          this.giftList = [...this.giftList, ...data.resultObject.studentToGiftInfo]
+        })
+      }
+    },
     dataFormat (date) {
       return moment(date).format('YYYY-MM-DD HH:mm:ss')
     },
@@ -199,8 +223,8 @@ export default {
         loginId: this.loginId,
         activityId: this.activityId,
         studentId: this.studentId,
-        page: 0,
-        pageSize: 15
+        page: 1,
+        pageSize: this.pageSize
       }
       let ajaxArr = [
         this.getStuBasicInfo(this, data),
@@ -218,11 +242,12 @@ export default {
         this.videoList = data[2].resultObject.videoPath
         // 选手所获投票记录
         this.voteCon = data[3].resultObject.studentVotingInfo
+        this.voteTotalCount = data[3].resultObject.studentVotingInfoCount
         // 选手所获礼物列表
         this.giftList = data[4].resultObject.studentToGiftInfo
-
-        console.log('1', this.voteCon)
-        console.log('2', this.giftList)
+        this.giftTotalCount = data[3].resultObject.studentToGiftInfoCount
+        console.log('1', data[3].resultObject)
+        console.log('2', data[4].resultObject)
       })
     },
     /**
@@ -349,10 +374,16 @@ export default {
   },
   computed: {
     isLoadMoreVoteCon () {
-      return false
+      if (this.voteCon.length === 0) {
+        return false
+      }
+      return this.page < Math.ceil(this.voteTotalCount / this.pageSize)
     },
     isLoadMoreGift () {
-      return false
+      if (this.giftList.length === 0) {
+        return false
+      }
+      return this.page < Math.ceil(this.giftTotalCount / this.pageSize)
     },
     /**
      * 是否展示图片列表

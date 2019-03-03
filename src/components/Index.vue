@@ -182,7 +182,7 @@ export default {
       keywords: '', //搜索关键字
       dialog: 'none',
       isShowAllStudent: false,//是否显示加载全部
-      page: 0, //当前页码
+      page: 1, //当前页码
       pageSize: 15,
       videoList: []
     }
@@ -467,7 +467,7 @@ export default {
       if (this.dataList.length === 0) {
         return false
       }
-      return (this.page + 1) < Math.ceil(this.activityInfo.count / this.pageSize)
+      return this.page < Math.ceil(this.activityInfo.count / this.pageSize)
     },
     /**
      * 是否展示学生列表
