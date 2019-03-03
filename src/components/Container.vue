@@ -26,13 +26,13 @@
             <span :class="(selectedTab===3)?'selected-tab-font':'unselected-tab-font'">排行榜</span>
           </router-link>
         </li>
-        <li>
-          <router-link to="/register" tag="div" class="li-item">
-            <img :src="(selectedTab===4) ? selectImg.register.selected : selectImg.register.unselected"
-                 class="li-item-icon"/>
-            <span :class="(selectedTab===4)?'selected-tab-font':'unselected-tab-font'">报名</span>
-          </router-link>
-        </li>
+        <!--<li>-->
+          <!--<router-link to="/register" tag="div" class="li-item">-->
+            <!--<img :src="(selectedTab===4) ? selectImg.register.selected : selectImg.register.unselected"-->
+                 <!--class="li-item-icon"/>-->
+            <!--<span :class="(selectedTab===4)?'selected-tab-font':'unselected-tab-font'">报名</span>-->
+          <!--</router-link>-->
+        <!--</li>-->
       </ul>
     </div>
   </div>

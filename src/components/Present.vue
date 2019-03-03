@@ -154,7 +154,7 @@ export default {
       apiService.wxPay(this, {
         openid: this.config.openId,
         outTradeNo: outTradeNo,
-        totalFee: 1,//this.num * this.price * 100,
+        totalFee: this.num * this.price * 100,
         body: this.giftName,
         detail: '给用户增加' + this.giftTicket + '票',
         studentId: this.studentId,

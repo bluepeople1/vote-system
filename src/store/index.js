@@ -26,7 +26,7 @@ const stores = new Vuex.Store({
       }
     },
     isShowLoading: false,
-    isPlay: true// 音乐的播放暂停
+    isPlay: false // 音乐的播放暂停
   },
   getters: {
     /**

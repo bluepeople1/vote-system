@@ -65,4 +65,8 @@ export default {
   /deep/ .swiper-pagination-bullet-active {
     background: #009a3f !important;
   }
+
+  .swiper-pagination-fraction, .swiper-pagination-custom, .swiper-container-horizontal > .swiper-pagination-bullets {
+    bottom: 20px;
+  }
 </style>

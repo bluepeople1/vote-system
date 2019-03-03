@@ -395,7 +395,6 @@ export default {
     loadMoreStudent () {
       this.page += 1
       this.getStudentList(res => {
-        console.log(res)
         this.dataList = this.dataList.concat(res.studentInfo)
       })
     },
@@ -547,6 +546,7 @@ export default {
     #banner {
       width: 100%;
       #image {
+        padding-top: 5px;
         width: 100%;
         height: 220px;
       }

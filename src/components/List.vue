@@ -93,7 +93,7 @@ export default {
       apiService.getActivityStudents(this, {
         loginId: this.config.loginId, // 登录用户Id
         activityId: this.config.activityId, // 当前所在活动Id
-        page: 0,
+        page: 1,
         pageSize: 10,
         studentName: ''
       }).then(success => {
