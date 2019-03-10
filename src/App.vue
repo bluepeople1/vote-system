@@ -4,7 +4,7 @@
       <music-player></music-player>
       <router-view/>
     </div>
-    <loading :isShow="isShowLoading"></loading>
+    <loading :isShow="loadingInfo.isShow" :content="loadingInfo.content"></loading>
   </div>
 </template>
 
@@ -18,8 +18,8 @@ export default {
     loading, MusicPlayer
   },
   computed: {
-    isShowLoading () {
-      return this.$store.getters.isShowLoading
+    loadingInfo () {
+      return this.$store.getters.loadingInfo
     }
   }
 }

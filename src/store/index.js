@@ -16,16 +16,18 @@ const stores = new Vuex.Store({
       sharedUrl: '',
       sharedImg: '',
       activityInfo: {},
-      base_url: 'https://www.hzrtpxt.top/nserver',
-      img_url: 'http://www.yaqinkeji.top',
       musicUrl: null,
+      studentCode: 0,
       set setParams (d) {
         for (let [key, value] of d) {
           this[key] = value
         }
       }
     },
-    isShowLoading: false,
+    loading: {
+      isShow: false,
+      content: '正在火速加载中...'
+    },
     isPlay: false // 音乐的播放暂停
   },
   getters: {
@@ -34,8 +36,8 @@ const stores = new Vuex.Store({
      * @param state
      * @returns {getters.isShowLoading|(function(*))|boolean|*|default.computed.isShowLoading|m.computed.isShowLoading}
      */
-    isShowLoading: state => {
-      return state.isShowLoading
+    loadingInfo: state => {
+      return state.loading
     },
     /**
      * 返回播放状态
@@ -53,26 +55,18 @@ const stores = new Vuex.Store({
     config (state, data) {
       state.config.setParams = data
     },
-    /**
-     * 显示或者隐藏Loading
-     * @param state
-     */
-    showOrHideLoading (state) {
-      state.isShowLoading = !state.isShowLoading
-    },
-    /**
-     * 显示loading
-     * @param state
-     */
-    showLoading (state) {
-      state.isShowLoading = true
+    loading (state, data) {
+      state.loading = {
+        isShow: data.isShow,
+        content: data.content
+      }
     },
     /**
      * 隐藏loading
      * @param state
      */
     hideLoading (state) {
-      state.isShowLoading = false
+      state.loading.isShow = false
     },
     /**
      * 播放/暂停音乐
@@ -86,19 +80,8 @@ const stores = new Vuex.Store({
     config (context, data) {
       context.commit('config', data)
     },
-    /**
-     * 提交显示或者隐藏Loading动作
-     * @param context
-     */
-    showOrHideLoading (context) {
-      context.commit('showOrHideLoading')
-    },
-    /**
-     * 显示loading
-     * @param context
-     */
-    showLoading (context) {
-      context.commit('showLoading')
+    loading (context, content) {
+      context.commit('loading', content)
     },
     /**
      * 隐藏loading

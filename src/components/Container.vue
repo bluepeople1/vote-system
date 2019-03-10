@@ -27,7 +27,7 @@
             <span :class="(selectedTab === 3)?'selected-tab-font':'unselected-tab-font'">排行榜</span>
           </div>
         </li>
-        <li>
+        <li v-if="Number(config.studentCode) === 0">
           <div @click="redirect('register')" class="li-item">
             <img :src="(selectedTab === 4) ? selectImg.register.selected : selectImg.register.unselected"
                  class="li-item-icon"/>
@@ -56,6 +56,7 @@ export default {
       openId: this.$route.params.openId,
       nickName: this.$route.params.nickName,
       headImgUrl: this.$route.params.headImgUrl,
+      studentCode: this.$route.params.studentCode,
       selectImg: {
         index: {
           selected: require('../assets/img/index_selected.png'),
@@ -122,7 +123,8 @@ export default {
             name: 'Register',
             params: {
               loginId: this.loginId,
-              activityId: this.activityId
+              activityId: this.activityId,
+              openId: this.openId
             }
           })
           break
@@ -130,16 +132,15 @@ export default {
     },
     init () {
       if (!(this.config.activityId && this.config.loginId)) {
-        let activityId = this.$route.params.activityId
-        let loginId = this.$route.params.loginId
-        let sharedUrl = 'http://www.yaqinkeji.top/homeschool/wxInterface/wxToGrantAuthorization?aid=' + activityId + '&bid=' + loginId
+        let sharedUrl = 'http://www.yaqinkeji.top/homeschool/wxInterface/wxToGrantAuthorization?aid=' + this.activityId + '&bid=' + this.loginId
         let map = new Map()
-        map.set('nickName', this.$route.params.nickname || '')
-        map.set('headImgUrl', this.$route.params.headimgurl || '')
-        map.set('openId', this.$route.params.openId)
-        map.set('loginId', loginId)
+        map.set('nickName', this.nickName || '')
+        map.set('headImgUrl', this.headImgUrl || '')
+        map.set('openId', this.openId)
+        map.set('loginId', this.loginId)
         map.set('sharedUrl', sharedUrl)
-        map.set('activityId', activityId)
+        map.set('activityId', this.activityId)
+        map.set('studentCode', Number(this.studentCode))
         this.$store.dispatch('config', map)
         this.loadData()
       }

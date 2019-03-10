@@ -46,7 +46,10 @@ axios.defaults.timeout = 15000
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {
   // console.log('发请求')
-  stores.dispatch('showLoading')
+  stores.dispatch('loading', {
+    isShow: true,
+    content: '正在火速加载中...'
+  })
   // 在发送请求之前做些什么
   // config.headers = {
   //   'SessionId': stores.getters.config._sessionId

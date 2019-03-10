@@ -127,7 +127,7 @@ export default {
    * @param data
    * @returns {*|AxiosPromise<any>}
    */
-  register: (vm, data) => vm.axios.get(host + 'wxToAddStudent', {params: data}),
+  register: (vm, data) => vm.axios.post(host + 'wxToAddStudent', data),
   /**
    * 20、获取阿里云上传视频的凭证
    * @param vm

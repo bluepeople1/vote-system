@@ -1,7 +1,7 @@
 <template>
   <!--详情页-->
   <div id="main">
-    <div style="margin:15px;">
+    <div style="margin: 55px 15px;">
       <div class="page__bd marT10 marT35">
         <div class="weui-cells weui-cells_form">
           <div class="title">
@@ -45,11 +45,13 @@
                         :key="index"
                         v-if="images && images.length">
                       <img class="weui-uploader__file" :src="item">
+                      <img @click="deleteImg(index)" class="delete" src="../assets/img/delete.png">
                     </li>
-                    <li v-if="images.length < 9">
+                    <li v-if="images.length < 9" class="selectImg">
                       <div class="weui-uploader__input-box">
-                        <div id="uploaderInput" @click="selectImg()" class="weui-uploader__input"></div>
+                        <div id="uploaderInput" class="weui-uploader__input"></div>
                       </div>
+                      <input type="file" id="imgUpload" @change="imageChange($event)">
                     </li>
                   </ul>
                 </div>
@@ -58,7 +60,7 @@
           </div>
         </div>
         <div class="upload">
-          <my-player v-if="videoUrl !== ''" :videoPath="videoUrl"/>
+          <my-player style="margin: 15px;" v-if="videoUrl !== ''" :videoPath="videoUrl"/>
           <div class="selectVideo" v-if="videoUrl === ''">
             <div class="uploadVideoBtn">
               <img src="../assets/img/upload_video.png">
@@ -74,8 +76,7 @@
             <!--<span class="progress">上传进度: <i id="auth-progress">{{authProgress}}</i> %</span>-->
           </div>
         </div>
-
-        <div class="flex-grow marT15" @click="sign">
+        <div class="flex-grow marT35" @click="authUpload">
           <a class="weui-btn weui-btn_primary flex-grow">立即报名</a>
         </div>
       </div>
@@ -93,7 +94,6 @@
 
 import apiService from '@/api/Service'
 import Dialog from './common/Dialog'
-import wx from 'weixin-js-sdk'
 import {signs} from '@/assets/js/sign'
 import VideoPlayer from './common/VideoPlayer'
 
@@ -116,20 +116,53 @@ export default {
       title: '', //dialog title 信息
       content: '', //dialog 显示提示内容
       dialog: 'none',
+      openId: this.$route.params.openId,
       loginId: this.$route.params.loginId,
       activityId: this.$route.params.activityId,
       images: [],
       videos: [],
       aliyunUserId: '1767548054776104',
       region: 'cn-shanghai',
-      preViewVideoUrl: ''
+      preViewVideoUrl: '',
+      imageUrls: [],
+      client: new OSS.Wrapper({
+        region: 'oss-cn-shanghai',
+        accessKeyId: 'LTAIQ4GpUKhm8SV4',
+        accessKeySecret: 'rWnaH83ydq5NSpVTLcFUwWrBU218JI',
+        bucket: 'my-img-bucket'
+      })
     }
   },
   methods: {
+    deleteImg (index) {
+      this.images.splice(index, 1)
+      this.imageUrls.splice(index, 1)
+    },
+    /**
+     * 重置视频选择状态
+     */
     reSelect () {
       this.statusText = '您可以重新选择一个视频~'
       this.preViewVideoUrl = ''
     },
+    /**
+     * 选择图片
+     * @param e
+     */
+    imageChange (e) {
+      this.images.push(URL.createObjectURL(e.target.files[0]))
+      try {
+        this.client.put((new Date()).valueOf()+ '-' + e.target.files[0].name, e.target.files[0]).then(result => {
+          this.imageUrls.push(result.url)
+        })
+      } catch (er) {
+        console.log(er)
+      }
+    },
+    /**
+     * 选择视频
+     * @param e
+     */
     fileChange (e) {
       this.file = e.target.files[0]
       this.preViewVideoUrl = URL.createObjectURL(e.target.files[0])
@@ -152,6 +185,10 @@ export default {
       this.resumeDisabled = true
     },
     authUpload () {
+      this.$store.dispatch('loading', {
+        isShow: true,
+        content: '正在上传视频...'
+      })
       // 然后调用 startUpload 方法, 开始上传
       if (this.uploader !== null) {
         this.uploader.startUpload()
@@ -189,7 +226,7 @@ export default {
         addFileSuccess: function (uploadInfo) {
           self.uploadDisabled = false
           self.resumeDisabled = false
-          self.statusText = '添加文件成功, 等待上传...'
+          // self.statusText = '添加文件成功, 等待上传...'
           console.log('addFileSuccess: ' + uploadInfo.file.name)
         },
         // 开始上传
@@ -225,25 +262,18 @@ export default {
         },
         // 文件上传成功
         onUploadSucceed: function (uploadInfo) {
-          console.log(uploadInfo)
-          console.log('onUploadSucceed: ' + uploadInfo.file.name + ', endpoint:' + uploadInfo.endpoint + ', bucket:' + uploadInfo.bucket + ', object:' + uploadInfo.object)
-          self.statusText = '文件上传成功!'
+          self.$store.dispatch('hideLoading')
+          self.sign(uploadInfo.videoId)
         },
         // 文件上传失败
         onUploadFailed: function (uploadInfo, code, message) {
-          console.log('onUploadFailed: file:' + uploadInfo.file.name + ',code:' + code + ', message:' + message)
-          self.statusText = '文件上传失败!'
         },
         // 取消文件上传
         onUploadCanceled: function (uploadInfo, code, message) {
-          console.log('Canceled file: ' + uploadInfo.file.name + ', code: ' + code + ', message:' + message)
-          self.statusText = '文件已暂停上传'
         },
         // 文件上传进度，单位：字节, 可以在这个函数中拿到上传进度并显示在页面上
         onUploadProgress: function (uploadInfo, totalSize, progress) {
-          console.log('onUploadProgress:file:' + uploadInfo.file.name + ', fileSize:' + totalSize + ', percent:' + Math.ceil(progress * 100) + '%')
           self.authProgress = Math.ceil(progress * 100)
-          self.statusText = '文件上传中...'
         },
         // 上传凭证超时
         onUploadTokenExpired: function (uploadInfo) {
@@ -260,7 +290,6 @@ export default {
         },
         // 全部文件上传结束
         onUploadEnd: function (uploadInfo) {
-          console.log('onUploadEnd: uploaded all the files')
           self.statusText = '文件上传完毕'
         }
       })
@@ -270,54 +299,25 @@ export default {
     isIosDevice () {
       return navigator.appVersion.includes('iPhone')
     },
-    //适配ios设备localId展示图片
-    getLocalImgData (localId) {
-      wx.getLocalImgData({
-        localId: localId, // 图片的localID
-        success: (res) => {
-          let localData = res.localData
-          if (localData.indexOf('data:image') !== 0) {
-            //判断是否有这样的头部
-            localData = 'data:image/jpeg;base64,' + localData
-          }
-          localData = localData.replace(/[\r|\n]/g, '').replace('data:image/jgp', 'data:image/jpeg')
-          //第一个替换的是换行符，第二个替换的是图片类型，因为在IOS机上测试时看到它的图片类型时jgp，
-          //这不知道时什么格式的图片，为了兼容其他设备就把它转为jpeg
-          this.images.push(localData)
-        }
-      })
-    },
-    //上传图片
-    uploadImg (localIds) {
-      wx.uploadImage({
-        localId: localIds[0], // 需要上传的图片的本地ID，由chooseImage接口获得
-        isShowProgressTips: 1,// 默认为1，显示进度提示
-        success: (res) => {
-          //let serverId = res.serverId; // 返回图片的服务器端ID
-          this.userImg = res.serverId
-        }
-      })
-    },
-    //选择图片
-    selectImg () {
-      wx.chooseImage({
-        count: 1, // 默认9
-        sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
-        sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
-        success: (res) => {// 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
-          this.getLocalImgData(res.localIds[0])
-        }
-      })
-    },
     //dialog 的监听方法
     dialogListener: function (data) {
       this.dialog = data.hide
+      this.toIndex()
     },
     toIndex: function () {
-      this.$router.push('/index')
+      this.$router.push({
+        name: 'Index',
+        params: {
+          loginId: this.config.loginId,
+          activityId: this.config.activityId,
+          openId: this.config.openId,
+          nickName: this.config.nickName,
+          headImgUrl: this.config.headImgUrl
+        }
+      })
     },
     //报名方法
-    sign: function () {
+    sign (videoId) {
       if (!this.userName) {
         this.title = '错误提示'
         this.content = '请填写参赛选手姓名'
@@ -330,28 +330,39 @@ export default {
         this.dialog = 'block' //显示dialog
         return
       }
-      if (!(this.images && this.images.length)) {
+      if (!(this.imageUrls && this.imageUrls.length)) {
         this.title = '错误提示'
         this.content = '请至少选择一张参赛选手图片'
         this.dialog = 'block' //显示dialog
         return
       }
-
       apiService.register(this, {
+        openId: this.openId,
         loginId: this.loginId,
         activityId: this.activityId,
         studentName: this.userName,
         tel: this.contact,
-        ImageId: [],
-        videoId: []
+        ImageId: this.imageUrls,
+        videoId: [videoId]
       }).then(success => {
-        this.title = '报名成功'
-        this.content = '您已成功参加活动'
-        this.dialog = 'block' //显示dialog
+        if (success.resultNumber === '0') {
+          this.reset()
+          this.title = '报名成功'
+          this.content = success.message
+          this.dialog = 'block' //显示dialog
+        }
+      }).catch(err => {
+        alert('err')
       })
     },
+    /**
+     * 重置页面
+     */
     reset () {
+      this.$store.dispatch('config', new Map().set('studentCode', 1))
+      this.preViewVideoUrl = ''
       this.images.length = 0
+      this.imageUrls.length = 0
       this.userName = ''
       this.contact = ''
     }
@@ -549,12 +560,28 @@ export default {
     display: flex;
     margin-bottom: 0 !important;
     margin-right: 0 !important;
+    .weui-uploader__files {
+      .selectImg {
+        input {
+          position: absolute;
+          width: 77px;
+          height: 77px;
+          opacity: 0;
+          z-index: 2;
+        }
+      }
+      .delete {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        right: 4px;
+      }
+    }
   }
 
   .weui-gallery {
     z-index: 10000000 !important;
   }
-
   ul {
     list-style: none;
     width: 100%;
@@ -564,6 +591,8 @@ export default {
       justify-content: flex-start;
       display: flex;
       flex-wrap: wrap;
+      position: relative;
     }
   }
+
 </style>

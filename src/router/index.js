@@ -16,7 +16,7 @@ Vue.use(Router)
  * @type {{path: string, name: string, component, meta: {keepAlive: boolean}, beforeEnter: index.beforeEnter}}
  */
 const index = {
-  path: '/index/:loginId/:activityId/:openId/:nickName/:headImgUrl',
+  path: '/index/:loginId/:activityId/:openId/:nickName/:headImgUrl/:studentCode',
   name: 'Index',
   component: IndexPage,
   meta: {
@@ -53,7 +53,7 @@ const list = {
  * @type {{path: string, name: string, component}}
  */
 const register = {
-  path: '/register/:loginId/:activityId',
+  path: '/register/:loginId/:activityId/:openId',
   name: 'Register',
   component: RegisterPage
 }
@@ -72,7 +72,7 @@ const container = {
  * @type {{path: string, name: string, title: string, component, meta: {pageTitle: string, keepAlive: boolean}}}
  */
 const detail = {
-  path: '/detail/:loginId/:activityId/:studentId',
+  path: '/detail/:loginId/:activityId/:studentId/:openId/:nickName/:headImgUrl',
   name: 'Detail',
   title: '选手详情',
   component: DetailPage,

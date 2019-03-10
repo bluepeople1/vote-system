@@ -90,7 +90,11 @@ export default {
         params: {
           loginId: this.loginId,
           activityId: this.activityId,
-          studentId: studentId}
+          openId: this.config.openId,
+          nickName: this.config.nickName,
+          headImgUrl: this.config.headImgUrl,
+          studentId: studentId
+        }
       })
     },
     //获取排行榜列表

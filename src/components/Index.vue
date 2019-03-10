@@ -404,8 +404,8 @@ export default {
      */
     getStudentList (callback, isSearch = false) {
       Promise.all([this.getCurrentActivityStuList(this, {
-        loginId: this.activityInfo.loginId,
-        activityId: this.activityInfo.activityId,
+        loginId: this.config.loginId,
+        activityId: this.config.activityId,
         page: this.page,
         pageSize: 15,
         studentName: isSearch ? this.keywords : ''
@@ -427,7 +427,14 @@ export default {
       }
       this.$router.push({
         name: 'Detail',
-        params: {loginId: this.activityInfo.loginId, activityId: this.activityInfo.activityId, studentId: studentId}
+        params: {
+          loginId: this.config.loginId,
+          activityId: this.config.activityId,
+          openId: this.config.openId,
+          nickName: this.config.nickName,
+          headImgUrl: this.config.headImgUrl,
+          studentId: studentId
+        }
       })
     },
     /**

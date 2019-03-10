@@ -12,14 +12,27 @@
 export default {
   props: {
     title: {
-      type: String,
-      default: '六弦志合投票系统'
+      type: String
     }
   },
   methods: {
     back: function () {
-      this.$router.push('/index')
+      this.$router.push({
+        name: 'Index',
+        params: {
+          loginId: this.config.loginId,
+          activityId: this.config.activityId,
+          openId: this.config.openId,
+          nickName: this.config.nickName,
+          headImgUrl: this.config.headImgUrl
+        }
+      })
     }
+  },
+  computed: {
+    config () {
+      return this.$store.getters.config
+    },
   }
 }
 </script>

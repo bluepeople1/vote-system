@@ -31,15 +31,13 @@
           <div class="bg-white gift">
             <div>
               <my-img :imageSrc="item.giftIma"
-                      errorType="img"
+                      errorType="user"
                       class="gift-icon"
                       width="100%"
                       height="150px"/>
               <!--<img src="../assets/img/sugar_64.png" >-->
             </div>
-            <div>
-              {{item.giftName}} +{{item.giftToVotes}}票
-            </div>
+            <div>{{item.giftName}} + {{item.giftToVotes}}票</div>
           </div>
         </div>
       </div>
@@ -58,9 +56,6 @@
     <!--底部-->
     <div id="footer">
       <div class="weui-flex">
-        <!-- <div class="weui-flex__item" @click="goBack">
-          <div class="placeholder" style="margin:0 15px;"><a class="weui-btn weui-btn_default flex-grow">返回</a></div>
-        </div> -->
         <div class="weui-flex__item" @click="pay">
           <div class="placeholder" style="margin:0 15px;"><a class="weui-btn weui-btn_primary flex-grow">微信支付 <span
             class="price">{{totalPrices}}</span> 元</a></div>
@@ -125,19 +120,11 @@ export default {
       return this.num * this.price
     }
   },
-  mounted: function () {
-    window.addEventListener('popstate', e => {  //popstate监听返回按钮
-      this.backToIndex()
-    }, false)
-  },
   methods: {
     refreshUserInfo () {
       Promise.all([this.getStuInfo()]).then(res => {
         this.studentInfo = res[0].resultObject.studentInfo
       })
-    },
-    backToIndex: function () {
-      this.$router.push('/index')
     },
     //dialog 的监听方法
     dialogListener: function (data) {
@@ -239,13 +226,6 @@ export default {
         })
       })
     }
-  }
-  ,
-  beforeDestroy () {
-    // this.$jquery(window).off('popstate');
-    window.removeEventListener('popstate', function () {
-
-    }, false)
   }
 }
 </script>

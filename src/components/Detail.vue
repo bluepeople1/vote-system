@@ -173,6 +173,9 @@ export default {
       studentId: this.$route.params.studentId,
       loginId: this.$route.params.loginId,
       activityId: this.$route.params.activityId,
+      openId: this.$route.params.openId,
+      nickName: this.$route.params.nickName,
+      headImgUrl: this.$route.params.headImgUrl,
       voteCon: [], // 学生所获票数记录
       videoList: [],
       giftPage: 1,
@@ -320,7 +323,11 @@ export default {
     toPresentPage () {
       this.$router.push({
         name: 'Present',
-        params: {loginId: this.loginId, activityId: this.activityId, studentId: this.studentId}
+        params: {
+          loginId: this.loginId,
+          activityId: this.activityId,
+          studentId: this.studentId
+        }
       })
     },
     /**
@@ -347,9 +354,9 @@ export default {
         loginId: this.loginId,
         activityId: this.activityId,
         studentId: this.studentId,
-        openId: this.config.openId,
-        nickName: this.config.nickName,
-        headImgUrl: this.config.headImgUrl
+        openId: this.openId,
+        nickName: this.nickName,
+        headImgUrl: this.headImgUrl
       }).then(data => {
         console.log(data)
         //2001-当天已经跟该选手投票 2002-当天投票机会用完 2003-投票成功

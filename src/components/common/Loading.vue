@@ -2,7 +2,7 @@
   <div class="loading-page" v-if="isShow" @click="stop">
     <div class="loading-box">
       <div :data-loader="loaderType.circle" ></div>
-      <span>正在火速加载中...</span>
+      <span>{{content}}</span>
     </div>
   </div>
 </template>
@@ -15,6 +15,10 @@
       isShow:{
         type:Boolean,
         default:false
+      },
+      content: {
+        type: String,
+        default: '正在火速加载中...'
       }
     },
     data(){
