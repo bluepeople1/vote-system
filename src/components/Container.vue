@@ -9,30 +9,31 @@
     <div id="tabBar">
       <ul class="tab">
         <li>
-          <router-link :to="{name:'Index'}" tag="div" class="li-item">
-            <img :src="(selectedTab===1)?selectImg.index.selected:selectImg.index.unselected" class="li-item-icon"/>
-            <span :class="(selectedTab===1)?'selected-tab-font':'unselected-tab-font'">首页</span>
-          </router-link>
+          <div @click="redirect('index')" class="li-item">
+            <img :src="(selectedTab === 1)?selectImg.index.selected:selectImg.index.unselected" class="li-item-icon"/>
+            <span :class="(selectedTab === 1)?'selected-tab-font':'unselected-tab-font'">首页</span>
+          </div>
         </li>
         <li>
-          <router-link to="/prize" tag="div" class="li-item">
-            <img :src="(selectedTab === 2) ? selectImg.prize.selected : selectImg.prize.unselected" class="li-item-icon"/>
+          <div @click="redirect('prize')" class="li-item">
+            <img :src="(selectedTab === 2) ? selectImg.prize.selected : selectImg.prize.unselected"
+                 class="li-item-icon"/>
             <span :class="(selectedTab === 2)? 'selected-tab-font' : 'unselected-tab-font'">奖品</span>
-          </router-link>
+          </div>
         </li>
         <li>
-          <router-link to="/list" tag="div" class="li-item">
-            <img :src="(selectedTab===3) ? selectImg.list.selected : selectImg.list.unselected" class="li-item-icon"/>
-            <span :class="(selectedTab===3)?'selected-tab-font':'unselected-tab-font'">排行榜</span>
-          </router-link>
+          <div @click="redirect('list')" class="li-item">
+            <img :src="(selectedTab === 3) ? selectImg.list.selected : selectImg.list.unselected" class="li-item-icon"/>
+            <span :class="(selectedTab === 3)?'selected-tab-font':'unselected-tab-font'">排行榜</span>
+          </div>
         </li>
-        <!--<li>-->
-          <!--<router-link to="/register" tag="div" class="li-item">-->
-            <!--<img :src="(selectedTab===4) ? selectImg.register.selected : selectImg.register.unselected"-->
-                 <!--class="li-item-icon"/>-->
-            <!--<span :class="(selectedTab===4)?'selected-tab-font':'unselected-tab-font'">报名</span>-->
-          <!--</router-link>-->
-        <!--</li>-->
+        <li>
+          <div @click="redirect('register')" class="li-item">
+            <img :src="(selectedTab === 4) ? selectImg.register.selected : selectImg.register.unselected"
+                 class="li-item-icon"/>
+            <span :class="(selectedTab === 4)?'selected-tab-font':'unselected-tab-font'">报名</span>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
@@ -50,6 +51,11 @@ export default {
   components: {MusicPlayer, MyMarquee},
   data () {
     return {
+      activityId: this.$route.params.activityId,
+      loginId: this.$route.params.loginId,
+      openId: this.$route.params.openId,
+      nickName: this.$route.params.nickName,
+      headImgUrl: this.$route.params.headImgUrl,
       selectImg: {
         index: {
           selected: require('../assets/img/index_selected.png'),
@@ -79,15 +85,58 @@ export default {
     //this.device();
   },
   methods: {
+    redirect (name) {
+      switch (name) {
+        case 'index':
+          this.$router.push({
+            name: 'Index',
+            params: {
+              loginId: this.loginId,
+              activityId: this.activityId,
+              openId: this.openId,
+              nickName: this.nickName,
+              headImgUrl: this.headImgUrl
+            }
+          })
+          break
+        case 'prize':
+          this.$router.push({
+            name: 'Prize',
+            params: {
+              loginId: this.loginId,
+              activityId: this.activityId
+            }
+          })
+          break
+        case 'list':
+          this.$router.push({
+            name: 'List',
+            params: {
+              loginId: this.loginId,
+              activityId: this.activityId
+            }
+          })
+          break
+        case 'register':
+          this.$router.push({
+            name: 'Register',
+            params: {
+              loginId: this.loginId,
+              activityId: this.activityId
+            }
+          })
+          break
+      }
+    },
     init () {
       if (!(this.config.activityId && this.config.loginId)) {
-        let activityId = this.$route.query.activityId
-        let loginId = this.$route.query.loginId
+        let activityId = this.$route.params.activityId
+        let loginId = this.$route.params.loginId
         let sharedUrl = 'http://www.yaqinkeji.top/homeschool/wxInterface/wxToGrantAuthorization?aid=' + activityId + '&bid=' + loginId
         let map = new Map()
-        map.set('nickName', this.$route.query.nickname || '')
-        map.set('headImgUrl', this.$route.query.headimgurl || '')
-        map.set('openId', this.$route.query.openId)
+        map.set('nickName', this.$route.params.nickname || '')
+        map.set('headImgUrl', this.$route.params.headimgurl || '')
+        map.set('openId', this.$route.params.openId)
         map.set('loginId', loginId)
         map.set('sharedUrl', sharedUrl)
         map.set('activityId', activityId)
@@ -184,6 +233,9 @@ export default {
         jsApiList: [
           'onMenuShareTimeline',
           'onMenuShareAppMessage',
+          'chooseImage',
+          'previewImage',
+          'uploadImage'
           // 'updateAppMessageShareData',
           // 'updateTimelineShareData'
         ]

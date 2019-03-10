@@ -2,7 +2,7 @@
   <swiper :options="swiperOption" ref="mySwiper">
     <!-- slides -->
     <swiper-slide v-for="(item, index) in dataList" :key="index">
-      <my-img :imageSrc="item" errorType="img" class="banner-img" width="100%" :height="height + 'px'"/>
+      <my-img :imageSrc="item" errorType="img" class="banner-img" />
     </swiper-slide>
     <div class="swiper-pagination" slot="pagination"></div>
   </swiper>
@@ -64,9 +64,5 @@ export default {
 
   /deep/ .swiper-pagination-bullet-active {
     background: #009a3f !important;
-  }
-
-  .swiper-pagination-fraction, .swiper-pagination-custom, .swiper-container-horizontal > .swiper-pagination-bullets {
-    bottom: 20px;
   }
 </style>

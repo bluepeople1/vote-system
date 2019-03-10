@@ -19,9 +19,7 @@
                     <div>
                       <!--<img v-if="item.prizeImg!==null" :src="path+item.prizeImg" width="65%">-->
                       <my-img :imageSrc="item.prizeIma"
-                              errorType="img"
-                              width="100%"
-                              height="auto"/>
+                              errorType="img"/>
                     </div>
                   </li>
                 </ul>
@@ -76,15 +74,16 @@ export default {
   },
   data () {
     return {
-      dataList: []
+      dataList: [],
+      loginId: this.$route.params.loginId,
+      activityId: this.$route.params.activityId
     }
   },
   created: function () {
     apiService.getActivityPrize(this, {
-      loginId: this.config.loginId,
-      activityId: this.config.activityId
+      loginId: this.loginId,
+      activityId: this.activityId
     }).then(res => {
-      console.log(res)
       if (res.resultObject.activityPrize && res.resultObject.activityPrize.length) {
         this.dataList = res.resultObject.activityPrize
       }

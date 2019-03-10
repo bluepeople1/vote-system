@@ -58,7 +58,9 @@ export default {
       title: '',
       content: '',
       dialog: 'none',
-      dataList: []
+      dataList: [],
+      loginId: this.$route.params.loginId,
+      activityId: this.$route.params.activityId
     }
   },
   created: function () {
@@ -85,14 +87,17 @@ export default {
       }
       this.$router.push({
         name: 'Detail',
-        params: {loginId: this.activityInfo.loginId, activityId: this.activityInfo.activityId, studentId: studentId}
+        params: {
+          loginId: this.loginId,
+          activityId: this.activityId,
+          studentId: studentId}
       })
     },
     //获取排行榜列表
     getRankingList () {
       apiService.getActivityStudents(this, {
-        loginId: this.config.loginId, // 登录用户Id
-        activityId: this.config.activityId, // 当前所在活动Id
+        loginId: this.loginId, // 登录用户Id
+        activityId: this.activityId, // 当前所在活动Id
         page: 1,
         pageSize: 10,
         studentName: ''

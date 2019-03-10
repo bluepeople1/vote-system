@@ -120,7 +120,20 @@ export default {
    * @param data
    * @returns {*|AxiosPromise<any>}
    */
-  getActivityMusic: (vm, data) => vm.axios.get(host + 'selectActivityMusicWx', {params: data})
+  getActivityMusic: (vm, data) => vm.axios.get(host + 'selectActivityMusicWx', {params: data}),
+  /**
+   * 19、报名
+   * @param vm
+   * @param data
+   * @returns {*|AxiosPromise<any>}
+   */
+  register: (vm, data) => vm.axios.get(host + 'wxToAddStudent', {params: data}),
+  /**
+   * 20、获取阿里云上传视频的凭证
+   * @param vm
+   * @returns {*|AxiosPromise<any>}
+   */
+  getAliyunVideoId: (vm) => vm.axios.get(host + 'getAliyunVedioId')
 
 };
 

@@ -4,7 +4,7 @@
     <div id="banner">
       <!--海报图-->
       <div id="image">
-        <swiper-banner :dataList="banner" :height="170"/>
+        <swiper-banner :dataList="banner" />
       </div>
       <!--已报名、累计投票、访问量-->
       <div id="counter">
@@ -61,7 +61,7 @@
             <span><span>{{seconds}}</span> 秒</span>
           </li>
         </ul>
-        {{time}}
+        <!--{{time}}-->
       </div>
     </div>
     <!--内容-->
@@ -118,12 +118,12 @@
       <div class="marTop30" v-if="isShowImgList">
         <ul>
           <li v-for="(it,idx) in imgList" :key="idx">
-            <my-img :imageSrc="it" errorType="img" width="100%"/>
+            <my-img :imageSrc="it" errorType="img"/>
           </li>
         </ul>
       </div>
       <none-data class="index-none-data" v-else/>
-      <div class="marTop30">
+      <div class="marTop30" v-if="videoList.length !== 0">
         <div class="weui-flex">
           <div class="weui-flex__item">
             <hr class="line">
@@ -298,15 +298,16 @@ export default {
     timeDiff () {
       let timeCount = setInterval(() => {
         let timeDiff = ''
-        if (store.isActivityNotBegin(this.nowTime, this.beginTime)) {
+        let nowTime = moment().valueOf()
+        if (store.isActivityNotBegin(nowTime, this.beginTime)) {
           //活动还未开始
           this.timeCountTitle = '距活动开始倒计时'
-          timeDiff = this.beginTime - this.nowTime
+          timeDiff = this.beginTime - nowTime
         } else {
-          if (!store.isActivityEnd(this.nowTime, this.endTime)) {
+          if (!store.isActivityEnd(nowTime, this.endTime)) {
             //活动开始且未结束
             this.timeCountTitle = '距活动结束倒计时'
-            timeDiff = this.endTime - this.nowTime
+            timeDiff = this.endTime - nowTime
           } else {
             if (!timeDiff) {
               clearInterval(timeCount);
@@ -549,6 +550,7 @@ export default {
         padding-top: 5px;
         width: 100%;
         height: 220px;
+        margin-bottom: 15px;
       }
       /*计数器*/
       #counter {

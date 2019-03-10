@@ -47,7 +47,7 @@
         </div>
       </div>
       <div v-if="isShowImgList" v-for="(it, i) in studentImages" :key="i" style="margin: 15px;">
-        <my-img :imageSrc="it" errorType="img" width="100%"/>
+        <my-img :imageSrc="it" errorType="img"/>
       </div>
       <none-data class="index-none-data" v-else/>
       <div v-for="(it,idx) in videoList" :key="idx" v-if="videoList.length !== 0">

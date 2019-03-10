@@ -16,17 +16,17 @@ Vue.use(Router)
  * @type {{path: string, name: string, component, meta: {keepAlive: boolean}, beforeEnter: index.beforeEnter}}
  */
 const index = {
-  path: '/index',
+  path: '/index/:loginId/:activityId/:openId/:nickName/:headImgUrl',
   name: 'Index',
   component: IndexPage,
   meta: {
     keepAlive: false
   },
   beforeEnter: (to, from, next) => {
-    let activity = JSON.parse(sessionStorage.getItem('activity'))
-    if (activity) {
-      document.title = activity.activeName
-    }
+    // let activity = JSON.parse(sessionStorage.getItem('activity'))
+    // if (activity) {
+    //   document.title = activity.activeName
+    // }
     next()
   }
 }
@@ -35,7 +35,7 @@ const index = {
  * @type {{path: string, name: string, component}}
  */
 const prize = {
-  path: '/prize',
+  path: '/prize/:loginId/:activityId',
   name: 'Prize',
   component: PrizePage
 }
@@ -44,7 +44,7 @@ const prize = {
  * @type {{path: string, name: string, component}}
  */
 const list = {
-  path: '/list',
+  path: '/list/:loginId/:activityId',
   name: 'List',
   component: ListPage
 }
@@ -53,7 +53,7 @@ const list = {
  * @type {{path: string, name: string, component}}
  */
 const register = {
-  path: '/register',
+  path: '/register/:loginId/:activityId',
   name: 'Register',
   component: RegisterPage
 }
