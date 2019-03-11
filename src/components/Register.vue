@@ -121,15 +121,14 @@ export default {
       activityId: this.$route.params.activityId,
       images: [],
       videos: [],
-      aliyunUserId: '1767548054776104',
       region: 'cn-shanghai',
       preViewVideoUrl: '',
       imageUrls: [],
       client: new OSS.Wrapper({
-        region: 'oss-cn-shanghai',
-        accessKeyId: 'LTAIQ4GpUKhm8SV4',
-        accessKeySecret: 'rWnaH83ydq5NSpVTLcFUwWrBU218JI',
-        bucket: 'my-img-bucket'
+        region: this.config.oss.region,
+        accessKeyId: this.config.oss.accessKeyId,
+        accessKeySecret: this.config.oss.accessKeySecret,
+        bucket: this.config.oss.bucket
       })
     }
   },
@@ -221,7 +220,7 @@ export default {
         retryCount: 3, // 网络失败重试次数（构造参数 retryCount, 默认 3）
         retryDuration: 2, // 网络失败重试间隔（构造参数 retryDuration, 默认 2）
         region: self.region, // 配置项 region, 默认 cn-shanghai
-        userId: self.aliyunUserId, // 阿里云账号ID
+        userId: self.config.userId, // 阿里云账号ID
         // 添加文件成功
         addFileSuccess: function (uploadInfo) {
           self.uploadDisabled = false

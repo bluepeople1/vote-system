@@ -69,10 +69,7 @@
       <!--搜索框-->
       <div id="search">
         <input type="text" v-model="keywords" placeholder="请输入选手信息"/>
-        <!-- <button>搜  索</button> -->
-        <div @click="search">
-          <a class="weui-btn weui-btn_primary flex-grow">搜 索</a>
-        </div>
+        <div @click="search" class="weui-btn weui-btn_primary flex-grow">搜 索</div>
       </div>
       <!--列表-->
       <div id="list" v-if="isShowStudentList">
@@ -184,7 +181,8 @@ export default {
       isShowAllStudent: false,//是否显示加载全部
       page: 1, //当前页码
       pageSize: 15,
-      videoList: []
+      videoList: [],
+      studentCount: 0
     }
   },
   created: function () {
@@ -211,6 +209,7 @@ export default {
       this.imgList = data[1].resultObject.contentImgUrl
       this.dataList = data[2].resultObject.studentInfo
       this.videoList = data[3].resultObject.videoPath
+      this.studentCount = data[2].resultObject.studentCount
     }, error => {
       console.log(error)
     })
@@ -410,6 +409,7 @@ export default {
         pageSize: 15,
         studentName: isSearch ? this.keywords : ''
       })]).then(data => {
+        this.studentCount = data[0].resultObject.studentCount
         callback(data[0].resultObject)
       })
     },
@@ -474,7 +474,7 @@ export default {
       if (this.dataList.length === 0) {
         return false
       }
-      return this.page < Math.ceil(this.activityInfo.count / this.pageSize)
+      return this.page < Math.ceil(this.studentCount / this.pageSize)
     },
     /**
      * 是否展示学生列表
@@ -627,12 +627,13 @@ export default {
       /*搜索框*/
       #search input {
         width: 70%;
-        height: 21px;
+        height: 30px;
         background: #ffffff;
         border: 1px solid #ececec;
         border-radius: 3px;
         padding: 5px;
         box-sizing: unset;
+        outline: none;
       }
       #list {
         display: flex;

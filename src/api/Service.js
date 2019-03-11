@@ -1,5 +1,9 @@
-let host = 'http://www.yaqinkeji.top/homeschool/wxInterface/';
-const wxPayUrl = 'http://www.yaqinkeji.top/homeschool/wxPay/userPay';
+//毛
+// const prefix = 'http://www.yaqinkeji.top/'
+// 黄
+const prefix = 'http://www.hzrtpxt.top/'
+const host = prefix + 'homeschool/wxInterface/';
+const wxPayUrl = prefix + 'homeschool/wxPay/userPay';
 
 export default {
   /**
@@ -32,7 +36,7 @@ export default {
    * @param data
    * @returns {*|AxiosPromise<any>}
    */
-  getActivityStudents: (vm, data) => vm.axios.get(host + 'wxSelectActivityAllStudent', {params: data}),
+  getActivityStudents: (vm, data) => vm.axios.get(host + 'wxSelectStudetByLikeName', {params: data}),
 
   /**
    * 5、点击进入学生详情-查询学生所有照片

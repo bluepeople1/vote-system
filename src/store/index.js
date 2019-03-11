@@ -6,7 +6,24 @@ Vue.use(Vuex)
 const stores = new Vuex.Store({
   state: {
     config: {
-      appId: 'wx244b2b17c6b7901f',
+      prefix: 'http://www.hzrtpxt.top/',
+      // prefix: 'http://www.yaqinkeji.top/',
+      userId: '1673235257996760', // 黄
+      // userId: '1767548054776104', // 毛
+      oss: {
+        // 黄
+        region: 'oss-cn-shanghai',
+        accessKeyId: 'LTAIShLo31hiLdah',
+        accessKeySecret: '3gzqUIhIg2E5s18tcZPsQu6bZeHuT5',
+        bucket: 'liuxianzhihe',
+        // 毛
+        // region: 'oss-cn-shanghai',
+        // accessKeyId: 'LTAIQ4GpUKhm8SV4',
+        // accessKeySecret: 'rWnaH83ydq5NSpVTLcFUwWrBU218JI',
+        // bucket: 'my-img-bucket',
+      },
+      appId: 'wxb36f7c6095549952',// 黄
+      // appId: 'wx244b2b17c6b7901f',// 毛
       nickName: '',
       headImgUrl: '',
       loginId: '',

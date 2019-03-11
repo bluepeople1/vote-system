@@ -132,7 +132,7 @@ export default {
     },
     init () {
       if (!(this.config.activityId && this.config.loginId)) {
-        let sharedUrl = 'http://www.yaqinkeji.top/homeschool/wxInterface/wxToGrantAuthorization?aid=' + this.activityId + '&bid=' + this.loginId
+        let sharedUrl = this.config.prefix + 'homeschool/wxInterface/wxToGrantAuthorization?aid=' + this.activityId + '&bid=' + this.loginId
         let map = new Map()
         map.set('nickName', this.nickName || '')
         map.set('headImgUrl', this.headImgUrl || '')
@@ -156,12 +156,10 @@ export default {
         this.getJsTicketAndToken(this, data)
       ]
       Promise.all(ajaxArr).then(data => {
-        console.log(data)
+        document.title = data[1].resultObject.ActivityInfo.activityName
         let m = new Map()
         m.set('activityInfo', data[1].resultObject)
-        // m.set('musicUrl', 'https://www.yaqinkeji.top' + data[0].resultObject.musicPath)
         m.set('musicUrl', data[0].resultObject.musicPath)
-        document.title = data[1].resultObject.ActivityInfo.activityName
         this.$store.dispatch('config', m)
         this.setWxShareConfig(data[2].resultObject, data[1].resultObject.ActivityInfo)
       }, error => {
@@ -234,9 +232,6 @@ export default {
         jsApiList: [
           'onMenuShareTimeline',
           'onMenuShareAppMessage',
-          'chooseImage',
-          'previewImage',
-          'uploadImage'
           // 'updateAppMessageShareData',
           // 'updateTimelineShareData'
         ]
@@ -325,6 +320,10 @@ export default {
 <style scoped lang="less">
   ul {
     list-style: none;
+    li {
+      width: 30%;
+      font-size: 10px;
+    }
   }
 
   .tab {
@@ -334,11 +333,6 @@ export default {
     justify-content: center;
     align-items: center;
     height: 50px;
-  }
-
-  li {
-    width: 30%;
-    font-size: 10px;
   }
 
   .selected-tab-font {
