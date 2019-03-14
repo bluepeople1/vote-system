@@ -617,12 +617,11 @@ export default {
     #content {
       /*搜索*/
       #search {
-        width: 100%;
+        margin: 15px;
         height: 45px;
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
-        margin-top: 15px;
       }
       /*搜索框*/
       #search input {
@@ -716,7 +715,6 @@ export default {
     }
     .weui-btn {
       font-size: 14px !important;
-      margin-left: 5px;
     }
     .marTop15 {
       margin-top: 15px;

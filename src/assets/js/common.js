@@ -1,4 +1,5 @@
 const CommonService = {
+
   /**
    * 获取地址栏?后的参数
    * @param name
@@ -40,7 +41,6 @@ const CommonService = {
   isActivityNotBegin (nowTime, beginTime) {
     //当前时间减去开始时间，如果小于0，代表活动还未开始
     return this.calTimeDiff(nowTime, beginTime) <= 0;
-
   }
 }
 

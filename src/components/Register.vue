@@ -37,7 +37,7 @@
               <div class="weui-uploader">
                 <div class="weui-uploader__hd">
                   <label class="weui-label">图片上传</label>
-                  <div class="weui-uploader__info">{{images.length}}/9</div>
+                  <div class="weui-uploader__info">{{imageUrls.length}}/{{images.length}}</div>
                 </div>
                 <div class="weui-uploader__bd">
                   <ul class="weui-uploader__files" ref="uploaderFiles">
@@ -51,7 +51,7 @@
                       <div class="weui-uploader__input-box">
                         <div id="uploaderInput" class="weui-uploader__input"></div>
                       </div>
-                      <input type="file" id="imgUpload" @change="imageChange($event)">
+                      <input type="file" accept="image/*" id="imgUpload" @change="imageChange($event)">
                     </li>
                   </ul>
                 </div>
@@ -64,7 +64,7 @@
           <div class="selectVideo" v-if="videoUrl === ''">
             <div class="uploadVideoBtn">
               <img src="../assets/img/upload_video.png">
-              <input type="file" id="fileUpload" @change="fileChange($event)">
+              <input type="file" accept="video/mp4" id="fileUpload" @change="fileChange($event)">
             </div>
             <label class="status"><span>{{statusText}}</span></label>
           </div>
@@ -76,7 +76,7 @@
             <!--<span class="progress">上传进度: <i id="auth-progress">{{authProgress}}</i> %</span>-->
           </div>
         </div>
-        <div class="flex-grow marT35" @click="authUpload">
+        <div class="flex-grow marT35" @click="signUp">
           <a class="weui-btn weui-btn_primary flex-grow">立即报名</a>
         </div>
       </div>
@@ -124,15 +124,17 @@ export default {
       region: 'cn-shanghai',
       preViewVideoUrl: '',
       imageUrls: [],
-      client: new OSS.Wrapper({
-        region: this.config.oss.region,
-        accessKeyId: this.config.oss.accessKeyId,
-        accessKeySecret: this.config.oss.accessKeySecret,
-        bucket: this.config.oss.bucket
-      })
+      imageFiles: []
     }
   },
   methods: {
+    signUp () {
+      if (this.file) {
+        this.authUpload()
+      } else {
+        this.sign()
+      }
+    },
     deleteImg (index) {
       this.images.splice(index, 1)
       this.imageUrls.splice(index, 1)
@@ -149,9 +151,17 @@ export default {
      * @param e
      */
     imageChange (e) {
-      this.images.push(URL.createObjectURL(e.target.files[0]))
+      let file = e.target.files[0]
+      this.images.push(URL.createObjectURL(file))
+      this.imageFiles.push(file)
+      let client = new OSS.Wrapper({
+        region: this.config.oss.region,
+        accessKeyId: this.config.oss.accessKeyId,
+        accessKeySecret: this.config.oss.accessKeySecret,
+        bucket: this.config.oss.bucket
+      })
       try {
-        this.client.put((new Date()).valueOf()+ '-' + e.target.files[0].name, e.target.files[0]).then(result => {
+        client.put((new Date()).valueOf() + '-' + file.name, file).then(result => {
           this.imageUrls.push(result.url)
         })
       } catch (er) {
@@ -165,7 +175,6 @@ export default {
     fileChange (e) {
       this.file = e.target.files[0]
       this.preViewVideoUrl = URL.createObjectURL(e.target.files[0])
-      console.log(this.preViewVideoUrl)
       if (!this.file) {
         alert('请先选择需要上传的文件!')
         return
@@ -177,12 +186,12 @@ export default {
         this.statusText = ''
       }
       this.uploader = this.createUploader()
-      console.log(userData)
       this.uploader.addFile(this.file, null, null, null, userData)
       this.uploadDisabled = false
       this.pauseDisabled = true
       this.resumeDisabled = true
     },
+    // 上传
     authUpload () {
       this.$store.dispatch('loading', {
         isShow: true,
@@ -315,25 +324,30 @@ export default {
         }
       })
     },
+    /**
+     * 信息提示
+     */
+    showTip (msg) {
+      [this.title, this.content, this.dialog] = msg
+    },
     //报名方法
     sign (videoId) {
       if (!this.userName) {
-        this.title = '错误提示'
-        this.content = '请填写参赛选手姓名'
-        this.dialog = 'block' //显示dialog
+        this.showTip(['错误提示', '请填写参赛选手姓名~', 'block'])
         return
       }
       if (!this.contact) {
-        this.title = '错误提示'
-        this.content = '请填写联系方式'
-        this.dialog = 'block' //显示dialog
+        this.showTip(['错误提示', '请填写联系方式~', 'block'])
         return
       }
       if (!(this.imageUrls && this.imageUrls.length)) {
-        this.title = '错误提示'
-        this.content = '请至少选择一张参赛选手图片'
-        this.dialog = 'block' //显示dialog
-        return
+        if (this.images.length - this.imageUrls.length) {
+          this.showTip(['错误提示', '图片正在上传，请稍后再试~', 'block'])
+          return
+        } else {
+          this.showTip(['错误提示', '请至少选择一张图片~', 'block'])
+          return
+        }
       }
       apiService.register(this, {
         openId: this.openId,
@@ -342,22 +356,53 @@ export default {
         studentName: this.userName,
         tel: this.contact,
         ImageId: this.imageUrls,
-        videoId: [videoId]
+        videoId: videoId ? [videoId] : []
       }).then(success => {
+        alert(success.resultNumber)
         if (success.resultNumber === '0') {
           this.reset()
-          this.title = '报名成功'
-          this.content = success.message
-          this.dialog = 'block' //显示dialog
+          this.showTip(['报名成功', success.message, 'block'])
+        } else {
+          this.showTip(['错误提示', '发生未知错误，请联系管理员，给您带来不便请谅解', 'block'])
         }
       }).catch(err => {
-        alert('err')
+        this.showTip(['错误提示', '发生未知错误，请联系管理员，给您带来不便请谅解', 'block'])
       })
+    },
+    /**
+     * 批量上传图片
+     */
+    batchUploadImage (callbackToRegister) {
+      let client = new OSS.Wrapper({
+        region: this.config.oss.region,
+        accessKeyId: this.config.oss.accessKeyId,
+        accessKeySecret: this.config.oss.accessKeySecret,
+        bucket: this.config.oss.bucket
+      })
+      this.$store.dispatch('loading', {
+        isShow: true,
+        content: '正在上传图片...'
+      })
+      let count = this.imageFiles.length
+      for (let img of this.imageFiles) {
+        try {
+          client.put((new Date()).valueOf() + '-' + img.name, img).then(result => {
+            this.imageUrls.push(result.url)
+            count--
+            if (!count) {
+              callbackToRegister()
+            }
+          })
+        } catch (er) {
+          console.log(er)
+        }
+      }
     },
     /**
      * 重置页面
      */
     reset () {
+      this.$store.dispatch('hideLoading')
       this.$store.dispatch('config', new Map().set('studentCode', 1))
       this.preViewVideoUrl = ''
       this.images.length = 0
@@ -581,6 +626,7 @@ export default {
   .weui-gallery {
     z-index: 10000000 !important;
   }
+
   ul {
     list-style: none;
     width: 100%;
