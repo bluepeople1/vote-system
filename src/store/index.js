@@ -13,8 +13,8 @@ const stores = new Vuex.Store({
       oss: {
         // 黄
         region: 'oss-cn-shanghai',
-        accessKeyId: 'LTAIr2dQKMvLkdVr',
-        accessKeySecret: 'YPIekJvzrIVO3UGQtHG3cCsxz3CbSe',
+        accessKeyId: 'LTAI89GHj1gjSXVX',
+        accessKeySecret: '3qQWPLKyOBxdah1A6gcwjN9gcYs6ij',
         bucket: 'liuxianzhihe',
         // 毛
         // region: 'oss-cn-shanghai',
