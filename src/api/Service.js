@@ -1,7 +1,7 @@
 //毛
-const prefix = 'http://www.yaqinkeji.top/'
+// const prefix = 'http://www.yaqinkeji.top/'
 // 黄
-// const prefix = 'http://www.hzrtpxt.top/'
+const prefix = 'http://www.hzrtpxt.top/'
 const host = prefix + 'homeschool/wxInterface/';
 const wxPayUrl = prefix + 'homeschool/wxPay/userPay';
 
