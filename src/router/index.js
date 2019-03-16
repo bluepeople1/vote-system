@@ -56,7 +56,7 @@ const register = {
 const container = {
   path: '/',
   name: 'Container',
-  component: Container,
+  component: resolve => require(['@/components/Container'], resolve),
   children: [index, prize, list, register]
 }
 /**
