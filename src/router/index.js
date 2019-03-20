@@ -1,4 +1,5 @@
-import Vue from 'vue'
+// import Vue from 'vue'
+const Vue = require('vue')
 import Router from 'vue-router'
 import Container from '@/components/Container' //容器
 Vue.use(Router)

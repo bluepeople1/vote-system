@@ -1,4 +1,5 @@
-import Vue from 'vue'
+// import Vue from 'vue'
+const Vue = require('vue')
 import Vuex from 'vuex'
 
 Vue.use(Vuex)

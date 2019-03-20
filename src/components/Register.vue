@@ -358,7 +358,6 @@ export default {
         ImageId: this.imageUrls,
         videoId: videoId ? [videoId] : []
       }).then(success => {
-        alert(success.resultNumber)
         if (success.resultNumber === '0') {
           this.reset()
           this.showTip(['报名成功', success.message, 'block'])

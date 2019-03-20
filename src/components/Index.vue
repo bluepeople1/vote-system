@@ -458,6 +458,7 @@ export default {
   watch: {
     $route: {
       handler: function (val, oldVal) {
+        this.page = 1
         this.getStudentList(res => {
           this.dataList = res.studentInfo
         })
