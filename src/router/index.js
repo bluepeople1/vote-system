@@ -75,6 +75,20 @@ const detail = {
   }
 }
 /**
+ * 活动分享
+ * @type {{path: string, name: string, title: string, component, meta: {pageTitle: string, keepAlive: boolean}}}
+ */
+const studentSharePage = {
+  path: '/studentSharePage/:loginId/:activityId/:openId/:nickName/:headImgUrl/:studentCode/:studentId',
+  name: 'StudentSharePage',
+  title: '活动分享',
+  component: resolve => require(['@/components/Share'], resolve),
+  meta: {
+    pageTitle: '活动分享',
+    keepAlive: true
+  }
+}
+/**
  * 礼物赠送
  * @type {{path: string, name: string, component}}
  */
@@ -85,7 +99,7 @@ const present = {
 }
 
 const router = new Router({
-  routes: [container, present, detail], scrollBehavior (to, from, savedPosition) {
+  routes: [container, present, detail, studentSharePage], scrollBehavior (to, from, savedPosition) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve({x: 0, y: 0})
