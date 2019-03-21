@@ -1,12 +1,22 @@
 <template>
   <!--详情页-->
   <div id="main">
-    <my-header title="详情页"/>
+    <my-header :title="studentInfo.studentCode + '号选手'"/>
     <!--内容-->
     <div id="content">
+      <div v-if="isShowImgList" v-for="(it, i) in studentImages" :key="i" style="margin: 15px;">
+        <my-img :imageSrc="it" errorType="img"/>
+      </div>
+      <none-data class="index-none-data" v-else/>
+      <div v-if="videoList.length !== 0">
+        <div class="video-title">选手视频</div>
+        <div v-for="(it,idx) in videoList" :key="idx" >
+          <my-player :videoPath="it" :poster="studentImages[0]"/>
+        </div>
+      </div>
       <!--用户名-->
       <div id="userName">
-        {{studentInfo.studentCode + '号选手：' + studentInfo.studentName}}
+        {{studentInfo.studentName}}
       </div>
       <!--用户信息-->
       <div id="counter">
@@ -33,25 +43,7 @@
               </div>
             </div>
           </div>
-          <!-- <div class="weui-flex__item">
-              <div class="placeholder">
-                  <div>
-                      <img src="../assets/img/white_pv.png" />
-                      <span> 礼物点数</span>
-                  </div>
-                  <div>
-                      <span>108</span>
-                  </div>
-              </div>
-          </div> -->
         </div>
-      </div>
-      <div v-if="isShowImgList" v-for="(it, i) in studentImages" :key="i" style="margin: 15px;">
-        <my-img :imageSrc="it" errorType="img"/>
-      </div>
-      <none-data class="index-none-data" v-else/>
-      <div v-for="(it,idx) in videoList" :key="idx" v-if="videoList.length !== 0">
-        <my-player :videoPath="it" :poster="studentImages[0]"/>
       </div>
       <!--礼物赠送列表-->
       <div class="list">
@@ -151,6 +143,8 @@ import moment from 'moment'
 import CommonService from '../assets/js/common'
 import SwiperView from './common/SwiperView'
 import NoneData from './common/NoneData'
+import {signs} from '@/assets/js/sign'
+import wx from 'weixin-js-sdk'
 
 export default {
   components: {
@@ -182,10 +176,12 @@ export default {
       votePage: 1,
       voteTotalCount: 0,
       giftTotalCount: 0,
-      pageSize: 15
+      pageSize: 15,
+      shareUrl: ''
     }
   },
   created () {
+    this.sharedUrl = this.config.prefix + 'homeschool/wxInterface/wxToGrantAuthorizationToStudent?aid=' + this.activityId + '&bid=' + this.loginId +'&studentId=' + this.studentId
     this.getStuInfo()
   },
   mounted: function () {
@@ -234,7 +230,11 @@ export default {
         this.getStuImages(this, data),
         this.getStuVideos(this, data),
         this.getStuVoteCon(this, listParams),
-        this.getStuGiftList(this, listParams)
+        this.getStuGiftList(this, listParams),
+        this.getCurrentActivityInfo(this, {
+          loginId: this.loginId,
+          activityId: this.activityId
+        })
       ]
       Promise.all(ajaxArr).then(data => {
         // 选手基本信息
@@ -249,8 +249,54 @@ export default {
         // 选手所获礼物列表
         this.giftList = data[4].resultObject.studentToGiftInfo
         this.giftTotalCount = data[3].resultObject.studentToGiftInfoCount
-        console.log('1', data[3].resultObject)
-        console.log('2', data[4].resultObject)
+        this.setWxShareConfig(data[5].resultObject.ActivityInfo)
+      })
+    },
+    /**
+     * 微信分享配置信息
+     * @param activityInfo
+     */
+    setWxShareConfig (activityInfo) {
+      let shareConfig = {
+        title: '我是' + this.studentInfo.studentName + '，快来支持我吧！', // 分享标题
+        desc: '我是' + this.studentInfo.studentName + '，现在正在参加' + activityInfo.activityName || '我们正在做活动，快点进来看看吧！',
+        link: this.sharedUrl, // 分享链接
+        imgUrl: this.studentImages[0] || '', // 分享图标
+        success: function () {
+          // console.log('成功');
+        },
+        cancel: function () {
+          // alert('失败');
+        }
+      }
+      wx.ready(function () {
+        wx.onMenuShareTimeline(shareConfig)
+        wx.onMenuShareAppMessage(shareConfig)
+      })
+    },
+    /**
+     * 获取当前活动的信息
+     * @param that
+     * @param params
+     * @response resultNumber 0:成功 非0:失败
+     * @response resultMsg 结果消息
+     * @response resultObject.studentCount 报名个数
+     * @response resultObject.studentTicketCount 总票数
+     * @response resultObject.ActivityBrowseVolume 浏览量
+     * @response resultObject.id 活动id
+     * @response resultObject.activityName 活动名
+     * @response resultObject.activityContent 活动内容
+     * @response resultObject.activityStartTime 开始时间
+     * @response resultObject.activityEndTime 结束时间
+     * @response resultObject.onlineApplication 0-允许在线报名 1-不允许
+     */
+    getCurrentActivityInfo (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActiityInfo(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
+        })
       })
     },
     /**
@@ -473,7 +519,16 @@ export default {
     #content {
       margin-top: 44px;
       margin-bottom: 44px;
+      .video-title {
+        margin-top: 8px;
+        background: #3cb371;
+        color: #fff;
+        height: 40px;
+        line-height: 40px;
+        font-size: 18px;
+      }
       #userName {
+        margin-top: 20px;
         background: #fff;
         height: 35px;
         line-height: 35px;
