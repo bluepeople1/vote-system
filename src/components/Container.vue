@@ -177,7 +177,6 @@ export default {
           return reject(err)
         })
       })
-
     },
     /**
      * 获取当前活动的信息
