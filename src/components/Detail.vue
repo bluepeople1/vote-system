@@ -404,7 +404,6 @@ export default {
         nickName: this.nickName,
         headImgUrl: this.headImgUrl
       }).then(data => {
-        console.log(data)
         //2001-当天已经跟该选手投票 2002-当天投票机会用完 2003-投票成功
         switch (Number(data.resultNumber)) {
           case 2001:
