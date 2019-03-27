@@ -82,9 +82,25 @@
       </div>
     </div>
 
-    <!--底部-->
-    <div id="footer">
-
+    <div class="marTop30">
+      <div class="weui-flex">
+        <div class="weui-flex__item">
+          <hr class="line">
+        </div>
+        <div class="weui-flex__item">
+          <div class="placeholder">活动详情</div>
+        </div>
+        <div class="weui-flex__item">
+          <hr class="line">
+        </div>
+      </div>
+    </div>
+    <div class="marTop30" v-if="isShowImgList" style="margin-bottom: 55px">
+      <ul>
+        <li v-for="(it,idx) in imgList" :key="idx">
+          <my-img :imageSrc="it" errorType="img"/>
+        </li>
+      </ul>
     </div>
     <my-dialog :title="title" :content="content" :display="dialog" v-on:dialogListener="dialogListener"/>
   </div>
@@ -96,11 +112,13 @@ import apiService from '@/api/Service'
 import Dialog from './common/Dialog'
 import {signs} from '@/assets/js/sign'
 import VideoPlayer from './common/VideoPlayer'
+import ImageError from './common/ImageError'
 
 export default {
   components: {
     'my-dialog': Dialog,
-    'my-player': VideoPlayer
+    'my-player': VideoPlayer,
+    'my-img': ImageError
   },
   data () {
     return {
@@ -124,10 +142,38 @@ export default {
       region: 'cn-shanghai',
       preViewVideoUrl: '',
       imageUrls: [],
-      imageFiles: []
+      imageFiles: [],
+      imgList: []
     }
   },
+  created () {
+    let params = {
+      loginId: this.loginId,
+      activityId: this.activityId
+    }
+    this.getCurrentActivityPropaganda(this, params).then(res => {
+      console.log(res)
+      this.imgList = res.resultObject.contentImgUrl
+    })
+  },
   methods: {
+    /**
+     * 获取当前活动首页宣传图
+     * @param that
+     * @param params
+     * @response resultNumber 0:成功 非0:失败
+     * @response resultMsg 结果消息
+     * @response resultObject.contentImgUrl 图片路径
+     */
+    getCurrentActivityPropaganda (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActivityContentImg(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
+        })
+      })
+    },
     signUp () {
       if (this.file) {
         this.authUpload()
@@ -411,6 +457,12 @@ export default {
     }
   },
   computed: {
+    /**
+     * 是否展示图片列表
+     */
+    isShowImgList () {
+      return this.imgList.length !== 0
+    },
     videoUrl () {
       return this.preViewVideoUrl
     },

@@ -34,6 +34,26 @@
       </div>
     </div>
     <none-data class="none-data" v-else/>
+    <div class="marTop30">
+      <div class="weui-flex">
+        <div class="weui-flex__item">
+          <hr class="line">
+        </div>
+        <div class="weui-flex__item">
+          <div class="placeholder">活动详情</div>
+        </div>
+        <div class="weui-flex__item">
+          <hr class="line">
+        </div>
+      </div>
+    </div>
+    <div class="marTop30" v-if="isShowImgList" style="margin-bottom: 55px">
+      <ul>
+        <li v-for="(it,idx) in imgList" :key="idx">
+          <my-img :imageSrc="it" errorType="img"/>
+        </li>
+      </ul>
+    </div>
     <my-dialog :title="title" :content="content" :display="dialog"
                v-on:dialogListener="dialogListener"/>
   </div>
@@ -60,13 +80,38 @@ export default {
       dialog: 'none',
       dataList: [],
       loginId: this.$route.params.loginId,
-      activityId: this.$route.params.activityId
+      activityId: this.$route.params.activityId,
+      imgList: []
     }
   },
   created: function () {
-    this.getRankingList()
+    let params = {
+      loginId: this.loginId,
+      activityId: this.activityId
+    }
+    this.getCurrentActivityPropaganda(this, params).then(res => {
+      this.imgList = res.resultObject.contentImgUrl
+      this.getRankingList()
+    })
   },
   methods: {
+    /**
+     * 获取当前活动首页宣传图
+     * @param that
+     * @param params
+     * @response resultNumber 0:成功 非0:失败
+     * @response resultMsg 结果消息
+     * @response resultObject.contentImgUrl 图片路径
+     */
+    getCurrentActivityPropaganda (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActivityContentImg(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
+        })
+      })
+    },
     //dialog 的监听方法
     dialogListener: function (data) {
       this.dialog = data.hide
@@ -113,6 +158,12 @@ export default {
     }
   },
   computed: {
+    /**
+     * 是否展示图片列表
+     */
+    isShowImgList () {
+      return this.imgList.length !== 0
+    },
     noneData () {
       return this.dataList.length !== 0
     },

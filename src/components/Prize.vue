@@ -1,9 +1,7 @@
 <template>
   <div id="main">
-
     <div style="margin: 35px 15px;">
       <ul style="width:100%">
-
         <li style="width:100%">
           <div class="panel">
             <div class="title">
@@ -24,6 +22,21 @@
                   </li>
                 </ul>
               </div>
+            </div>
+            <none-data class="index-none-data" v-else/>
+          </div>
+        </li>
+        <li>
+          <div class="panel">
+            <div class="title">
+              <div style="height:30px">活动详情</div>
+            </div>
+            <div class="marTop30" v-if="isShowImgList">
+              <ul>
+                <li v-for="(it,idx) in imgList" :key="idx">
+                  <my-img :imageSrc="it" errorType="img"/>
+                </li>
+              </ul>
             </div>
             <none-data class="index-none-data" v-else/>
           </div>
@@ -56,7 +69,6 @@
             </div>
           </div>
         </li>
-
       </ul>
     </div>
   </div>
@@ -76,18 +88,42 @@ export default {
     return {
       dataList: [],
       loginId: this.$route.params.loginId,
-      activityId: this.$route.params.activityId
+      activityId: this.$route.params.activityId,
+      imgList: []
     }
   },
   created: function () {
-    apiService.getActivityPrize(this, {
+    let params = {
       loginId: this.loginId,
       activityId: this.activityId
-    }).then(res => {
-      if (res.resultObject.activityPrize && res.resultObject.activityPrize.length) {
-        this.dataList = res.resultObject.activityPrize
-      }
+    }
+    this.getCurrentActivityPropaganda(this, params).then(res => {
+      this.imgList = res.resultObject.contentImgUrl
+      apiService.getActivityPrize(this, params).then(res => {
+        if (res.resultObject.activityPrize && res.resultObject.activityPrize.length) {
+          this.dataList = res.resultObject.activityPrize
+        }
+      })
     })
+  },
+  methods: {
+    /**
+     * 获取当前活动首页宣传图
+     * @param that
+     * @param params
+     * @response resultNumber 0:成功 非0:失败
+     * @response resultMsg 结果消息
+     * @response resultObject.contentImgUrl 图片路径
+     */
+    getCurrentActivityPropaganda (that, params) {
+      return new Promise(function (resolve, reject) {
+        apiService.getActivityContentImg(that, params).then(success => {
+          return resolve(success)
+        }, err => {
+          return reject(err)
+        })
+      })
+    }
   },
   computed: {
     noneData () {
@@ -95,6 +131,12 @@ export default {
     },
     config () {
       return this.$store.getters.config
+    },
+    /**
+     * 是否展示图片列表
+     */
+    isShowImgList () {
+      return this.imgList.length !== 0
     }
   }
 

@@ -88,7 +88,6 @@
         </div>
       </div>
       <none-data class="index-none-data" v-else/>
-
       <div class="marTop15" v-show="isLoadMore">
         <div class="weui-flex">
           <div class="weui-flex__item" @click="loadMoreStudent">
@@ -98,7 +97,6 @@
           </div>
         </div>
       </div>
-
       <div class="marTop30">
         <div class="weui-flex">
           <div class="weui-flex__item">
@@ -555,9 +553,9 @@ export default {
     #banner {
       width: 100%;
       #image {
-        padding-top: 5px;
+        padding-top: 30px;
         width: 100%;
-        height: 220px;
+        height: 80vh;
         margin-bottom: 15px;
       }
       /*计数器*/

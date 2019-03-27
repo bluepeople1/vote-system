@@ -6,7 +6,13 @@
          :onerror="userErr"
          :width="width"
          :height="height"/>
-    <img v-if='errorType==="img"' class="bigImage" v-lazy="imageSrc" :key="imageSrc" :onerror="imgErr" :width="width" :height="height"/>
+    <img v-if='errorType==="img"'
+         class="bigImage"
+         v-lazy="imageSrc"
+         :key="imageSrc"
+         :onerror="imgErr"
+         :width="width"
+         :height="height"/>
   </div>
 </template>
 

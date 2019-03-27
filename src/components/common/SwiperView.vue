@@ -2,7 +2,7 @@
   <swiper :options="swiperOption" ref="mySwiper">
     <!-- slides -->
     <swiper-slide v-for="(item, index) in dataList" :key="index">
-      <my-img :imageSrc="item" errorType="img" class="banner-img" />
+      <my-img :imageSrc="item" errorType="img" class="banner-img" height="100%" />
     </swiper-slide>
     <div class="swiper-pagination" slot="pagination"></div>
   </swiper>
@@ -59,7 +59,7 @@ export default {
 
 <style scoped lang="less">
   .swiper-container {
-    height: 220px !important;
+    height: 100% !important;
   }
 
   /deep/ .swiper-pagination-bullet-active {
